@@ -1,4 +1,5 @@
 class Trade < ApplicationRecord
+  has_many :trade_cards, dependent: :destroy
   enum :contact, {
     line: 0,
     x: 1,
