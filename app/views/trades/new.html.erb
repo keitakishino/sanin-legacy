@@ -24,5 +24,39 @@
     <%= form.textarea :memo %>
   </div>
 
+  <div>
+    <%= form.fields_for :trade_cards do |card| %>
+      <div>
+        <%= card.label :name %>
+        <%= card.text_field :name %>
+      </div>
+
+      <div>
+        <%= card.label :expansion %>
+        <%= card.text_field :expansion %>
+      </div>
+
+      <div>
+        <%= card.label :foil %>
+        <%= card.checkbox :foil %>
+      </div>
+
+      <div>
+        <%= form.label :language %>
+        <%= form.collection_select :language, TradeCard.languages, :last, :first %>
+      </div>
+
+      <div>
+        <%= form.label :edition %>
+        <%= form.collection_select :edition, TradeCard.editions, :last, :first %>
+      </div>
+
+      <div>
+        <%= form.label :state %>
+        <%= form.collection_select :state, TradeCard.states, :last, :first %>
+      </div>
+    <% end %>
+  </div>
+
   <%= form.submit %>
 <% end %>

@@ -19,9 +19,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_08_023003) do
     t.integer "language"
     t.string "name"
     t.integer "state"
-    t.integer "trade_id_id"
+    t.integer "trade_id"
     t.datetime "updated_at", null: false
-    t.index ["trade_id_id"], name: "index_trade_cards_on_trade_id_id"
+    t.index ["trade_id"], name: "index_trade_cards_on_trade_id"
   end
 
   create_table "trades", force: :cascade do |t|

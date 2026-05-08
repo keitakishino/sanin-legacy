@@ -1,7 +1,7 @@
 class CreateTradeCards < ActiveRecord::Migration[8.1]
   def change
     create_table :trade_cards do |t|
-      t.belongs_to :trade_id
+      t.belongs_to :trade
       t.string :name
       t.integer :language
       t.boolean :foil
