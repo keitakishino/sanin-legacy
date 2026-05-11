@@ -13,6 +13,6 @@ Rails.application.routes.draw do
   root "sanins#index"
 
   resources "trades" do
-    resources "wish_lists"
+    resources "wishlists"
   end
 end
