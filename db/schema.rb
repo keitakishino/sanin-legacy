@@ -11,7 +11,17 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[8.1].define(version: 2026_05_08_023003) do
-  create_table "trade_cards", force: :cascade do |t|
+  create_table "trades", force: :cascade do |t|
+    t.integer "contact"
+    t.string "contact_account"
+    t.datetime "created_at", null: false
+    t.text "memo"
+    t.string "name"
+    t.integer "residue"
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "wishlists", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "edition"
     t.string "expansion"
@@ -21,16 +31,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_08_023003) do
     t.integer "state"
     t.integer "trade_id"
     t.datetime "updated_at", null: false
-    t.index ["trade_id"], name: "index_trade_cards_on_trade_id"
-  end
-
-  create_table "trades", force: :cascade do |t|
-    t.integer "contact"
-    t.string "contact_account"
-    t.datetime "created_at", null: false
-    t.text "memo"
-    t.string "name"
-    t.integer "residue"
-    t.datetime "updated_at", null: false
+    t.index ["trade_id"], name: "index_wishlists_on_trade_id"
   end
 end

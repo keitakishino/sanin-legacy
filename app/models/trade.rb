@@ -1,6 +1,6 @@
 class Trade < ApplicationRecord
-  has_many :trade_cards, dependent: :destroy
-  accepts_nested_attributes_for :trade_cards, allow_destroy: true
+  has_many :wishlists, dependent: :destroy
+  accepts_nested_attributes_for :wishlists, allow_destroy: true
 
   enum :contact, {
     line: 0,

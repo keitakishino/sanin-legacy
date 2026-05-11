@@ -15,15 +15,15 @@
 
 <div>
   <%= card.label :language %>
-  <%= card.collection_select :language, TradeCard.languages, :last, :first %>
+  <%= card.collection_select :language, WishList.languages, :last, :first %>
 </div>
 
 <div>
   <%= card.label :edition %>
-  <%= card.collection_select :edition, TradeCard.editions, :last, :first %>
+  <%= card.collection_select :edition, WishList.editions, :last, :first %>
 </div>
 
 <div>
   <%= card.label :state %>
-  <%= card.collection_select :state, TradeCard.states, :last, :first %>
+  <%= card.collection_select :state, WishList.states, :last, :first %>
 </div>

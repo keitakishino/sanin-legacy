@@ -1,6 +1,6 @@
 class CreateTradeCards < ActiveRecord::Migration[8.1]
   def change
-    create_table :trade_cards do |t|
+    create_table :wishlists do |t|
       t.belongs_to :trade
       t.string :name
       t.integer :language

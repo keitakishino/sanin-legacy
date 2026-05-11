@@ -1,4 +1,4 @@
-class TradeCard < ApplicationRecord
+class Wishlist < ApplicationRecord
   belongs_to :trade
 
   enum :edition, {
