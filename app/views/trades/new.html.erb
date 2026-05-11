@@ -24,11 +24,5 @@
     <%= form.textarea :memo %>
   </div>
 
-  <div>
-    <%= form.fields_for :trade_cards do |card| %>
-      <%= render partial: 'trade_cards/form', locals: { card: card } %>
-    <% end %>
-  </div>
-
   <%= form.submit %>
 <% end %>
