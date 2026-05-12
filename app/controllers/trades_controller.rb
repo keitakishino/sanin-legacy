@@ -5,16 +5,7 @@ class TradesController < ActionController::Base
 
   def create
     @trade = Trade.create!(trade_params)
-    redirect_to new_wishlists_trade_path(@trade)
-  end
-
-  def new_wishlists
-    @trade = Trade.find(params[:id])
-  end
-
-  def edit_wishlists
-    @trade = Trade.find(params[:id])
-    @wishlists = @trade.wishlists
+    redirect_to trade_wishlists_path(@trade)
   end
 
   private

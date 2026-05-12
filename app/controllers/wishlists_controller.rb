@@ -1,5 +1,6 @@
 class WishlistsController < ActionController::Base
-  def new
+  def index
     @trade = Trade.find(params[:trade_id])
+    @wishlists = @trade.wishlists
   end
 end

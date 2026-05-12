@@ -13,9 +13,6 @@ Rails.application.routes.draw do
   root "sanins#index"
 
   resources "trades" do
-    member do
-      get "new_wishlists"
-      get "edit_wishlists"
-    end
+    resources "wishlists"
   end
 end
