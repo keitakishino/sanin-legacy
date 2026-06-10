@@ -1,29 +1,23 @@
 <div>
-  <%= card.label :name %>
-  <%= card.text_field :name %>
+  <%= wishlist.name %>
 </div>
 
 <div>
-  <%= card.label :expansion %>
-  <%= card.text_field :expansion %>
+  <%= wishlist.expansion %>
 </div>
 
 <div>
-  <%= card.label :foil %>
-  <%= card.checkbox :foil %>
+  <%= wishlist.foil %>
 </div>
 
 <div>
-  <%= card.label :language %>
-  <%= card.collection_select :language, Wishlist.languages, :last, :first %>
+  <%= wishlist.language %>
 </div>
 
 <div>
-  <%= card.label :edition %>
-  <%= card.collection_select :edition, Wishlist.editions, :last, :first %>
+  <%= wishlist.edition %>
 </div>
 
 <div>
-  <%= card.label :state %>
-  <%= card.collection_select :state, Wishlist.states, :last, :first %>
+  <%= wishlist.state %>
 </div>
