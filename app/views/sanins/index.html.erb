@@ -1,4 +1,10 @@
-<%= link_to 'create trade', new_trade_path %>
+<div>
+  <%= link_to 'create trade', new_trade_path, { class: "btn btn-primary" } %>
+</div>
+
+<div class="alert alert-primary" role="alert">
+  This is a primary alert—check it out!
+</div>
 
 <% if @trade %>
   <%= link_to 'wishlist',  trade_wishlists_path(@trade) %>

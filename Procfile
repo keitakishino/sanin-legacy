@@ -1,2 +1,2 @@
-web: rails server -p 3000
-css: rails dartsass:watch
+web: bundle exec rails server -p 3000
+css: bundle exec rails dartsass:watch

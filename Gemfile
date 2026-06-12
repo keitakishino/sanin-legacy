@@ -18,7 +18,8 @@ gem "stimulus-rails"
 gem "jbuilder"
 
 gem "dartsass-rails"
-gem "bootstrap", "~> 5.3.3"
+gem "bootstrap", "~> 5.3.8"
+gem 'jquery-rails'
 gem "foreman"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
