@@ -3,10 +3,6 @@ ENV['RAILS_ENV'] ||= 'test'
 
 require File.expand_path('../config/environment', __dir__)
 
-# Allow all hosts in test environment to prevent HostAuthorization errors in request specs
-# by explicitly setting them
-Rails.application.config.hosts = ["127.0.0.1", "localhost", "example.com", "www.example.com"]
-
 # Prevent database truncation if the environment is production
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 
