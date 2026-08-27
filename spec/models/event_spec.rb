@@ -2,9 +2,27 @@ require 'rails_helper'
 
 RSpec.describe Event, type: :model do
   describe 'validations' do
-    it { is_expected.to validate_presence_of(:title) }
-    it { is_expected.to validate_presence_of(:event_date) }
-    it { is_expected.to validate_length_of(:title).is_at_most(255) }
+    describe 'presence validations' do
+      it 'validates presence of title' do
+        event = Event.new(event_date: Date.today)
+        expect(event.valid?).to be false
+        expect(event.errors[:title]).to be_present
+      end
+
+      it 'validates presence of event_date' do
+        event = Event.new(title: 'Test Event')
+        expect(event.valid?).to be false
+        expect(event.errors[:event_date]).to be_present
+      end
+    end
+
+    describe 'length validations' do
+      it 'validates title length is at most 255 characters' do
+        event = Event.new(title: 'a' * 256, event_date: Date.today)
+        expect(event.valid?).to be false
+        expect(event.errors[:title]).to be_present
+      end
+    end
   end
 
   describe 'logical deletion' do
