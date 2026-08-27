@@ -1,6 +1,6 @@
 class Event < ApplicationRecord
   # Associations
-  # belongs_to :created_by, class_name: "User" # To be added after Issue #28 merge
+  belongs_to :created_by, class_name: "User", optional: true
 
   # Validations
   validates :title, presence: true, length: { maximum: 255 }

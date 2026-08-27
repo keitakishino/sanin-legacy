@@ -10,9 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_28_030200) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_28_213426) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "events", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id", comment: "作成者（管理者）のuser_id。FK制約はIssue #28マージ後に別マイグレーションで追加"
+    t.text "description", comment: "イベント説明"
+    t.datetime "discarded_at", comment: "論理削除フラグ（null=有効、datetime=削除日時）"
+    t.date "event_date", null: false, comment: "イベント開催日"
+    t.string "spreadsheet_id", comment: "Google SheetsファイルID（初回エクスポート時に生成）"
+    t.string "title", null: false, comment: "イベント名"
+    t.datetime "updated_at", null: false
+    t.index ["created_by_id"], name: "index_events_on_created_by_id"
+    t.index ["discarded_at"], name: "index_events_on_discarded_at"
+    t.index ["event_date", "discarded_at"], name: "index_events_on_event_date_and_discarded_at"
+    t.index ["title"], name: "index_events_on_title"
+  end
 
   create_table "expansions", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -79,11 +94,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_28_030200) do
     t.string "language"
     t.string "name"
     t.string "state"
-    t.integer "trade_id"
+    t.bigint "trade_id"
     t.datetime "updated_at", null: false
     t.index ["trade_id"], name: "index_wishlists_on_trade_id"
   end
 
+  add_foreign_key "events", "users", column: "created_by_id"
   add_foreign_key "identities", "users"
   add_foreign_key "invitations", "users", column: "issued_by_id"
   add_foreign_key "invitations", "users", column: "used_by_id"

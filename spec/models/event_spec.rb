@@ -1,6 +1,21 @@
 require 'rails_helper'
 
 RSpec.describe Event, type: :model do
+  describe 'associations' do
+    describe 'belongs_to :created_by' do
+      it 'has a belongs_to association with User' do
+        user = create(:user)
+        event = create(:event, created_by_id: user.id)
+        expect(event.created_by).to eq(user)
+      end
+
+      it 'allows created_by_id to be nil' do
+        event = create(:event, created_by_id: nil)
+        expect(event.created_by).to be_nil
+      end
+    end
+  end
+
   describe 'validations' do
     describe 'presence validations' do
       it 'validates presence of title' do
