@@ -5,6 +5,7 @@ RSpec.describe User, type: :model do
     it { is_expected.to have_many(:identities).dependent(:destroy) }
     it { is_expected.to have_many(:invitations_issued).dependent(:restrict_with_exception) }
     it { is_expected.to have_many(:invitations_used).dependent(:restrict_with_exception) }
+    it { is_expected.to have_many(:created_events).dependent(:restrict_with_exception) }
   end
 
   describe 'validations' do
