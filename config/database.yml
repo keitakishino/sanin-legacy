@@ -18,7 +18,14 @@ test:
 production:
   <<: *default
   database: <%= ENV.fetch("DATABASE_NAME", "sanin_legacy_production") %>
-  host: <%= ENV.fetch("DATABASE_HOST") { (ENV["RAILS_ENV"] == "production") ? (raise "DATABASE_HOST is required in production") : "localhost" } %>
-  port: <%= ENV.fetch("DATABASE_PORT") { (ENV["RAILS_ENV"] == "production") ? (raise "DATABASE_PORT is required in production") : 5432 } %>
-  username: <%= ENV.fetch("DATABASE_USER") { (ENV["RAILS_ENV"] == "production") ? (raise "DATABASE_USER is required in production") : "sanin_legacy" } %>
-  password: <%= ENV.fetch("DATABASE_PASSWORD") { (ENV["RAILS_ENV"] == "production") ? (raise "DATABASE_PASSWORD is required in production") : "development_password" } %>
+  <% if ENV["RAILS_ENV"] == "production" %>
+  host: <%= ENV.fetch("DATABASE_HOST") { raise "DATABASE_HOST is required in production" } %>
+  port: <%= ENV.fetch("DATABASE_PORT") { raise "DATABASE_PORT is required in production" } %>
+  username: <%= ENV.fetch("DATABASE_USER") { raise "DATABASE_USER is required in production" } %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD") { raise "DATABASE_PASSWORD is required in production" } %>
+  <% else %>
+  host: <%= ENV.fetch("DATABASE_HOST", "localhost") %>
+  port: <%= ENV.fetch("DATABASE_PORT", 5432) %>
+  username: <%= ENV.fetch("DATABASE_USER", "sanin_legacy") %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD", "development_password") %>
+  <% end %>
