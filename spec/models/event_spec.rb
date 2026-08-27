@@ -8,24 +8,27 @@ RSpec.describe Event, type: :model do
         event = create(:event, created_by_id: user.id)
         expect(event.created_by).to eq(user)
       end
-
-      it 'allows created_by_id to be nil' do
-        event = create(:event, created_by_id: nil)
-        expect(event.created_by).to be_nil
-      end
     end
   end
 
   describe 'validations' do
     describe 'presence validations' do
+      it 'validates presence of created_by' do
+        event = Event.new(title: 'Test Event', event_date: Date.today)
+        expect(event.valid?).to be false
+        expect(event.errors[:created_by]).to be_present
+      end
+
       it 'validates presence of title' do
-        event = Event.new(event_date: Date.today)
+        user = create(:user)
+        event = Event.new(event_date: Date.today, created_by: user)
         expect(event.valid?).to be false
         expect(event.errors[:title]).to be_present
       end
 
       it 'validates presence of event_date' do
-        event = Event.new(title: 'Test Event')
+        user = create(:user)
+        event = Event.new(title: 'Test Event', created_by: user)
         expect(event.valid?).to be false
         expect(event.errors[:event_date]).to be_present
       end

@@ -10,13 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_28_213426) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_28_213427) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "events", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.bigint "created_by_id", comment: "作成者（管理者）のuser_id。FK制約はIssue #28マージ後に別マイグレーションで追加"
+    t.bigint "created_by_id", null: false, comment: "作成者（管理者）のuser_id。FK制約はIssue #28マージ後に別マイグレーションで追加"
     t.text "description", comment: "イベント説明"
     t.datetime "discarded_at", comment: "論理削除フラグ（null=有効、datetime=削除日時）"
     t.date "event_date", null: false, comment: "イベント開催日"

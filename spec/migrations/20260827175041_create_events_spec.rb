@@ -25,6 +25,7 @@ RSpec.describe 'CreateEvents' do
 
       expect(columns_hash['title'].null).to be false
       expect(columns_hash['event_date'].null).to be false
+      expect(columns_hash['created_by_id'].null).to be false
     end
   end
 

@@ -1,8 +1,9 @@
 class Event < ApplicationRecord
   # Associations
-  belongs_to :created_by, class_name: "User", optional: true
+  belongs_to :created_by, class_name: "User"
 
   # Validations
+  validates :created_by, presence: true
   validates :title, presence: true, length: { maximum: 255 }
   validates :event_date, presence: true
 

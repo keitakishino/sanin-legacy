@@ -3,7 +3,7 @@ FactoryBot.define do
     sequence(:title) { |n| "Event #{n}" }
     description { "サンプルイベント説明" }
     event_date { Date.today + 7.days }
-    created_by_id { nil }
+    association :created_by, factory: :user
     spreadsheet_id { nil }
     discarded_at { nil }
   end
