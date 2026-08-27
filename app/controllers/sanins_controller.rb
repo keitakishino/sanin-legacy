@@ -1,4 +1,4 @@
-class SaninsController < ActionController::Base
+class SaninsController < ApplicationController
   def index
     @trade = Trade.first
   end

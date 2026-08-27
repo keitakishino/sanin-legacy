@@ -1,4 +1,4 @@
-class TradesController < ActionController::Base
+class TradesController < ApplicationController
   def new
     @trade = Trade.new
   end
