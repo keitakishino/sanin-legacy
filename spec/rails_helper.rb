@@ -44,6 +44,16 @@ RSpec.configure do |config|
   # Filter lines from Rails gems in backtraces.
   config.filter_rails_from_backtrace!
 
-  # Include FactoryBot methods for convenient use
+  # Include FactoryBot methods (build, create, etc.) without the FactoryBot:: prefix.
   config.include FactoryBot::Syntax::Methods
+
+  # Include time-travel helpers (freeze_time, travel_to, etc.).
+  config.include ActiveSupport::Testing::TimeHelpers
+end
+
+Shoulda::Matchers.configure do |config|
+  config.integrate do |with|
+    with.test_framework :rspec
+    with.library :rails
+  end
 end

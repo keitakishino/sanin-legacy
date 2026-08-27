@@ -8,7 +8,6 @@ class CreateIdentities < ActiveRecord::Migration[8.1]
       t.datetime :created_at, null: false
     end
 
-    add_index :identities, [:provider, :uid], unique: true
-    add_index :identities, :user_id
+    add_index :identities, [ :provider, :uid ], unique: true
   end
 end

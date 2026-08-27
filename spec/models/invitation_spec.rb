@@ -34,7 +34,7 @@ RSpec.describe Invitation, type: :model do
     end
 
     describe 'signup_token uniqueness validation' do
-      let(:invitation) { create(:invitation, signup_token: 'token123') }
+      let!(:invitation) { create(:invitation, signup_token: 'token123') }
 
       it 'allows duplicate nil signup_token' do
         new_invitation = build(:invitation, signup_token: nil)
@@ -222,7 +222,7 @@ RSpec.describe Invitation, type: :model do
   end
 
   describe '.find_by_code' do
-    let(:invitation) { create(:invitation, code: 'TESTCODE') }
+    let!(:invitation) { create(:invitation, code: 'TESTCODE') }
 
     it 'finds invitation by code' do
       expect(Invitation.find_by_code('TESTCODE')).to eq(invitation)
@@ -248,7 +248,9 @@ RSpec.describe Invitation, type: :model do
   end
 
   describe '.expire_old_codes' do
-    let!(:active_invitation) { create(:invitation, status: :active, expires_at: 1.day.ago) }
+    let!(:active_invitation) do
+      create(:invitation, status: :active).tap { |invitation| invitation.update_column(:expires_at, 1.day.ago) }
+    end
     let!(:future_invitation) { create(:invitation, status: :active, expires_at: 1.day.from_now) }
     let!(:already_expired) { create(:expired_invitation) }
 

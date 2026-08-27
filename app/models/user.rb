@@ -2,9 +2,9 @@ class User < ApplicationRecord
   has_secure_password validations: false
 
   has_many :identities, dependent: :destroy
-  has_many :invitations_issued, class_name: 'Invitation', foreign_key: 'issued_by_id',
+  has_many :invitations_issued, class_name: "Invitation", foreign_key: "issued_by_id",
                                  dependent: :restrict_with_exception
-  has_many :invitations_used, class_name: 'Invitation', foreign_key: 'used_by_id',
+  has_many :invitations_used, class_name: "Invitation", foreign_key: "used_by_id",
                                dependent: :restrict_with_exception
 
   enum :role, { general: 0, admin: 1 }, prefix: true
@@ -19,6 +19,6 @@ class User < ApplicationRecord
   private
 
   def will_save_password?
-    password.present?
+    password.present? || password_confirmation.present?
   end
 end

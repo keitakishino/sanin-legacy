@@ -13,7 +13,7 @@ RSpec.describe Identity, type: :model do
     it { is_expected.to validate_presence_of(:user_id) }
 
     describe 'uid uniqueness scope to provider' do
-      let(:identity) { create(:identity, provider: :google, uid: 'unique_uid') }
+      let!(:identity) { create(:identity, provider: :google, uid: 'unique_uid') }
 
       it 'allows same uid for different providers' do
         new_identity = build(:twitter_identity, uid: 'unique_uid')

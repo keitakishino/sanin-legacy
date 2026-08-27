@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :identity do
-    user
+    user { association :user, strategy: :create }
     provider { :google }
     sequence(:uid) { |n| "google_uid_#{n}" }
 

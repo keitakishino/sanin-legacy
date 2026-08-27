@@ -13,10 +13,10 @@ class Identity < ApplicationRecord
 
   def provider_display_name
     case provider
-    when 'google'
-      'Google'
-    when 'twitter'
-      'Twitter(X)'
+    when "google"
+      "Google"
+    when "twitter"
+      "Twitter(X)"
     end
   end
 end

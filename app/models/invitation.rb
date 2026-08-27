@@ -1,10 +1,10 @@
 class Invitation < ApplicationRecord
-  belongs_to :issued_by, class_name: 'User'
-  belongs_to :used_by, class_name: 'User', optional: true
+  belongs_to :issued_by, class_name: "User"
+  belongs_to :used_by, class_name: "User", optional: true
 
   enum :status, { active: 0, used: 1, expired: 2, revoked: 3 }, prefix: true
 
-  validates :code, presence: true, uniqueness: true, format: { with: /\A[a-zA-Z0-9]+\z/, message: 'must contain only alphanumeric characters' }
+  validates :code, presence: true, uniqueness: true, format: { with: /\A[a-zA-Z0-9]+\z/, message: "must contain only alphanumeric characters" }
   validates :issued_by_id, presence: true
   validates :status, presence: true
   validates :expires_at, presence: true
@@ -17,19 +17,19 @@ class Invitation < ApplicationRecord
   scope :used_invitations, -> { where(status: :used) }
   scope :expired_invitations, -> { where(status: :expired) }
   scope :revoked_invitations, -> { where(status: :revoked) }
-  scope :not_used, -> { where(status: [:active, :expired, :revoked]) }
-  scope :expired_and_active, -> { where(status: [:expired, :active]) }
+  scope :not_used, -> { where(status: [ :active, :expired, :revoked ]) }
+  scope :expired_and_active, -> { where(status: [ :expired, :active ]) }
 
   def expired?
     expires_at < Time.current
   end
 
   def used?
-    status == 'used'
+    status == "used"
   end
 
   def available?
-    active? && !expired?
+    status_active? && !expired?
   end
 
   def use_by(user)
@@ -52,17 +52,17 @@ class Invitation < ApplicationRecord
     end
 
     def expire_old_codes
-      where(status: :active).where('expires_at < ?', Time.current).update_all(status: :expired)
+      where(status: :active).where("expires_at < ?", Time.current).update_all(status: :expired)
     end
   end
 
   private
 
   def issued_by_is_admin
-    errors.add(:issued_by, 'must be an admin user') unless issued_by&.role_admin?
+    errors.add(:issued_by, "must be an admin user") unless issued_by&.role_admin?
   end
 
   def expires_at_in_future
-    errors.add(:expires_at, 'must be in the future') if expires_at.present? && expires_at < Time.current
+    errors.add(:expires_at, "must be in the future") if expires_at.present? && expires_at < Time.current
   end
 end
