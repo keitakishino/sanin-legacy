@@ -10,7 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_08_023003) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_27_175103) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_catalog.plpgsql"
+
+  create_table "expansions", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "name_ja"
+    t.string "scryfall_set_code", null: false
+    t.datetime "updated_at", null: false
+    t.index ["scryfall_set_code"], name: "index_expansions_on_scryfall_set_code", unique: true
+  end
+
   create_table "trades", force: :cascade do |t|
     t.string "contact"
     t.string "contact_account"
