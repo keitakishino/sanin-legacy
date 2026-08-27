@@ -1,6 +1,13 @@
 # syntax=docker/dockerfile:1
 # check=error=true
 
+# 開発環境での使用:
+#   docker-compose up --build
+#
+# 本番環境での使用:
+#   docker build -t sanin_legacy .
+#   docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value> --name sanin_legacy sanin_legacy
+
 # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
 # docker build -t sanin_legacy .
 # docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name sanin_legacy sanin_legacy
@@ -16,7 +23,7 @@ WORKDIR /rails
 
 # Install base packages
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 && \
+    apt-get install --no-install-recommends -y curl libjemalloc2 libvips postgresql-client && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
@@ -52,7 +59,7 @@ COPY . .
 RUN bundle exec bootsnap precompile -j 1 app/ lib/
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+RUN DATABASE_HOST=localhost DATABASE_PORT=5432 DATABASE_USER=sanin_legacy DATABASE_PASSWORD=dummy SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 
 
