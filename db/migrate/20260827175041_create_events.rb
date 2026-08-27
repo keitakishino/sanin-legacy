@@ -12,7 +12,7 @@ class CreateEvents < ActiveRecord::Migration[8.1]
 
     add_index :events, :created_by_id, name: "index_events_on_created_by_id"
     add_index :events, :discarded_at, name: "index_events_on_discarded_at"
-    add_index :events, [:event_date, :discarded_at], name: "index_events_on_event_date_and_discarded_at"
+    add_index :events, [ :event_date, :discarded_at ], name: "index_events_on_event_date_and_discarded_at"
     add_index :events, :title, name: "index_events_on_title"
   end
 end
