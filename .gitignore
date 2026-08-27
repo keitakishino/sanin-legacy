@@ -33,6 +33,9 @@
 /public/assets
 /vendor/bundle
 
+# Ignore local docker compose overrides (e.g. worktree-specific port remapping).
+docker-compose.override.yml
+
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
