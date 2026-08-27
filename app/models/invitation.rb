@@ -25,7 +25,7 @@ class Invitation < ApplicationRecord
   end
 
   def used?
-    status == "used"
+    status_used?
   end
 
   def available?
