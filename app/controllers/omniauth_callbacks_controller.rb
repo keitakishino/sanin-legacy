@@ -29,8 +29,23 @@ class OmniauthCallbacksController < ApplicationController
         log_in(user)
         redirect_to root_path
       rescue ActiveRecord::RecordInvalid => e
-        flash[:alert] = build_error_message(e.record)
-        redirect_to signin_path
+        if e.record.is_a?(Identity)
+          # Identity creation failed - check if it's due to uid uniqueness (TOCTOU race)
+          existing_identity = Identity.find_by(provider: :google, uid: uid)
+          if existing_identity
+            # Another request created this identity; log in with that user
+            log_in(existing_identity.user)
+            redirect_to root_path
+          else
+            # Other identity validation error
+            flash[:alert] = build_error_message(e.record)
+            redirect_to signin_path
+          end
+        else
+          # User creation failed
+          flash[:alert] = build_error_message(e.record)
+          redirect_to signin_path
+        end
       rescue ActiveRecord::RecordNotUnique => e
         flash[:alert] = "ユーザー作成に失敗しました（username重複。別の方法で再試行してください）"
         redirect_to signin_path
@@ -55,7 +70,7 @@ class OmniauthCallbacksController < ApplicationController
   end
 
   def create_identity_for_user(user, provider, uid)
-    user.identities.create(provider: provider, uid: uid)
+    user.identities.create!(provider: provider, uid: uid)
   end
 
   def generate_unique_username(email)
@@ -65,17 +80,25 @@ class OmniauthCallbacksController < ApplicationController
     base_username = base_username.gsub(/[^a-zA-Z0-9_]/, "_")[0..49]
     base_username = "user" if base_username.blank?
 
-    candidate_username = base_username
-    counter = 1
     max_attempts = 100
 
-    while counter <= max_attempts && User.exists?(username: candidate_username)
-      candidate_username = "#{base_username}#{counter}"
-      counter += 1
-    end
+    # Generate all candidate usernames (base + numbered variants)
+    candidates = [ base_username ] + (1..max_attempts).map { |i| "#{base_username}#{i}" }
 
-    # If all attempts exhausted, use timestamp-based fallback
-    counter > max_attempts ? "#{base_username}_#{Time.current.to_i}" : candidate_username
+    # Fetch existing usernames in a single query (addresses N+1 issue)
+    existing_usernames = User.where(username: candidates).pluck(:username).to_set
+
+    # Find the first non-existing username
+    selected_username = candidates.find { |u| !existing_usernames.include?(u) }
+
+    if selected_username.nil?
+      # All attempts exhausted, use timestamp-based fallback
+      # Trim base_username to ensure final username doesn't exceed 50 chars:
+      # base_username (39) + "_" (1) + timestamp (10) = 50 chars
+      "#{base_username[0..38]}_#{Time.current.to_i}"
+    else
+      selected_username
+    end
   end
 
   def build_error_message(record)

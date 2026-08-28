@@ -194,6 +194,94 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
         }.not_to change(User, :count)
       end
     end
+
+    context "when timestamp fallback username is needed" do
+      # Create 101 users to exhaust the retry counter:
+      # candidates are: conflict, conflict1, conflict2, ..., conflict100
+      let!(:existing_users) do
+        # Create "conflict" and "conflict1" through "conflict100"
+        [
+          create(:user, username: "conflict")
+        ] + (1..100).map do |i|
+          create(:user, username: "conflict#{i}")
+        end
+      end
+
+      before do
+        mock_google_auth(uid: "google_timestamp", email: "conflict@example.com")
+      end
+
+      it "creates a new user with timestamp-based fallback username" do
+        expect {
+          get "/auth/google/callback"
+        }.to change(User, :count).by(1)
+
+        new_user = User.last
+        expect(new_user.username).to match(/^conflict_\d{10}$/)
+      end
+
+      it "ensures timestamp fallback username does not exceed 50 characters" do
+        get "/auth/google/callback"
+        new_user = User.last
+        expect(new_user.username.length).to be <= 50
+      end
+
+      it "creates identity for the user with timestamp username" do
+        expect {
+          get "/auth/google/callback"
+        }.to change(Identity, :count).by(1)
+
+        identity = Identity.last
+        expect(identity.uid).to eq("google_timestamp")
+        expect(identity.user_id).to eq(User.last.id)
+      end
+    end
+
+    context "when identity creation fails due to TOCTOU race condition" do
+      let(:existing_user) { create(:user, email: "existing@example.com") }
+      let!(:existing_identity) { create(:google_identity, user: existing_user, uid: "google_race") }
+
+      before do
+        mock_google_auth(uid: "google_race", email: "newemail@example.com")
+
+        # Simulate TOCTOU race: first check returns nil, but identity already exists in DB
+        # We use a counter to return nil on first call and the existing identity on subsequent calls
+        find_by_call_count = 0
+        allow(Identity).to receive(:find_by) do |**kwargs|
+          find_by_call_count += 1
+          if find_by_call_count == 1 && kwargs[:uid] == "google_race"
+            # First call returns nil (simulating the identity not yet created at that moment)
+            nil
+          else
+            # Subsequent calls find the identity (another request created it in the meantime)
+            Identity.where(kwargs).first
+          end
+        end
+      end
+
+      it "handles TOCTOU race condition by logging in with the existing user" do
+        get "/auth/google/callback"
+        expect(session[:user_id]).to eq(existing_user.id)
+      end
+
+      it "redirects to root_path when identity is found in rescue" do
+        get "/auth/google/callback"
+        expect(response).to redirect_to(root_path)
+      end
+
+      it "does not create a duplicate identity" do
+        expect {
+          get "/auth/google/callback"
+        }.not_to change(Identity, :count)
+      end
+
+      it "logs in with the user linked to the existing identity, not the newly created user" do
+        # In TOCTOU race, a new user may be created (becomes orphaned) but we should
+        # log in with the user linked to the existing identity
+        get "/auth/google/callback"
+        expect(session[:user_id]).to eq(existing_user.id)
+      end
+    end
   end
 
   describe "GET /auth/failure" do
