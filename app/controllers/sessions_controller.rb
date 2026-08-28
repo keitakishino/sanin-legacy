@@ -3,8 +3,8 @@ class SessionsController < ApplicationController
   end
 
   def create
-    email = params[:email] || params['email']
-    password = params[:password] || params['password']
+    email = params[:email] || params["email"]
+    password = params[:password] || params["password"]
 
     # Log debug info to response for testing
     if Rails.env.test?
