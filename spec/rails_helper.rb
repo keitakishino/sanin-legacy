@@ -17,7 +17,7 @@ require 'rspec/rails'
 # the boot-up time by auto-requiring all files in the support directory. Alternatively, you
 # may explicitly require only the files you need.
 #
-# Dir[Rails.root.join('spec', 'support', '**', '*.rb')].sort.each { |f| require f }
+Dir[Rails.root.join('spec', 'support', '**', '*.rb')].sort.each { |f| require f }
 
 # Checks for pending migrations and applies them before tests are run.
 # If you are not using ActiveRecord, you can remove these lines.
@@ -55,5 +55,16 @@ Shoulda::Matchers.configure do |config|
   config.integrate do |with|
     with.test_framework :rspec
     with.library :rails
+  end
+end
+
+RSpec.configure do |config|
+  # Disable CSRF protection for request specs in test.
+  # Even though config/environments/test.rb sets hosts to an empty Set for host authorization,
+  # CSRF verification still occurs in request specs. The `allow_forgery_protection = false`
+  # setting does not fully disable CSRF verification in Rails 8.1 request specs, so we need
+  # to stub the verification method explicitly.
+  config.before(:each, type: :request) do
+    allow_any_instance_of(ActionController::Base).to receive(:verify_authenticity_token)
   end
 end
