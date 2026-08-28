@@ -14,6 +14,7 @@ class User < ApplicationRecord
   validates :username, presence: true, uniqueness: true, length: { minimum: 3, maximum: 50 }
   validates :email, uniqueness: { allow_nil: true }, format: { with: URI::MailTo::EMAIL_REGEXP, if: :email? }
   validates :password, :password_confirmation, presence: true, length: { minimum: 8 }, if: :will_save_password?
+  validate :password_confirmation_match, if: :will_save_password?
 
   scope :admins, -> { where(role: :admin) }
   scope :general_users, -> { where(role: :general) }
@@ -22,5 +23,11 @@ class User < ApplicationRecord
 
   def will_save_password?
     password.present? || password_confirmation.present?
+  end
+
+  def password_confirmation_match
+    return if password_confirmation.blank?
+
+    errors.add(:password_confirmation, "doesn't match password") if password != password_confirmation
   end
 end

@@ -21,6 +21,7 @@ class OmniauthCallbacksController < ApplicationController
 
     if identity.present?
       user = identity.user
+      handle_signup_token_if_present(user)
       log_in(user)
       redirect_to root_path
     else
@@ -29,6 +30,7 @@ class OmniauthCallbacksController < ApplicationController
         ActiveRecord::Base.transaction do
           user = create_user_from_oauth(email)
           create_identity_for_user(user, provider, uid)
+          handle_signup_token_if_present(user)
         end
         log_in(user)
         redirect_to root_path
@@ -38,6 +40,7 @@ class OmniauthCallbacksController < ApplicationController
         existing_identity = Identity.find_by(provider: provider, uid: uid)
         if existing_identity
           # Log in with the user linked to the existing identity
+          handle_signup_token_if_present(existing_identity.user)
           log_in(existing_identity.user)
           redirect_to root_path
         else
@@ -59,6 +62,17 @@ class OmniauthCallbacksController < ApplicationController
   end
 
   private
+
+  def handle_signup_token_if_present(user)
+    token = session[:signup_token]
+    return unless token.present?
+
+    invitation = Invitation.find_by_signup_token(token)
+    if invitation.present? && invitation.available?
+      invitation.use_by(user)
+    end
+    session.delete(:signup_token)
+  end
 
   def create_user_from_oauth(email)
     username = generate_unique_username(email)
