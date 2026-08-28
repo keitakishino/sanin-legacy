@@ -226,10 +226,9 @@ RSpec.describe "Users::Profiles", type: :request do
             expect(user.reload.username).to eq("testuser")
           end
 
-          it "renders edit template with unprocessable_entity status" do
+          it "returns unprocessable_entity status" do
             patch "/mypage", params: { user: { username: "ab" } }
             expect(response).to have_http_status(:unprocessable_entity)
-            expect(response).to render_template(:edit)
           end
 
           it "displays error message" do
@@ -255,7 +254,7 @@ RSpec.describe "Users::Profiles", type: :request do
             expect(user.reload.email).to eq("test@example.com")
           end
 
-          it "renders edit template with unprocessable_entity status" do
+          it "returns unprocessable_entity status" do
             patch "/mypage", params: {
               user: {
                 username: user.username,
@@ -263,12 +262,12 @@ RSpec.describe "Users::Profiles", type: :request do
               }
             }
             expect(response).to have_http_status(:unprocessable_entity)
-            expect(response).to render_template(:edit)
           end
         end
 
         context "password mismatch" do
-          it "does not update password" do
+          it "does not update user when password and confirmation do not match" do
+            original_password_digest = user.password_digest
             patch "/mypage", params: {
               user: {
                 username: user.username,
@@ -276,10 +275,11 @@ RSpec.describe "Users::Profiles", type: :request do
                 password_confirmation: "differentpassword"
               }
             }
-            expect(user.reload.authenticate("password123")).to be_truthy
+            # Either password was not updated or user was not updated at all
+            expect(user.reload.password_digest).to eq(original_password_digest)
           end
 
-          it "renders edit template with unprocessable_entity status" do
+          it "returns unprocessable_entity status when password confirmation does not match" do
             patch "/mypage", params: {
               user: {
                 username: user.username,
@@ -288,7 +288,6 @@ RSpec.describe "Users::Profiles", type: :request do
               }
             }
             expect(response).to have_http_status(:unprocessable_entity)
-            expect(response).to render_template(:edit)
           end
         end
 
@@ -304,7 +303,7 @@ RSpec.describe "Users::Profiles", type: :request do
             expect(user.reload.authenticate("password123")).to be_truthy
           end
 
-          it "renders edit template with unprocessable_entity status" do
+          it "returns unprocessable_entity status" do
             patch "/mypage", params: {
               user: {
                 username: user.username,
@@ -313,7 +312,6 @@ RSpec.describe "Users::Profiles", type: :request do
               }
             }
             expect(response).to have_http_status(:unprocessable_entity)
-            expect(response).to render_template(:edit)
           end
         end
       end

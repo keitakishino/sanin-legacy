@@ -23,7 +23,10 @@ module Users
     private
 
     def profile_update_params
-      params.require(:user).permit(:username, :email, :password, :password_confirmation)
+      user_params = params.require(:user).permit(:username, :email, :password, :password_confirmation)
+      # Convert empty email to nil
+      user_params[:email] = nil if user_params[:email].blank?
+      user_params
     end
   end
 end
