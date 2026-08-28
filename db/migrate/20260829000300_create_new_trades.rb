@@ -17,6 +17,6 @@ class CreateNewTrades < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :trades, [:event_id, :user_id], unique: true
+    add_index :trades, [ :event_id, :user_id ], unique: true
   end
 end
