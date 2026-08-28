@@ -3,15 +3,8 @@ class SessionsController < ApplicationController
   end
 
   def create
-    email = params[:email] || params["email"]
-    password = params[:password] || params["password"]
-
-    # Log debug info to response for testing
-    if Rails.env.test?
-      @debug_email = email.inspect
-      @debug_password = password.inspect
-      @debug_all_params = params.except(:controller, :action, :authenticity_token).inspect
-    end
+    email = params[:email]
+    password = params[:password]
 
     user = User.find_by(email: email)
     if user&.authenticate(password)

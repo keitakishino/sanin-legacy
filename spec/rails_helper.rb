@@ -67,4 +67,9 @@ RSpec.configure do |config|
       Rails.application.config.hosts = Set.new
     end
   end
+
+  # Disable CSRF protection for request specs
+  config.before(:each, type: :request) do
+    allow_any_instance_of(ActionController::Base).to receive(:verify_authenticity_token)
+  end
 end

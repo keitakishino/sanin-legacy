@@ -11,16 +11,9 @@ RSpec.describe "Sessions Controller", type: :request do
   describe "User Factory" do
     it "creates a user with correct email and password" do
       test_user = build(:user, email: "factory@example.com", password: "password123")
-      puts "Built user: email=#{test_user.email}, password=password123"
-      puts "Password digest set: #{test_user.password_digest.present?}"
-
       test_user.save!
-      puts "Saved user: email=#{test_user.email}"
 
       fetched_user = User.find_by(email: "factory@example.com")
-      puts "Fetched user: email=#{fetched_user.email if fetched_user}"
-      puts "Fetched user authenticate: #{fetched_user&.authenticate('password123')}"
-
       expect(fetched_user).to be_present
       expect(fetched_user.authenticate("password123")).to be_truthy
     end
@@ -38,28 +31,7 @@ RSpec.describe "Sessions Controller", type: :request do
 
   describe "Sign In with valid credentials" do
     it "logs in the user and redirects to root" do
-      # Debug: Verify user was created correctly
-      expect(user.email).to eq("test@example.com")
-      puts "User ID: #{user.id}"
-      puts "User email: #{user.email}"
-      puts "User authenticate check: #{user.authenticate('password123').inspect}"
-
-      # Check if user exists in database
-      db_user = User.find_by(email: "test@example.com")
-      puts "User found in DB: #{db_user.present?}"
-      puts "DB User authenticate: #{db_user&.authenticate('password123')}"
-
-      # Try posting - test different param formats
-      # First try: direct parameters
-      post signin_path, params: { email: "test@example.com", password: "password123" }
-      puts "Response status (direct): #{response.status}"
-
-      if response.status == 422
-        # Try nested format
-        post signin_path, params: { session: { email: "test@example.com", password: "password123" } }
-        puts "Response status (nested): #{response.status}"
-      end
-
+      post signin_path, params: { email: user.email, password: "password123" }
       expect(response).to redirect_to(root_path)
       follow_redirect!
       expect(response).to have_http_status(:ok)
