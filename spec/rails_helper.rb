@@ -67,4 +67,13 @@ RSpec.configure do |config|
   config.before(:each, type: :request) do
     allow_any_instance_of(ActionController::Base).to receive(:verify_authenticity_token)
   end
+
+  # OmniAuth test mode configuration
+  config.before(:each, type: :request) do
+    OmniAuth.config.test_mode = true
+  end
+
+  config.after(:each, type: :request) do
+    OmniAuth.config.mock_auth.clear
+  end
 end
