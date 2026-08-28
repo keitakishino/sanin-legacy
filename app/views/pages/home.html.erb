@@ -7,8 +7,13 @@
       <p>You are logged in as <strong><%= current_user.username %></strong></p>
     </div>
   <% else %>
-    <p class="mb-4">
-      <%= link_to "Sign In", signin_path, class: "bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700" %>
-    </p>
+    <div class="space-y-4">
+      <p>
+        <%= link_to "Sign In with Email", signin_path, class: "bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 inline-block" %>
+      </p>
+      <p>
+        <%= button_to "Sign In with Google", "/auth/google", class: "bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-md hover:bg-gray-50 inline-block" %>
+      </p>
+    </div>
   <% end %>
 </div>

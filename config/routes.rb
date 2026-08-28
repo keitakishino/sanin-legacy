@@ -14,4 +14,7 @@ Rails.application.routes.draw do
   get "/signin", to: "sessions#new"
   post "/signin", to: "sessions#create"
   delete "/signout", to: "sessions#destroy"
+
+  match "/auth/:provider/callback", to: "omniauth_callbacks#create", via: [ :get, :post ]
+  get "/auth/failure", to: "omniauth_callbacks#failure"
 end
