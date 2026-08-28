@@ -276,10 +276,60 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
       end
 
       it "logs in with the user linked to the existing identity, not the newly created user" do
-        # In TOCTOU race, a new user may be created (becomes orphaned) but we should
-        # log in with the user linked to the existing identity
+        # Transaction ensures that if Identity creation fails, User is rolled back
+        # so we log in with the existing user linked to the existing identity
         get "/auth/google/callback"
         expect(session[:user_id]).to eq(existing_user.id)
+      end
+
+      it "does not create an orphaned user due to transaction rollback" do
+        user_count_before = User.count
+        expect {
+          get "/auth/google/callback"
+        }.not_to change(User, :count)
+        # Verify the session has the correct user
+        expect(session[:user_id]).to eq(existing_user.id)
+      end
+    end
+
+    context "when identity creation fails due to TOCTOU race with transaction isolation" do
+      let(:existing_user) { create(:user, email: "existing@example.com") }
+      let!(:existing_identity) { create(:google_identity, user: existing_user, uid: "google_toctou_orphan") }
+
+      before do
+        mock_google_auth(uid: "google_toctou_orphan", email: "newemail@example.com")
+
+        # Simulate TOCTOU race: first check returns nil (in google action), but by the time
+        # transaction tries to create identity, another request has already created it
+        find_by_call_count = 0
+        allow(Identity).to receive(:find_by) do |**kwargs|
+          find_by_call_count += 1
+          if find_by_call_count == 1 && kwargs[:uid] == "google_toctou_orphan"
+            # First call in google action returns nil
+            nil
+          else
+            # Subsequent calls find the identity (another request created it during transaction)
+            Identity.where(kwargs).first
+          end
+        end
+      end
+
+      it "does not create orphaned user when identity uniqueness constraint fails in transaction" do
+        user_count_before = User.count
+        expect {
+          get "/auth/google/callback"
+        }.not_to change(User, :count)
+        # Verify the session is logged in as the existing user
+        expect(session[:user_id]).to eq(existing_user.id)
+      end
+
+      it "ensures transaction rollback prevents orphaned user" do
+        get "/auth/google/callback"
+        # All users should be the ones that were created before this request
+        all_users = User.pluck(:email).sort
+        original_users = User.where("created_at < ?", 1.minute.ago).pluck(:email).sort
+        # The new email from OAuth should not be in the database
+        expect(all_users).not_to include("newemail@example.com")
       end
     end
   end

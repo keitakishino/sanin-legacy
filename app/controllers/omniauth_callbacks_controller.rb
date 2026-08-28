@@ -24,31 +24,30 @@ class OmniauthCallbacksController < ApplicationController
       redirect_to root_path
     else
       begin
-        user = create_user_from_oauth(email)
-        identity = create_identity_for_user(user, :google, uid)
+        user = nil
+        ActiveRecord::Base.transaction do
+          user = create_user_from_oauth(email)
+          create_identity_for_user(user, :google, uid)
+        end
         log_in(user)
         redirect_to root_path
-      rescue ActiveRecord::RecordInvalid => e
-        if e.record.is_a?(Identity)
-          # Identity creation failed - check if it's due to uid uniqueness (TOCTOU race)
-          existing_identity = Identity.find_by(provider: :google, uid: uid)
-          if existing_identity
-            # Another request created this identity; log in with that user
-            log_in(existing_identity.user)
-            redirect_to root_path
-          else
-            # Other identity validation error
-            flash[:alert] = build_error_message(e.record)
-            redirect_to signin_path
-          end
+      rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique => e
+        # Transaction has been rolled back, so no orphaned User remains
+        # TOCTOU race condition: another request may have created the identity
+        existing_identity = Identity.find_by(provider: :google, uid: uid)
+        if existing_identity
+          # Log in with the user linked to the existing identity
+          log_in(existing_identity.user)
+          redirect_to root_path
         else
-          # User creation failed
-          flash[:alert] = build_error_message(e.record)
+          # Other validation error occurred
+          if e.is_a?(ActiveRecord::RecordInvalid)
+            flash[:alert] = build_error_message(e.record)
+          else
+            flash[:alert] = "ユーザー作成に失敗しました（username重複。別の方法で再試行してください）"
+          end
           redirect_to signin_path
         end
-      rescue ActiveRecord::RecordNotUnique => e
-        flash[:alert] = "ユーザー作成に失敗しました（username重複。別の方法で再試行してください）"
-        redirect_to signin_path
       end
     end
   end
@@ -94,8 +93,8 @@ class OmniauthCallbacksController < ApplicationController
     if selected_username.nil?
       # All attempts exhausted, use timestamp-based fallback
       # Trim base_username to ensure final username doesn't exceed 50 chars:
-      # base_username (39) + "_" (1) + timestamp (10) = 50 chars
-      "#{base_username[0..38]}_#{Time.current.to_i}"
+      # base_username (37) + "_" (1) + timestamp (10) = 48 chars (with 2 char margin)
+      "#{base_username[0..37]}_#{Time.current.to_i}"
     else
       selected_username
     end
