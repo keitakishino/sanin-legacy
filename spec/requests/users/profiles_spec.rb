@@ -1,6 +1,14 @@
 require "rails_helper"
 
 RSpec.describe "Users::Profiles", type: :request do
+  before do
+    I18n.locale = :ja
+  end
+
+  after do
+    I18n.locale = :en
+  end
+
   let(:user) { create(:user, username: "testuser", email: "test@example.com", password: "password123") }
 
   describe "GET /mypage (show)" do
@@ -195,26 +203,130 @@ RSpec.describe "Users::Profiles", type: :request do
         end
 
         context "updating password" do
-          it "updates password successfully" do
-            patch "/mypage", params: {
-              user: {
-                username: user.username,
-                password: "newpassword123",
-                password_confirmation: "newpassword123"
+          context "with valid current_password" do
+            it "updates password successfully" do
+              patch "/mypage", params: {
+                user: {
+                  username: user.username,
+                  current_password: "password123",
+                  password: "newpassword123",
+                  password_confirmation: "newpassword123"
+                }
               }
-            }
-            expect(user.reload.authenticate("newpassword123")).to be_truthy
+              expect(user.reload.authenticate("newpassword123")).to be_truthy
+            end
+
+            it "redirects to mypage after password update" do
+              patch "/mypage", params: {
+                user: {
+                  username: user.username,
+                  current_password: "password123",
+                  password: "newpassword123",
+                  password_confirmation: "newpassword123"
+                }
+              }
+              expect(response).to redirect_to("/mypage")
+            end
           end
 
-          it "redirects to mypage after password update" do
-            patch "/mypage", params: {
-              user: {
-                username: user.username,
-                password: "newpassword123",
-                password_confirmation: "newpassword123"
+          context "with incorrect current_password" do
+            it "does not update password" do
+              original_password_digest = user.password_digest
+              patch "/mypage", params: {
+                user: {
+                  username: user.username,
+                  current_password: "wrongpassword",
+                  password: "newpassword123",
+                  password_confirmation: "newpassword123"
+                }
               }
-            }
-            expect(response).to redirect_to("/mypage")
+              expect(user.reload.password_digest).to eq(original_password_digest)
+            end
+
+            it "returns unprocessable_entity status" do
+              patch "/mypage", params: {
+                user: {
+                  username: user.username,
+                  current_password: "wrongpassword",
+                  password: "newpassword123",
+                  password_confirmation: "newpassword123"
+                }
+              }
+              expect(response).to have_http_status(:unprocessable_entity)
+            end
+
+            it "displays error message about current_password" do
+              patch "/mypage", params: {
+                user: {
+                  username: user.username,
+                  current_password: "wrongpassword",
+                  password: "newpassword123",
+                  password_confirmation: "newpassword123"
+                }
+              }
+              expect(response.body).to include("現在のパスワード")
+              expect(response.body).to include("正しくありません")
+            end
+          end
+
+          context "with blank current_password" do
+            it "does not update password" do
+              original_password_digest = user.password_digest
+              patch "/mypage", params: {
+                user: {
+                  username: user.username,
+                  current_password: "",
+                  password: "newpassword123",
+                  password_confirmation: "newpassword123"
+                }
+              }
+              expect(user.reload.password_digest).to eq(original_password_digest)
+            end
+
+            it "returns unprocessable_entity status" do
+              patch "/mypage", params: {
+                user: {
+                  username: user.username,
+                  current_password: "",
+                  password: "newpassword123",
+                  password_confirmation: "newpassword123"
+                }
+              }
+              expect(response).to have_http_status(:unprocessable_entity)
+            end
+
+            it "displays error message about current_password" do
+              patch "/mypage", params: {
+                user: {
+                  username: user.username,
+                  current_password: "",
+                  password: "newpassword123",
+                  password_confirmation: "newpassword123"
+                }
+              }
+              expect(response.body).to include("現在のパスワード")
+            end
+          end
+
+          context "without password change (username/email only)" do
+            it "updates without requiring current_password" do
+              patch "/mypage", params: {
+                user: {
+                  username: "newusername"
+                }
+              }
+              expect(user.reload.username).to eq("newusername")
+            end
+
+            it "does not require current_password validation" do
+              patch "/mypage", params: {
+                user: {
+                  username: "newusername",
+                  email: "newemail@example.com"
+                }
+              }
+              expect(response).to redirect_to("/mypage")
+            end
           end
         end
       end

@@ -13,7 +13,25 @@ module Users
 
     def update
       @user = current_user
-      if @user.update(profile_update_params)
+      user_params = profile_update_params
+
+      # Validate current_password if password is being changed
+      if user_params[:password].present?
+        current_password = params.dig(:user, :current_password)
+        if current_password.blank?
+          @user.errors.add(:current_password, "を入力してください")
+          render :edit, status: :unprocessable_entity
+          return
+        end
+
+        unless @user.authenticate(current_password)
+          @user.errors.add(:current_password, "が正しくありません")
+          render :edit, status: :unprocessable_entity
+          return
+        end
+      end
+
+      if @user.update(user_params)
         redirect_to mypage_path, notice: "プロフィールが更新されました"
       else
         render :edit, status: :unprocessable_entity
