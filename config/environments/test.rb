@@ -25,8 +25,15 @@ Rails.application.configure do
   # Render exception templates for rescuable exceptions and raise for other exceptions.
   config.action_dispatch.show_exceptions = :rescuable
 
-  # Disable request forgery protection in test environment.
-  config.action_controller.allow_forgery_protection = false
+  # Host authorization needs to be disabled in test environment.
+  # This is needed because test requests use generic hosts like "www.example.com"
+  # and we want tests to focus on application logic, not host validation.
+  # Note: allow_forgery_protection is false by default in test environment (Rails standard),
+  # but CSRF verification still occurs in request specs for POST/PATCH/DELETE requests.
+  # We disable it via before(:each) hook in spec/rails_helper.rb instead.
+  if defined?(ActionDispatch::HostAuthorization)
+    config.hosts = Set.new
+  end
 
   # Store uploaded files on the local file system in a temporary directory.
   config.active_storage.service = :test

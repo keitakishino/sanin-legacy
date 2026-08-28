@@ -1,11 +1,6 @@
 <div class="max-w-md mx-auto">
   <h2 class="text-3xl font-bold mb-8">Sign In</h2>
 
-  <% if @debug_email %>
-    <!-- DEBUG: EMAIL: <%= @debug_email %> PASSWORD: <%= @debug_password %> -->
-    <!-- DEBUG PARAMS: <%= @debug_all_params %> -->
-  <% end %>
-
   <%= form_with url: signin_path, local: true, class: "space-y-4" do |f| %>
     <div>
       <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>

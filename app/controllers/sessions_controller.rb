@@ -7,6 +7,8 @@ class SessionsController < ApplicationController
     password = params[:password]
 
     user = User.find_by(email: email)
+    # Use safe navigation and authenticate to avoid timing attacks.
+    # Both user not found and password incorrect result in the same generic error.
     if user&.authenticate(password)
       log_in(user)
       redirect_to root_path

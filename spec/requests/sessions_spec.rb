@@ -1,11 +1,6 @@
 require "rails_helper"
 
 RSpec.describe "Sessions Controller", type: :request do
-  before do
-    # Ensure host is set correctly for request specs
-    host! "www.example.com"
-  end
-
   let(:user) { create(:user, email: "test@example.com", password: "password123") }
 
   describe "User Factory" do

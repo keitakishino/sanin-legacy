@@ -59,16 +59,11 @@ Shoulda::Matchers.configure do |config|
 end
 
 RSpec.configure do |config|
-  # Disable host authorization for request specs
-  config.before(:suite) do
-    # The HostAuthorization middleware needs hosts to be empty for tests
-    if defined?(ActionDispatch::HostAuthorization) && Rails.application.config.hosts.present?
-      # Disable host authorization by clearing the hosts list
-      Rails.application.config.hosts = Set.new
-    end
-  end
-
-  # Disable CSRF protection for request specs
+  # Disable CSRF protection for request specs in test.
+  # Even though config/environments/test.rb sets hosts to an empty Set for host authorization,
+  # CSRF verification still occurs in request specs. The `allow_forgery_protection = false`
+  # setting does not fully disable CSRF verification in Rails 8.1 request specs, so we need
+  # to stub the verification method explicitly.
   config.before(:each, type: :request) do
     allow_any_instance_of(ActionController::Base).to receive(:verify_authenticity_token)
   end
