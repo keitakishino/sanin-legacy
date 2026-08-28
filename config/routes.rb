@@ -15,6 +15,10 @@ Rails.application.routes.draw do
   post "/signin", to: "sessions#create"
   delete "/signout", to: "sessions#destroy"
 
+  get "/mypage", to: "users/profiles#show", as: :mypage
+  get "/mypage/edit", to: "users/profiles#edit", as: :edit_mypage
+  patch "/mypage", to: "users/profiles#update"
+
   match "/auth/:provider/callback", to: "omniauth_callbacks#create", via: [ :get, :post ]
   get "/auth/failure", to: "omniauth_callbacks#failure"
 end
