@@ -17,6 +17,12 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
         expect(user.username).to eq("newuser")
       end
 
+      it "creates an OAuth user without password_digest" do
+        get "/auth/google/callback"
+        user = User.last
+        expect(user.password_digest).to be_nil
+      end
+
       it "creates a new identity linked to the user" do
         expect {
           get "/auth/google/callback"
@@ -157,6 +163,35 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
 
         new_user = User.last
         expect(new_user.username).to eq("testuser3")
+      end
+    end
+
+    context "when uid is missing from auth_hash" do
+      before do
+        OmniAuth.config.mock_auth[:google] = OmniAuth::AuthHash.new(
+          provider: "google",
+          uid: nil,
+          info: {
+            email: "test@example.com",
+            name: "Test User"
+          }
+        )
+      end
+
+      it "displays an error flash message" do
+        get "/auth/google/callback"
+        expect(flash[:alert]).to include("OAuth認可に失敗しました")
+      end
+
+      it "redirects to signin_path" do
+        get "/auth/google/callback"
+        expect(response).to redirect_to(signin_path)
+      end
+
+      it "does not create a new user" do
+        expect {
+          get "/auth/google/callback"
+        }.not_to change(User, :count)
       end
     end
   end
