@@ -30,8 +30,8 @@ class OmniauthCallbacksController < ApplicationController
         ActiveRecord::Base.transaction do
           user = create_user_from_oauth(email)
           create_identity_for_user(user, provider, uid)
+          handle_signup_token_if_present(user)
         end
-        handle_signup_token_if_present(user)
         log_in(user)
         redirect_to root_path
       rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique => e
@@ -68,10 +68,10 @@ class OmniauthCallbacksController < ApplicationController
     return unless token.present?
 
     invitation = Invitation.find_by_signup_token(token)
-    if invitation.present?
+    if invitation.present? && invitation.available?
       invitation.use_by(user)
-      session.delete(:signup_token)
     end
+    session.delete(:signup_token)
   end
 
   def create_user_from_oauth(email)

@@ -406,6 +406,92 @@ RSpec.describe "Registrations", type: :request do
         expect(session[:user_id]).to be_present
       end
     end
+
+    context "with expired invitation via OAuth" do
+      let(:expired_invitation) { create(:invitation, status: :active, expires_at: 1.hour.from_now) }
+      let(:expired_token) do
+        token = expired_invitation.generate_signup_token
+        expired_invitation.update(expires_at: 1.hour.ago)
+        token
+      end
+
+      before do
+        get "/signup", params: { token: expired_token }
+        mock_google_auth(uid: uid, email: email)
+      end
+
+      it "creates a user" do
+        expect do
+          post "/auth/google/callback"
+        end.to change { User.count }.by(1)
+      end
+
+      it "does not mark the expired invitation as used" do
+        post "/auth/google/callback"
+
+        expect(expired_invitation.reload.status).to eq("active")
+        expect(expired_invitation.reload.used_by).to be_nil
+      end
+
+      it "clears signup_token from session" do
+        post "/auth/google/callback"
+
+        expect(session[:signup_token]).to be_nil
+      end
+
+      it "logs in the user" do
+        post "/auth/google/callback"
+
+        expect(session[:user_id]).to eq(User.last.id)
+      end
+
+      it "redirects to root_path" do
+        post "/auth/google/callback"
+
+        expect(response).to redirect_to(root_path)
+      end
+    end
+
+    context "with revoked invitation via OAuth" do
+      let(:revoked_invitation) { create(:invitation, status: :revoked, expires_at: 1.hour.from_now) }
+      let(:revoked_token) { revoked_invitation.generate_signup_token }
+
+      before do
+        get "/signup", params: { token: revoked_token }
+        mock_google_auth(uid: uid, email: email)
+      end
+
+      it "creates a user" do
+        expect do
+          post "/auth/google/callback"
+        end.to change { User.count }.by(1)
+      end
+
+      it "does not mark the revoked invitation as used" do
+        post "/auth/google/callback"
+
+        expect(revoked_invitation.reload.status).to eq("revoked")
+        expect(revoked_invitation.reload.used_by).to be_nil
+      end
+
+      it "clears signup_token from session" do
+        post "/auth/google/callback"
+
+        expect(session[:signup_token]).to be_nil
+      end
+
+      it "logs in the user" do
+        post "/auth/google/callback"
+
+        expect(session[:user_id]).to eq(User.last.id)
+      end
+
+      it "redirects to root_path" do
+        post "/auth/google/callback"
+
+        expect(response).to redirect_to(root_path)
+      end
+    end
   end
 
   describe "Regression: Existing /signin route" do
