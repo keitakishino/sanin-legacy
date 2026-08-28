@@ -17,7 +17,7 @@ require 'rspec/rails'
 # the boot-up time by auto-requiring all files in the support directory. Alternatively, you
 # may explicitly require only the files you need.
 #
-# Dir[Rails.root.join('spec', 'support', '**', '*.rb')].sort.each { |f| require f }
+Dir[Rails.root.join('spec', 'support', '**', '*.rb')].sort.each { |f| require f }
 
 # Checks for pending migrations and applies them before tests are run.
 # If you are not using ActiveRecord, you can remove these lines.
@@ -55,5 +55,16 @@ Shoulda::Matchers.configure do |config|
   config.integrate do |with|
     with.test_framework :rspec
     with.library :rails
+  end
+end
+
+RSpec.configure do |config|
+  # Disable host authorization for request specs
+  config.before(:suite) do
+    # The HostAuthorization middleware needs hosts to be empty for tests
+    if defined?(ActionDispatch::HostAuthorization) && Rails.application.config.hosts.present?
+      # Disable host authorization by clearing the hosts list
+      Rails.application.config.hosts = Set.new
+    end
   end
 end

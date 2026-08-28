@@ -1,0 +1,24 @@
+<div class="max-w-md mx-auto">
+  <h2 class="text-3xl font-bold mb-8">Sign In</h2>
+
+  <% if @debug_email %>
+    <!-- DEBUG: EMAIL: <%= @debug_email %> PASSWORD: <%= @debug_password %> -->
+    <!-- DEBUG PARAMS: <%= @debug_all_params %> -->
+  <% end %>
+
+  <%= form_with url: signin_path, local: true, class: "space-y-4" do |f| %>
+    <div>
+      <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.email_field :email, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2", required: true %>
+    </div>
+
+    <div>
+      <%= f.label :password, class: "block text-sm font-medium text-gray-700" %>
+      <%= f.password_field :password, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2", required: true %>
+    </div>
+
+    <div class="flex items-center justify-between">
+      <%= f.submit "Sign In", class: "bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" %>
+    </div>
+  <% end %>
+</div>
