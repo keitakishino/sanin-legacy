@@ -15,6 +15,6 @@ Rails.application.routes.draw do
   post "/signin", to: "sessions#create"
   delete "/signout", to: "sessions#destroy"
 
-  match "/auth/google/callback", to: "omniauth_callbacks#google", via: [:get, :post]
+  match "/auth/:provider/callback", to: "omniauth_callbacks#create", via: [ :get, :post ]
   get "/auth/failure", to: "omniauth_callbacks#failure"
 end

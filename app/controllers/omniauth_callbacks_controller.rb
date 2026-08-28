@@ -1,5 +1,5 @@
 class OmniauthCallbacksController < ApplicationController
-  def google
+  def create
     auth_hash = request.env["omniauth.auth"]
     if auth_hash.blank?
       flash[:alert] = "OAuth認可に失敗しました"
@@ -14,9 +14,10 @@ class OmniauthCallbacksController < ApplicationController
       return
     end
 
+    provider = auth_hash.dig("provider")
     email = auth_hash.dig("info", "email")
 
-    identity = Identity.find_by(provider: :google, uid: uid)
+    identity = Identity.find_by(provider: provider, uid: uid)
 
     if identity.present?
       user = identity.user
@@ -27,14 +28,14 @@ class OmniauthCallbacksController < ApplicationController
         user = nil
         ActiveRecord::Base.transaction do
           user = create_user_from_oauth(email)
-          create_identity_for_user(user, :google, uid)
+          create_identity_for_user(user, provider, uid)
         end
         log_in(user)
         redirect_to root_path
       rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique => e
         # Transaction has been rolled back, so no orphaned User remains
         # TOCTOU race condition: another request may have created the identity
-        existing_identity = Identity.find_by(provider: :google, uid: uid)
+        existing_identity = Identity.find_by(provider: provider, uid: uid)
         if existing_identity
           # Log in with the user linked to the existing identity
           log_in(existing_identity.user)
