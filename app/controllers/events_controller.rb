@@ -8,6 +8,7 @@ class EventsController < ApplicationController
 
   def show
     @event = Event.find(params[:id])
-    # layout: false is set in the view template for turbo_frame rendering
+    # Rails のTurboサポートにより、turbo_frameタグを含むレスポンスは自動的にレイアウトがスキップされます
+    render :show, layout: false
   end
 end
