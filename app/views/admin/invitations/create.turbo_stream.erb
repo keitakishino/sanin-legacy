@@ -1,0 +1,44 @@
+<% if @invitation.errors.any? %>
+  <turbo-stream action="replace" target="invitation_form_error">
+    <template>
+      <div id="invitation_form_error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <p class="font-semibold"><%= t("admin.invitations.creation_failed") %></p>
+        <ul class="list-disc list-inside mt-2">
+          <% @invitation.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    </template>
+  </turbo-stream>
+<% else %>
+  <turbo-stream action="prepend" target="invitations">
+    <template>
+      <tr id="<%= dom_id(@invitation) %>" class="border-b hover:bg-gray-50">
+        <td class="px-6 py-3 text-sm font-mono"><%= @invitation.code %></td>
+        <td class="px-6 py-3 text-sm">
+          <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+            <%= t("activerecord.attributes.invitation.statuses.active") %>
+          </span>
+        </td>
+        <td class="px-6 py-3 text-sm">
+          <%= @invitation.expires_at.strftime("%Y-%m-%d %H:%M") %>
+          <% if @invitation.expired? %>
+            <span class="text-red-600 text-xs ml-2"><%= t("admin.invitations.expired_label") %></span>
+          <% end %>
+        </td>
+        <td class="px-6 py-3 text-sm"><%= @invitation.issued_by.username %></td>
+        <td class="px-6 py-3 text-sm"><%= @invitation.used_by&.username || "—" %></td>
+        <td class="px-6 py-3 text-sm"><%= @invitation.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+      </tr>
+    </template>
+  </turbo-stream>
+
+  <turbo-stream action="replace" target="invitation_form_success">
+    <template>
+      <div id="invitation_form_success" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        <%= t("admin.invitations.created") %>: <span class="font-mono font-semibold"><%= @invitation.code %></span>
+      </div>
+    </template>
+  </turbo-stream>
+<% end %>

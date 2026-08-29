@@ -1,0 +1,28 @@
+<tr id="<%= dom_id(invitation) %>" class="border-b hover:bg-gray-50">
+  <td class="px-6 py-3 text-sm font-mono"><%= invitation.code %></td>
+  <td class="px-6 py-3 text-sm">
+    <span class="px-3 py-1 rounded-full text-xs font-semibold
+      <% case invitation.status %>
+        <% when 'active' %>
+          bg-green-100 text-green-800
+        <% when 'used' %>
+          bg-blue-100 text-blue-800
+        <% when 'expired' %>
+          bg-gray-100 text-gray-800
+        <% when 'revoked' %>
+          bg-red-100 text-red-800
+      <% end %>
+    ">
+      <%= t("activerecord.attributes.invitation.statuses.#{invitation.status}") %>
+    </span>
+  </td>
+  <td class="px-6 py-3 text-sm">
+    <%= invitation.expires_at.strftime("%Y-%m-%d %H:%M") %>
+    <% if invitation.expired? %>
+      <span class="text-red-600 text-xs ml-2"><%= t("admin.invitations.expired_label") %></span>
+    <% end %>
+  </td>
+  <td class="px-6 py-3 text-sm"><%= invitation.issued_by.username %></td>
+  <td class="px-6 py-3 text-sm"><%= invitation.used_by&.username || "—" %></td>
+  <td class="px-6 py-3 text-sm"><%= invitation.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+</tr>

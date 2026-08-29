@@ -29,3 +29,26 @@
 
 en:
   hello: "Hello world"
+  activerecord:
+    attributes:
+      invitation:
+        code: "Code"
+        status: "Status"
+        expires_at: "Expires At"
+        issued_by_id: "Issued By"
+        used_by_id: "Used By"
+        created_at: "Created At"
+        statuses:
+          active: "Active"
+          used: "Used"
+          expired: "Expired"
+          revoked: "Revoked"
+  admin:
+    invitations:
+      title: "Invitation Code Issuance"
+      new_code_section: "New Code Issuance"
+      generate_button: "Generate Code"
+      issued_codes_list: "Issued Codes List"
+      created: "Invitation code issued successfully"
+      creation_failed: "Failed to issue invitation code"
+      expired_label: "(Expired)"

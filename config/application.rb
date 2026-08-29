@@ -24,6 +24,15 @@ module SaninLegacy
     # Host Authorization configuration
     config.hosts << "www.example.com"
 
+    # Set default locale to Japanese
+    config.i18n.default_locale = :ja
+
+    # Fall back to English for any key not translated in ja.yml (e.g. Rails'
+    # built-in ActiveRecord/ActiveModel validation messages such as
+    # "can't be blank" or "has already been taken", which are not defined by
+    # this app and would otherwise render as "Translation missing").
+    config.i18n.fallbacks = [ :en ]
+
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
   end
