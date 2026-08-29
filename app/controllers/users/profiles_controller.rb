@@ -1,6 +1,7 @@
 module Users
   class ProfilesController < ApplicationController
     before_action :authenticate_user!
+    around_action :set_locale_to_japanese
 
     def show
       @user = current_user
@@ -39,6 +40,10 @@ module Users
     end
 
     private
+
+    def set_locale_to_japanese
+      I18n.with_locale(:ja) { yield }
+    end
 
     def profile_update_params
       user_params = params.require(:user).permit(:username, :email, :password, :password_confirmation)
