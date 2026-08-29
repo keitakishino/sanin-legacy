@@ -51,9 +51,20 @@ RSpec.configure do |config|
   config.include ActiveSupport::Testing::TimeHelpers
 
   # Reset I18n locale to English for model specs to ensure consistent error messages,
-  # but keep Japanese for request/feature specs where the UI content is in Japanese
+  # but keep Japanese for request/feature specs where the UI content is in Japanese.
+  #
+  # Note: config.i18n.default_locale is set to :en in config/environments/test.rb
+  # (so that model specs get English ActiveRecord/ActiveModel validation messages),
+  # which is different from the app's real default of :ja (config/application.rb).
+  # Without the explicit before-hook below, request/feature specs would silently
+  # inherit that :en default and render English UI copy instead of the Japanese
+  # copy the app actually serves in every other environment.
   config.before(:each, type: :model) do
     I18n.locale = :en
+  end
+
+  config.before(:each, type: :request) do
+    I18n.locale = :ja
   end
 
   # Always reset locale back to default after each test to prevent cross-test pollution
