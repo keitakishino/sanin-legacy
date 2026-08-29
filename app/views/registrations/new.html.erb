@@ -1,0 +1,68 @@
+<div class="max-w-md mx-auto">
+  <h2 class="text-3xl font-bold mb-8">Sign Up</h2>
+
+  <% if flash[:alert] %>
+    <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+      <p class="text-red-800"><%= flash[:alert] %></p>
+    </div>
+  <% end %>
+
+  <div class="space-y-6">
+    <div>
+      <h3 class="text-lg font-semibold mb-4">Choose Authentication Method</h3>
+
+      <div class="space-y-3">
+        <button type="button" class="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm font-medium" onclick="showEmailForm()">
+          Email & Password
+        </button>
+
+        <%= button_to "/auth/google", method: :post, data: { turbo: false }, class: "w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm font-medium" do %>
+          Sign up with Google
+        <% end %>
+
+        <%= button_to "/auth/twitter", method: :post, data: { turbo: false }, class: "w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm font-medium" do %>
+          Sign up with X (Twitter)
+        <% end %>
+      </div>
+    </div>
+
+    <div id="email-form" class="hidden space-y-4">
+      <hr class="my-6">
+      <h3 class="text-lg font-semibold mb-4">Email & Password Registration</h3>
+
+      <%= form_with url: signup_path, local: true, class: "space-y-4" do |f| %>
+        <%= f.hidden_field :auth_method, value: "email" %>
+
+        <div>
+          <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
+          <%= f.email_field :email, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2", required: true %>
+        </div>
+
+        <div>
+          <%= f.label :password, class: "block text-sm font-medium text-gray-700" %>
+          <%= f.password_field :password, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2", required: true, placeholder: "Minimum 8 characters" %>
+        </div>
+
+        <div>
+          <%= f.label :password_confirmation, "Confirm Password", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.password_field :password_confirmation, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 border px-3 py-2", required: true %>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <%= f.submit "Create Account", class: "bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" %>
+          <button type="button" class="text-gray-600 hover:text-gray-900 text-sm" onclick="hideEmailForm()">Cancel</button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showEmailForm() {
+    document.getElementById('email-form').classList.remove('hidden');
+  }
+
+  function hideEmailForm() {
+    document.getElementById('email-form').classList.add('hidden');
+  }
+</script>

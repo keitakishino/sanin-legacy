@@ -72,4 +72,23 @@ RSpec.describe Identity, type: :model do
       end
     end
   end
+
+  describe '#twitter_profile_url' do
+    context 'when provider is twitter' do
+      let(:identity) { build(:twitter_identity, uid: '987654321012345678') }
+
+      it 'returns Twitter profile intent URL with user_id' do
+        expected_url = 'https://twitter.com/intent/user?user_id=987654321012345678'
+        expect(identity.twitter_profile_url).to eq(expected_url)
+      end
+    end
+
+    context 'when provider is google' do
+      let(:identity) { build(:google_identity) }
+
+      it 'returns nil' do
+        expect(identity.twitter_profile_url).to be_nil
+      end
+    end
+  end
 end

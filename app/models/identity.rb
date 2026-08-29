@@ -19,4 +19,10 @@ class Identity < ApplicationRecord
       "Twitter(X)"
     end
   end
+
+  def twitter_profile_url
+    return nil unless provider == "twitter"
+
+    "https://twitter.com/intent/user?user_id=#{uid}"
+  end
 end
