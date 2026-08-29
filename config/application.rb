@@ -31,7 +31,7 @@ module SaninLegacy
     # built-in ActiveRecord/ActiveModel validation messages such as
     # "can't be blank" or "has already been taken", which are not defined by
     # this app and would otherwise render as "Translation missing").
-    config.i18n.fallbacks = [:en]
+    config.i18n.fallbacks = [ :en ]
 
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
