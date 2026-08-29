@@ -74,7 +74,7 @@ RSpec.describe User, type: :model do
       it 'validates email format' do
         user = build(:user, email: 'invalid-email')
         expect(user).not_to be_valid
-        expect(user.errors[:email]).to include('is invalid')
+        expect(user.errors[:email]).to include('は無効です')
       end
 
       it 'allows valid email format' do
