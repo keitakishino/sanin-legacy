@@ -1,0 +1,39 @@
+<div class="py-8">
+  <h2 class="text-3xl font-bold mb-6"><%= t("admin.events.edit_title") %></h2>
+
+  <div class="bg-white shadow rounded-lg p-6">
+    <%= form_with model: @event, local: true, url: admin_event_path(@event), method: :patch, class: "space-y-4" do |f| %>
+      <% if @event.errors.any? %>
+        <div id="error_explanation" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <h2 class="font-bold text-lg"><%= pluralize(@event.errors.count, "error") %> prohibited this event from being saved:</h2>
+          <ul class="list-disc list-inside">
+            <% @event.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.label :title, t("activerecord.attributes.event.title"), class: "block text-sm font-medium mb-1" %>
+        <%= f.text_field :title, class: "w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500", required: true %>
+      </div>
+
+      <div>
+        <%= f.label :description, t("activerecord.attributes.event.description"), class: "block text-sm font-medium mb-1" %>
+        <%= f.text_area :description, class: "w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500", rows: 4 %>
+      </div>
+
+      <div>
+        <%= f.label :event_date, t("activerecord.attributes.event.event_date"), class: "block text-sm font-medium mb-1" %>
+        <%= f.date_field :event_date, class: "w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500", required: true %>
+      </div>
+
+      <div class="space-x-2">
+        <%= f.submit t("admin.events.submit"), class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
+        <%= link_to t("admin.events.cancel"), admin_events_path, class: "bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 inline-block" %>
+        <%= link_to t("admin.events.delete"), admin_event_path(@event), method: :delete, data: { turbo_confirm: t("admin.events.confirm_delete") }, class: "bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 inline-block" %>
+      </div>
+    <% end %>
+  </div>
+</div>
