@@ -74,7 +74,9 @@ RSpec.describe User, type: :model do
       it 'validates email format' do
         user = build(:user, email: 'invalid-email')
         expect(user).not_to be_valid
-        expect(user.errors[:email]).to include('is invalid')
+        I18n.with_locale(:ja) do
+          expect(user.errors[:email]).to include(I18n.t('activerecord.errors.messages.invalid'))
+        end
       end
 
       it 'allows valid email format' do
