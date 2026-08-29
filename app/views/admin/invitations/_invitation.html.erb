@@ -13,13 +13,13 @@
           bg-red-100 text-red-800
       <% end %>
     ">
-      <%= t("activerecord.attributes.invitation.statuses.#{invitation.status}", default: invitation.status) %>
+      <%= t("activerecord.attributes.invitation.statuses.#{invitation.status}") %>
     </span>
   </td>
   <td class="px-6 py-3 text-sm">
     <%= invitation.expires_at.strftime("%Y-%m-%d %H:%M") %>
     <% if invitation.expired? %>
-      <span class="text-red-600 text-xs ml-2">（期限切れ）</span>
+      <span class="text-red-600 text-xs ml-2"><%= t("admin.invitations.expired_label") %></span>
     <% end %>
   </td>
   <td class="px-6 py-3 text-sm"><%= invitation.issued_by.username %></td>

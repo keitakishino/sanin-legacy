@@ -1,31 +1,31 @@
 <div class="py-8">
-  <h2 class="text-3xl font-bold mb-6">招待コード発行</h2>
+  <h2 class="text-3xl font-bold mb-6"><%= t("admin.invitations.title") %></h2>
 
   <div id="invitation_form_success"></div>
   <div id="invitation_form_error"></div>
 
   <div class="bg-white shadow rounded-lg p-6 mb-8">
-    <h3 class="text-xl font-semibold mb-4">新規コード発行</h3>
+    <h3 class="text-xl font-semibold mb-4"><%= t("admin.invitations.new_code_section") %></h3>
 
     <%= form_with model: @invitation, local: true, url: admin_invitations_path, method: :post, class: "space-y-4" do |f| %>
       <div>
-        <%= f.submit "コード生成", class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
+        <%= f.submit t("admin.invitations.generate_button"), class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
       </div>
     <% end %>
   </div>
 
   <div class="bg-white shadow rounded-lg overflow-hidden">
-    <h3 class="text-xl font-semibold p-6 border-b">発行済みコード一覧</h3>
+    <h3 class="text-xl font-semibold p-6 border-b"><%= t("admin.invitations.issued_codes_list") %></h3>
 
     <table class="w-full">
       <thead class="bg-gray-100 border-b">
         <tr>
-          <th class="px-6 py-3 text-left text-sm font-semibold">コード</th>
-          <th class="px-6 py-3 text-left text-sm font-semibold">ステータス</th>
-          <th class="px-6 py-3 text-left text-sm font-semibold">有効期限</th>
-          <th class="px-6 py-3 text-left text-sm font-semibold">発行者</th>
-          <th class="px-6 py-3 text-left text-sm font-semibold">使用者</th>
-          <th class="px-6 py-3 text-left text-sm font-semibold">発行日時</th>
+          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.invitation.code") %></th>
+          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.invitation.status") %></th>
+          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.invitation.expires_at") %></th>
+          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.invitation.issued_by_id") %></th>
+          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.invitation.used_by_id") %></th>
+          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.invitation.created_at") %></th>
         </tr>
       </thead>
       <tbody id="invitations">

@@ -1,0 +1,24 @@
+ja:
+  activerecord:
+    attributes:
+      invitation:
+        code: "招待コード"
+        status: "ステータス"
+        expires_at: "有効期限"
+        issued_by_id: "発行者"
+        used_by_id: "使用者"
+        created_at: "発行日時"
+        statuses:
+          active: "有効"
+          used: "使用済み"
+          expired: "期限切れ"
+          revoked: "取り消し"
+  admin:
+    invitations:
+      title: "招待コード発行"
+      new_code_section: "新規コード発行"
+      generate_button: "コード生成"
+      issued_codes_list: "発行済みコード一覧"
+      created: "招待コードを発行しました"
+      creation_failed: "招待コード発行に失敗しました"
+      expired_label: "（期限切れ）"
