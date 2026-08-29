@@ -1,0 +1,61 @@
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+  <h1 class="text-3xl font-bold mb-6">登録情報</h1>
+
+  <div class="bg-white rounded-lg shadow-md p-6 space-y-6">
+    <!-- ユーザー名 -->
+    <div>
+      <h2 class="text-sm font-semibold text-gray-600 uppercase">ユーザー名</h2>
+      <p class="text-lg mt-2"><%= @user.username %></p>
+    </div>
+
+    <!-- メールアドレス -->
+    <div>
+      <h2 class="text-sm font-semibold text-gray-600 uppercase">メールアドレス</h2>
+      <p class="text-lg mt-2"><%= @user.email.present? ? @user.email : "未設定" %></p>
+    </div>
+
+    <!-- 登録日 -->
+    <div>
+      <h2 class="text-sm font-semibold text-gray-600 uppercase">登録日</h2>
+      <p class="text-lg mt-2"><%= @user.created_at.strftime("%Y年%m月%d日") %></p>
+    </div>
+
+    <!-- ロール -->
+    <div>
+      <h2 class="text-sm font-semibold text-gray-600 uppercase">ロール</h2>
+      <p class="text-lg mt-2">
+        <% if @user.role_admin? %>
+          <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">管理者</span>
+        <% else %>
+          <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">一般ユーザー</span>
+        <% end %>
+      </p>
+    </div>
+
+    <!-- 連携済み外部アカウント -->
+    <div>
+      <h2 class="text-sm font-semibold text-gray-600 uppercase mb-3">連携済み外部アカウント</h2>
+      <% if @user.identities.any? %>
+        <div class="space-y-2">
+          <% @user.identities.each do |identity| %>
+            <div class="flex items-center justify-between bg-gray-50 p-3 rounded">
+              <span><%= identity.provider_display_name %></span>
+              <% if identity.provider_twitter? && @twitter_identity %>
+                <a href="https://twitter.com/intent/user?user_id=<%= @twitter_identity.uid %>" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-semibold">
+                  アカウントを表示
+                </a>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-gray-500">連携済みのアカウントはありません</p>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 編集ボタンとキャンセルリンク -->
+  <div class="mt-8 flex gap-4">
+    <%= link_to "編集", edit_mypage_path, class: "px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold" %>
+  </div>
+</div>

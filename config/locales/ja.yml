@@ -1,6 +1,12 @@
 ja:
   activerecord:
     attributes:
+      user:
+        current_password: "現在のパスワード"
+        username: "ユーザー名"
+        email: "メールアドレス"
+        password: "パスワード"
+        password_confirmation: "パスワード確認"
       invitation:
         code: "招待コード"
         status: "ステータス"
@@ -13,6 +19,21 @@ ja:
           used: "使用済み"
           expired: "期限切れ"
           revoked: "取り消し"
+    errors:
+      messages:
+        invalid: "は無効です"
+        taken: "は既に存在します"
+        too_short: "は短すぎます（最小%{count}文字）"
+        too_long: "は長すぎます（最大%{count}文字）"
+        blank: "を入力してください"
+      models:
+        user:
+          attributes:
+            current_password:
+              blank: "を入力してください"
+              invalid: "が正しくありません"
+            password_confirmation:
+              confirmation: "とパスワードが一致しません"
   admin:
     invitations:
       title: "招待コード発行"
