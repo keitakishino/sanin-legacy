@@ -27,9 +27,12 @@
     <header class="bg-white shadow">
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">
         <h1 class="text-2xl font-bold">Sanin Legacy</h1>
-        <nav>
+        <nav class="flex items-center gap-4">
+          <% if user_signed_in? && current_user.role_admin? %>
+            <%= link_to "招待コード管理", admin_invitations_path, class: "text-blue-600 hover:underline" %>
+          <% end %>
           <% if user_signed_in? %>
-            <span class="mr-4"><%= current_user.username %></span>
+            <span class="mr-2"><%= current_user.username %></span>
             <%= button_to "Signout", signout_path, method: :delete, class: "text-blue-600 hover:underline" %>
           <% else %>
             <%= link_to "Sign In", signin_path, class: "text-blue-600 hover:underline" %>

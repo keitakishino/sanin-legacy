@@ -20,4 +20,8 @@ Rails.application.routes.draw do
 
   match "/auth/:provider/callback", to: "omniauth_callbacks#create", via: [ :get, :post ]
   get "/auth/failure", to: "omniauth_callbacks#failure"
+
+  namespace :admin do
+    resources :invitations, only: [ :index, :create ]
+  end
 end
