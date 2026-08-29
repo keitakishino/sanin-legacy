@@ -1,14 +1,6 @@
 require "rails_helper"
 
 RSpec.describe "Users::Profiles", type: :request do
-  before do
-    I18n.locale = :ja
-  end
-
-  after do
-    I18n.locale = :en
-  end
-
   let(:user) { create(:user, username: "testuser", email: "test@example.com", password: "password123") }
 
   describe "GET /mypage (show)" do

@@ -19,13 +19,13 @@ module Users
       if user_params[:password].present?
         current_password = params.dig(:user, :current_password)
         if current_password.blank?
-          @user.errors.add(:current_password, "を入力してください")
+          @user.errors.add(:current_password, I18n.t("activerecord.errors.models.user.attributes.current_password.blank"))
           render :edit, status: :unprocessable_entity
           return
         end
 
         unless @user.authenticate(current_password)
-          @user.errors.add(:current_password, "が正しくありません")
+          @user.errors.add(:current_password, I18n.t("activerecord.errors.models.user.attributes.current_password.invalid"))
           render :edit, status: :unprocessable_entity
           return
         end

@@ -28,6 +28,6 @@ class User < ApplicationRecord
   def password_confirmation_match
     return if password_confirmation.blank?
 
-    errors.add(:password_confirmation, "パスワードと一致しません") if password != password_confirmation
+    errors.add(:password_confirmation, :confirmation) if password != password_confirmation
   end
 end

@@ -14,3 +14,11 @@ ja:
         too_short: "は短すぎます（最小%{count}文字）"
         too_long: "は長すぎます（最大%{count}文字）"
         blank: "を入力してください"
+      models:
+        user:
+          attributes:
+            current_password:
+              blank: "を入力してください"
+              invalid: "が正しくありません"
+            password_confirmation:
+              confirmation: "とパスワードが一致しません"
