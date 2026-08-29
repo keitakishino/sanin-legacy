@@ -7,6 +7,12 @@ ja:
         email: "メールアドレス"
         password: "パスワード"
         password_confirmation: "パスワード確認"
+      event:
+        title: "イベント名"
+        description: "説明"
+        event_date: "イベント日時"
+        created_by_id: "作成者"
+        created_at: "作成日時"
       invitation:
         code: "招待コード"
         status: "ステータス"
@@ -35,6 +41,21 @@ ja:
             password_confirmation:
               confirmation: "とパスワードが一致しません"
   admin:
+    events:
+      title: "イベント管理"
+      new_title: "新規イベント作成"
+      edit_title: "イベント編集"
+      new_button: "新規イベント作成"
+      edit: "編集"
+      delete: "削除"
+      submit: "保存"
+      cancel: "キャンセル"
+      actions: "操作"
+      no_events: "イベントはまだ登録されていません"
+      created: "イベントを作成しました"
+      updated: "イベントを更新しました"
+      deleted: "イベントを削除しました"
+      confirm_delete: "本当に削除してもよろしいですか？"
     invitations:
       title: "招待コード発行"
       new_code_section: "新規コード発行"
