@@ -5,7 +5,7 @@
     <div class="space-y-4">
       <% @events.each do |event| %>
         <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-          <%= link_to events_path(event),
+          <%= link_to event_path(event),
               class: "block text-lg font-semibold text-blue-600 hover:text-blue-800",
               data: { turbo_frame: "event_modal" } do %>
             <div class="flex items-start justify-between">

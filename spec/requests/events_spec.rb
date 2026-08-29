@@ -1,4 +1,5 @@
 require "rails_helper"
+require "nokogiri"
 
 RSpec.describe "Events", type: :request do
   let(:user) { create(:user, username: "testuser", email: "test@example.com", password: "password123") }
@@ -89,6 +90,38 @@ RSpec.describe "Events", type: :request do
         event1
         get "/events"
         expect(response.body).to include('id="event_modal"')
+      end
+
+      it "renders event links with correct href paths" do
+        event1
+        event2
+        get "/events"
+
+        # Parse HTML to verify actual href attributes
+        doc = Nokogiri::HTML.parse(response.body)
+        links = doc.css("a[href]")
+
+        # Find links that go to event details (format: /events/:id)
+        event_links = links.select { |link| link["href"].match?(%r{/events/\d+$}) }
+
+        expect(event_links.length).to eq(2)
+
+        # Verify each link points to the correct event
+        event_hrefs = event_links.map { |link| link["href"] }
+        expect(event_hrefs).to include("/events/#{event1.id}")
+        expect(event_hrefs).to include("/events/#{event2.id}")
+
+        # Ensure no links have incorrect format like /events.90 or /events?id=90
+        expect(event_links.all? { |link| link["href"].match?(%r{^/events/\d+$}) }).to be_truthy
+      end
+
+      it "does not use events_path in index links (should use event_path)" do
+        event1
+        get "/events"
+
+        # Verify the links don't contain the incorrect format
+        # /events.90 would be created by events_path(event)
+        expect(response.body).not_to match(%r{/events\.\d+})
       end
     end
   end
