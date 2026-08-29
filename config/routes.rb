@@ -28,6 +28,9 @@ Rails.application.routes.draw do
   match "/auth/:provider/callback", to: "omniauth_callbacks#create", via: [ :get, :post ]
   get "/auth/failure", to: "omniauth_callbacks#failure"
 
+  # User-facing events (listing and detail view)
+  resources :events, only: [ :index, :show ]
+
   namespace :admin do
     resources :invitations, only: [ :index, :create ]
     resources :events, only: [ :index, :new, :create, :edit, :update, :destroy ]
