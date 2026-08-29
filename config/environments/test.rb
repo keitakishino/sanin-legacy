@@ -57,4 +57,9 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # Set default locale to English for tests to match expected validation error messages
+  # The application uses Japanese as default in other environments,
+  # but tests expect English error messages from Rails validations.
+  config.i18n.default_locale = :en
 end

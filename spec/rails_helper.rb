@@ -49,6 +49,17 @@ RSpec.configure do |config|
 
   # Include time-travel helpers (freeze_time, travel_to, etc.).
   config.include ActiveSupport::Testing::TimeHelpers
+
+  # Reset I18n locale to English for model specs to ensure consistent error messages,
+  # but keep Japanese for request/feature specs where the UI content is in Japanese
+  config.before(:each, type: :model) do
+    I18n.locale = :en
+  end
+
+  # Always reset locale back to default after each test to prevent cross-test pollution
+  config.after(:each) do
+    I18n.locale = I18n.default_locale
+  end
 end
 
 Shoulda::Matchers.configure do |config|
