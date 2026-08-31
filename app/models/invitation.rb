@@ -29,7 +29,13 @@ class Invitation < ApplicationRecord
   end
 
   def available?
-    status_active? && !expired?
+    return false unless status_active? && !expired?
+
+    if signup_token.present?
+      return false if signup_token_expires_at.blank? || signup_token_expires_at < Time.current
+    end
+
+    true
   end
 
   def use_by(user)

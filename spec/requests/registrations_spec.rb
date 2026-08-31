@@ -65,6 +65,21 @@ RSpec.describe "Registrations", type: :request do
         expect(response).to have_http_status(:forbidden)
       end
     end
+
+    context "with signup_token_expires_at in the past (signup token 1-hour expiry)" do
+      let(:invitation) { create(:invitation, status: :active, expires_at: 1.day.from_now) }
+      let(:token) do
+        token = invitation.generate_signup_token
+        invitation.update(signup_token_expires_at: 1.hour.ago)
+        token
+      end
+
+      it "returns 403" do
+        get "/signup", params: { token: token }
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
   end
 
   describe "POST /signup (email)" do
@@ -232,6 +247,45 @@ RSpec.describe "Registrations", type: :request do
         post "/signup", params: params
 
         expect(response.body).to include("メール")
+      end
+    end
+
+    context "with signup_token_expires_at in the past (signup token 1-hour expiry)" do
+      let(:invitation) { create(:invitation, status: :active, expires_at: 1.day.from_now) }
+      let(:token) do
+        token = invitation.generate_signup_token
+        invitation.update(signup_token_expires_at: 1.hour.ago)
+        token
+      end
+      let(:params) do
+        {
+          email: "newuser@example.com",
+          password: "SecurePassword123",
+          password_confirmation: "SecurePassword123",
+          auth_method: "email"
+        }
+      end
+
+      before do
+        get "/signup", params: { token: token }
+      end
+
+      it "returns 403" do
+        post "/signup", params: params
+
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      it "does not create a user" do
+        expect do
+          post "/signup", params: params
+        end.not_to change { User.count }
+      end
+
+      it "does not mark invitation as used" do
+        post "/signup", params: params
+
+        expect(invitation.reload.status).to eq("active")
       end
     end
   end

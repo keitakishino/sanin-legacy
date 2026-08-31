@@ -186,6 +186,56 @@ RSpec.describe Invitation, type: :model do
         expect(invitation.available?).to be false
       end
     end
+
+    context 'when signup_token is not generated yet' do
+      let(:invitation) { build(:invitation) }
+
+      it 'returns true (no signup_token expiry check)' do
+        expect(invitation.signup_token).to be_nil
+        expect(invitation.available?).to be true
+      end
+    end
+
+    context 'when signup_token_expires_at is in the past' do
+      let(:invitation) { build(:invitation) }
+
+      before do
+        invitation.signup_token = 'test_token_123'
+        invitation.signup_token_expires_at = 1.hour.ago
+      end
+
+      it 'returns false' do
+        expect(invitation.available?).to be false
+      end
+    end
+
+    context 'when signup_token is present but signup_token_expires_at is nil' do
+      let(:invitation) { build(:invitation) }
+
+      before do
+        invitation.signup_token = 'test_token_123'
+        invitation.signup_token_expires_at = nil
+      end
+
+      it 'returns false' do
+        expect(invitation.available?).to be false
+      end
+    end
+
+    context 'when signup_token_expires_at is in the future' do
+      let(:invitation) { build(:invitation) }
+
+      before do
+        freeze_time do
+          invitation.signup_token = 'test_token_123'
+          invitation.signup_token_expires_at = 30.minutes.from_now
+        end
+      end
+
+      it 'returns true' do
+        expect(invitation.available?).to be true
+      end
+    end
   end
 
   describe '#use_by' do
