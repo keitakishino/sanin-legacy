@@ -1,0 +1,38 @@
+<div id="<%= dom_id(trade_card_offer) %>" class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+  <div class="flex items-start justify-between">
+    <div class="flex-1">
+      <h3 class="text-lg font-semibold text-gray-800"><%= trade_card_offer.card_name %></h3>
+      <div class="mt-4 space-y-2 text-gray-600">
+        <p><strong>数量:</strong> <%= trade_card_offer.quantity %></p>
+        <p><strong>言語:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.language.#{trade_card_offer.language}") %></p>
+        <p><strong>状態:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.condition.#{trade_card_offer.condition}") %></p>
+        <p><strong>フォイル:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.foil.#{trade_card_offer.foil}") %></p>
+        <p><strong>フレーム:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.frame.#{trade_card_offer.frame}") %></p>
+        <p><strong>PWマーク:</strong> <%= trade_card_offer.pw_mark ? "あり" : "なし" %></p>
+        <% if trade_card_offer.expansion %>
+          <p><strong>セット:</strong> <%= trade_card_offer.expansion.name %></p>
+        <% end %>
+        <% if trade_card_offer.note.present? %>
+          <p><strong>備考:</strong> <%= trade_card_offer.note %></p>
+        <% end %>
+        <% if trade_card_offer.amount.present? %>
+          <p><strong>金額:</strong> ¥<%= number_with_delimiter(trade_card_offer.amount) %></p>
+        <% end %>
+      </div>
+    </div>
+    <div class="flex gap-2 ml-4">
+      <button
+        type="button"
+        class="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+        onclick="document.getElementById('<%= dom_id(trade_card_offer, :edit_form) %>').style.display = 'block'">
+        編集
+      </button>
+      <%= button_to "削除", trade_card_offer_path(@trade.event, trade_card_offer), method: :delete, form: { local: true, data: { turbo: true } }, class: "px-3 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700" %>
+    </div>
+  </div>
+
+  <!-- Edit form (hidden by default) -->
+  <turbo-frame id="<%= dom_id(trade_card_offer, :edit_form) %>" style="display: none;" class="mt-4 border-t pt-4">
+    <%= render 'form', trade_card_offer: trade_card_offer %>
+  </turbo-frame>
+</div>

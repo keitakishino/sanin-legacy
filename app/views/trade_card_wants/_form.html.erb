@@ -1,0 +1,96 @@
+<% if trade_card_want.persisted? %>
+  <% form_url = trade_card_want_path(@trade.event, trade_card_want) %>
+  <% form_method = :patch %>
+<% else %>
+  <% form_url = trade_card_wants_path(@trade.event) %>
+  <% form_method = :post %>
+<% end %>
+
+<%= form_with url: form_url, method: form_method, local: true, data: { turbo: true } do |f| %>
+  <% if trade_card_want.errors.any? %>
+    <div id="error_explanation" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+      <h2 class="text-red-800 font-semibold mb-2">
+        <%= pluralize(trade_card_want.errors.count, "error") %> prohibited this record from being saved:
+      </h2>
+      <ul class="list-disc list-inside space-y-1 text-red-700">
+        <% trade_card_want.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="space-y-4">
+    <!-- Card Name -->
+    <div>
+      <%= f.label :card_name, "カード名" %>
+      <%= f.text_field :card_name, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" %>
+    </div>
+
+    <!-- Quantity -->
+    <div>
+      <%= f.label :quantity, "数量" %>
+      <%= f.number_field :quantity, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" %>
+    </div>
+
+    <!-- Language (nullable) -->
+    <div>
+      <%= f.label :language, "言語 (不問なら未選択)" %>
+      <%= f.select :language, [["不問", nil]] + TradeCardWant.languages.keys.map { |k| [I18n.t("activerecord.enums.trade_card_want.language.#{k}"), k] }, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" %>
+    </div>
+
+    <!-- Conditions (array field) -->
+    <div>
+      <%= f.label :conditions, "状態 (不問ならチェックなし)" %>
+      <div class="mt-2 space-y-2">
+        <% [["NM", 0], ["SP", 1], ["MP", 2], ["HP", 3], ["POOR", 4]].each do |label, value| %>
+          <label class="flex items-center">
+            <%= f.check_box :conditions, { multiple: true, include_hidden: false }, value, nil %>
+            <span class="ml-2"><%= label %></span>
+          </label>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Foil (nullable) -->
+    <div>
+      <%= f.label :foil, "フォイル (不問なら未選択)" %>
+      <%= f.select :foil, [["不問", nil]] + TradeCardWant.foils.keys.map { |k| [I18n.t("activerecord.enums.trade_card_want.foil.#{k}"), k] }, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" %>
+    </div>
+
+    <!-- Frame (nullable) -->
+    <div>
+      <%= f.label :frame, "フレーム (不問なら未選択)" %>
+      <%= f.select :frame, [["不問", nil]] + TradeCardWant.frames.keys.map { |k| [I18n.t("activerecord.enums.trade_card_want.frame.#{k}"), k] }, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" %>
+    </div>
+
+    <!-- Expansion -->
+    <div>
+      <%= f.label :expansion_id, "セット" %>
+      <%= f.collection_select :expansion_id, Expansion.all, :id, :name, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" %>
+    </div>
+
+    <!-- Note -->
+    <div>
+      <%= f.label :note, "備考" %>
+      <%= f.text_area :note, rows: 3, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" %>
+    </div>
+
+    <!-- Amount (admin only) -->
+    <% if current_user.role_admin? %>
+      <div>
+        <%= f.label :amount, "金額 (管理者のみ)" %>
+        <%= f.number_field :amount, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" %>
+      </div>
+    <% end %>
+
+    <!-- Submit buttons -->
+    <div class="flex gap-2 pt-4">
+      <%= f.submit trade_card_want.persisted? ? "更新" : "追加", class: "px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold" %>
+      <button type="button" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 font-semibold"
+              onclick="document.getElementById('<%= dom_id(trade_card_want, :edit_form) %>').style.display = 'none'">
+        キャンセル
+      </button>
+    </div>
+  </div>
+<% end %>

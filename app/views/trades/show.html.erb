@@ -1,0 +1,94 @@
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+  <!-- Header -->
+  <div class="mb-8">
+    <%= link_to "← イベント一覧に戻る", events_path, class: "text-blue-600 hover:text-blue-800 mb-4 inline-block" %>
+    <h1 class="text-3xl font-bold text-gray-800 mb-2"><%= @event.title %></h1>
+    <p class="text-gray-600 text-sm">
+      開催日: <%= @event.event_date.strftime("%Y年%m月%d日") %>
+    </p>
+  </div>
+
+  <!-- Trade Status -->
+  <div class="bg-gray-50 rounded-lg p-4 mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-800">トレード状態</h2>
+        <p class="text-gray-600 text-sm mt-1">
+          <%= I18n.t("activerecord.enums.trade.status.#{@trade.status}") %>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card Offers Section -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-bold text-gray-800">出すカード一覧</h2>
+    </div>
+
+    <div id="trade_card_offers" class="space-y-4">
+      <% if @trade.trade_card_offers.any? %>
+        <% @trade.trade_card_offers.each do |offer| %>
+          <%= render offer %>
+        <% end %>
+      <% else %>
+        <p class="text-gray-500 text-center py-8">カード明細はまだありません</p>
+      <% end %>
+    </div>
+
+    <div class="mt-4">
+      <button
+        type="button"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
+        id="add_offer_btn">
+        カード明細を追加
+      </button>
+    </div>
+
+    <turbo-frame id="new_trade_card_offer" style="display: none;" class="mt-4 bg-gray-50 p-4 rounded-lg">
+      <%= render 'trade_card_offers/form', trade_card_offer: @trade.trade_card_offers.build %>
+    </turbo-frame>
+  </div>
+
+  <!-- Card Wants Section -->
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-bold text-gray-800">欲しいカード一覧</h2>
+    </div>
+
+    <div id="trade_card_wants" class="space-y-4">
+      <% if @trade.trade_card_wants.any? %>
+        <% @trade.trade_card_wants.each do |want| %>
+          <%= render want %>
+        <% end %>
+      <% else %>
+        <p class="text-gray-500 text-center py-8">カード明細はまだありません</p>
+      <% end %>
+    </div>
+
+    <div class="mt-4">
+      <button
+        type="button"
+        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
+        id="add_want_btn">
+        カード明細を追加
+      </button>
+    </div>
+
+    <turbo-frame id="new_trade_card_want" style="display: none;" class="mt-4 bg-gray-50 p-4 rounded-lg">
+      <%= render 'trade_card_wants/form', trade_card_want: @trade.trade_card_wants.build %>
+    </turbo-frame>
+  </div>
+
+  <script>
+    document.getElementById('add_offer_btn').addEventListener('click', function() {
+      const frame = document.getElementById('new_trade_card_offer');
+      frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('add_want_btn').addEventListener('click', function() {
+      const frame = document.getElementById('new_trade_card_want');
+      frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
+    });
+  </script>
+</div>

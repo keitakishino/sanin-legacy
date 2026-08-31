@@ -31,6 +31,17 @@ Rails.application.routes.draw do
   # User-facing events (listing and detail view)
   resources :events, only: [ :index, :show ]
 
+  # User trade view and editing
+  get "/trades/:event_id", to: "trades#show", as: :trade
+  post "/trades/:event_id/card_offers", to: "trade_card_offers#create", as: :trade_card_offers
+  patch "/trades/:event_id/card_offers/:id", to: "trade_card_offers#update", as: :trade_card_offer
+  put "/trades/:event_id/card_offers/:id", to: "trade_card_offers#update"
+  delete "/trades/:event_id/card_offers/:id", to: "trade_card_offers#destroy"
+  post "/trades/:event_id/card_wants", to: "trade_card_wants#create", as: :trade_card_wants
+  patch "/trades/:event_id/card_wants/:id", to: "trade_card_wants#update", as: :trade_card_want
+  put "/trades/:event_id/card_wants/:id", to: "trade_card_wants#update"
+  delete "/trades/:event_id/card_wants/:id", to: "trade_card_wants#destroy"
+
   namespace :admin do
     resources :invitations, only: [ :index, :create ]
     resources :events, only: [ :index, :new, :create, :edit, :update, :destroy ]
