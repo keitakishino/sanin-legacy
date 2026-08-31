@@ -212,5 +212,4 @@ RSpec.describe "TradeCardOffers", type: :request do
       expect(flash[:notice]).to include("カード明細を削除しました")
     end
   end
-
 end
