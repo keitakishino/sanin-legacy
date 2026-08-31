@@ -92,6 +92,13 @@ RSpec.describe "TradeCardWants", type: :request do
         post "/trades/#{event.id}/card_wants", params: invalid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
         expect(response).to have_http_status(:unprocessable_entity)
       end
+
+      it "returns HTML redirect on error" do
+        trade
+        post "/trades/#{event.id}/card_wants", params: invalid_params
+        expect(response).to redirect_to(trade_path(event))
+        expect(flash[:alert]).to be_present
+      end
     end
 
     context "with invalid conditions values" do
@@ -116,6 +123,13 @@ RSpec.describe "TradeCardWants", type: :request do
         trade
         post "/trades/#{event.id}/card_wants", params: invalid_conditions_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
         expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "returns HTML redirect on error" do
+        trade
+        post "/trades/#{event.id}/card_wants", params: invalid_conditions_params
+        expect(response).to redirect_to(trade_path(event))
+        expect(flash[:alert]).to be_present
       end
     end
 

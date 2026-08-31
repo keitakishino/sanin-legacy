@@ -14,7 +14,7 @@ class TradeCardOffersController < ApplicationController
     else
       respond_to do |format|
         format.turbo_stream { render :form_error, status: :unprocessable_entity }
-        format.html { render :new, status: :unprocessable_entity }
+        format.html { redirect_to trade_path(@trade.event), alert: @trade_card_offer.errors.full_messages.join(", ") }
       end
     end
   end
@@ -28,7 +28,7 @@ class TradeCardOffersController < ApplicationController
     else
       respond_to do |format|
         format.turbo_stream { render :form_error, status: :unprocessable_entity }
-        format.html { render :edit, status: :unprocessable_entity }
+        format.html { redirect_to trade_path(@trade.event), alert: @trade_card_offer.errors.full_messages.join(", ") }
       end
     end
   end
