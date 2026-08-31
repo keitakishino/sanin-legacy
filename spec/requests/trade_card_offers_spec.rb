@@ -36,8 +36,7 @@ RSpec.describe "TradeCardOffers", type: :request do
       }.to change { TradeCardOffer.count }.by(1)
     end
 
-    xit "returns turbo_stream response" do
-      # TODO: Fix turbo_stream rendering - investigate 500 error
+    it "returns turbo_stream response" do
       trade
       post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
       expect(response).to have_http_status(:ok)
@@ -73,8 +72,7 @@ RSpec.describe "TradeCardOffers", type: :request do
         }.not_to change { TradeCardOffer.count }
       end
 
-      xit "returns unprocessable_entity status" do
-        # TODO: Fix turbo_stream rendering - investigate 500 error
+      it "returns unprocessable_entity status" do
         trade
         post "/trades/#{event.id}/card_offers", params: invalid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
         expect(response).to have_http_status(:unprocessable_entity)
@@ -124,8 +122,7 @@ RSpec.describe "TradeCardOffers", type: :request do
       expect(offer.quantity).to eq(2)
     end
 
-    xit "returns turbo_stream response" do
-      # TODO: Fix turbo_stream rendering - investigate 500 error
+    it "returns turbo_stream response" do
       offer
       patch "/trades/#{event.id}/card_offers/#{offer.id}", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
       expect(response).to have_http_status(:ok)

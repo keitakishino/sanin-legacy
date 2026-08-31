@@ -19,7 +19,7 @@ RSpec.describe "TradeCardWants", type: :request do
           card_name: "Black Lotus",
           quantity: 1,
           language: :ja,
-          conditions: [0, 1],
+          conditions: [ 0, 1 ],
           foil: :foil,
           frame: :normal,
           expansion_id: expansion.id,
@@ -35,28 +35,28 @@ RSpec.describe "TradeCardWants", type: :request do
       }.to change { TradeCardWant.count }.by(1)
     end
 
-    xit "creates want with nullable fields as nil" do
-      # TODO: Fix nullable enum fields handling
+    it "creates want with nullable fields as nil" do
       trade
       params_with_nil = {
         trade_card_want: {
           card_name: "Card",
           quantity: 1,
           language: nil,
-          conditions: [],
+          conditions: [ 0 ],
           foil: nil,
           frame: nil
         }
       }
       post "/trades/#{event.id}/card_wants", params: params_with_nil
+      expect(response).to redirect_to(trade_path(event))
       want = TradeCardWant.last
+      expect(want).not_to be_nil
       expect(want.language).to be_nil
       expect(want.foil).to be_nil
       expect(want.frame).to be_nil
     end
 
-    xit "returns turbo_stream response" do
-      # TODO: Fix turbo_stream rendering - investigate 500 error
+    it "returns turbo_stream response" do
       trade
       post "/trades/#{event.id}/card_wants", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
       expect(response).to have_http_status(:ok)
@@ -87,8 +87,7 @@ RSpec.describe "TradeCardWants", type: :request do
         }.not_to change { TradeCardWant.count }
       end
 
-      xit "returns unprocessable_entity status" do
-        # TODO: Fix turbo_stream rendering - investigate 500 error
+      it "returns unprocessable_entity status" do
         trade
         post "/trades/#{event.id}/card_wants", params: invalid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
         expect(response).to have_http_status(:unprocessable_entity)
@@ -101,7 +100,7 @@ RSpec.describe "TradeCardWants", type: :request do
           trade_card_want: {
             card_name: "Card",
             quantity: 1,
-            conditions: [0, 5, 6]  # 5 and 6 are invalid (only 0-4 allowed)
+            conditions: [ 0, 5, 6 ]  # 5 and 6 are invalid (only 0-4 allowed)
           }
         }
       end
@@ -113,8 +112,7 @@ RSpec.describe "TradeCardWants", type: :request do
         }.not_to change { TradeCardWant.count }
       end
 
-      xit "returns unprocessable_entity status" do
-        # TODO: Fix turbo_stream rendering - investigate 500 error
+      it "returns unprocessable_entity status" do
         trade
         post "/trades/#{event.id}/card_wants", params: invalid_conditions_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
         expect(response).to have_http_status(:unprocessable_entity)
@@ -148,7 +146,7 @@ RSpec.describe "TradeCardWants", type: :request do
           card_name: "Updated Card",
           quantity: 2,
           language: :en,
-          conditions: [1, 2],
+          conditions: [ 1, 2 ],
           foil: :non_foil,
           frame: :extended
         }
@@ -161,11 +159,10 @@ RSpec.describe "TradeCardWants", type: :request do
       want.reload
       expect(want.card_name).to eq("Updated Card")
       expect(want.quantity).to eq(2)
-      expect(want.conditions).to eq([1, 2])
+      expect(want.conditions).to eq([ 1, 2 ])
     end
 
-    xit "returns turbo_stream response" do
-      # TODO: Fix turbo_stream rendering - investigate 500 error
+    it "returns turbo_stream response" do
       want
       patch "/trades/#{event.id}/card_wants/#{want.id}", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
       expect(response).to have_http_status(:ok)
@@ -243,5 +240,4 @@ RSpec.describe "TradeCardWants", type: :request do
       expect(flash[:notice]).to include("カード明細を削除しました")
     end
   end
-
 end
