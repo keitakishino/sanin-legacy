@@ -212,6 +212,33 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
         expect(result[:message]).to include('Failed to parse')
       end
 
+      it 'returns failure when API response lacks data key' do
+        response_without_data = {
+          object: 'list',
+          has_more: false
+        }
+        stub_scryfall_api_response(response_without_data)
+
+        result = importer.call
+
+        expect(result[:success]).to be false
+        expect(result[:message]).to include('Invalid Scryfall API response structure')
+      end
+
+      it 'returns failure when API response data is not an array' do
+        response_with_invalid_data = {
+          object: 'list',
+          data: 'not_an_array',
+          has_more: false
+        }
+        stub_scryfall_api_response(response_with_invalid_data)
+
+        result = importer.call
+
+        expect(result[:success]).to be false
+        expect(result[:message]).to include('Invalid Scryfall API response structure')
+      end
+
       it 'logs the error' do
         stub_scryfall_api_error_response(500, 'Internal Server Error')
         allow(Rails.logger).to receive(:error)
@@ -249,11 +276,14 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
         stub_scryfall_api_response(response_with_invalid)
 
         # Simulate validation failure for the first set using and_wrap_original
-        allow(Expansion).to receive(:create!).and_wrap_original do |method, attrs|
+        allow(Expansion).to receive(:create).and_wrap_original do |method, attrs|
           if attrs[:scryfall_set_code] == 'INV1'
-            raise ActiveRecord::RecordInvalid.new(Expansion.new)
+            expansion = Expansion.new(attrs)
+            expansion.errors.add(:name, "can't be blank")
+            expansion
+          else
+            method.call(attrs)
           end
-          method.call(attrs)
         end
 
         result = importer.call
@@ -281,14 +311,204 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
         }
         stub_scryfall_api_response(response_with_invalid)
 
-        allow(Expansion).to receive(:create!) do |_attrs|
-          raise ActiveRecord::RecordInvalid.new(Expansion.new)
+        allow(Expansion).to receive(:create) do |_attrs|
+          expansion = Expansion.new
+          expansion.errors.add(:name, "can't be blank")
+          expansion
         end
         allow(Rails.logger).to receive(:error)
 
         importer.call
 
         expect(Rails.logger).to have_received(:error).at_least(:once)
+      end
+
+      it 'handles nil set code gracefully' do
+        response_with_nil_code = {
+          object: 'list',
+          data: [
+            {
+              object: 'set',
+              code: nil,
+              name: 'Set with nil code',
+              printed_name: nil,
+              set_type: 'expansion',
+              released_at: '2024-01-01'
+            },
+            {
+              object: 'set',
+              code: 'mh3',
+              name: 'Modern Horizons 3',
+              printed_name: 'モダンホライゾン3',
+              set_type: 'expansion',
+              released_at: '2024-06-14'
+            }
+          ],
+          has_more: false
+        }
+        stub_scryfall_api_response(response_with_nil_code)
+        allow(Rails.logger).to receive(:error)
+
+        result = importer.call
+
+        # First set should error, second should be created
+        expect(result[:error_count]).to eq(1)
+        expect(result[:created_count]).to eq(1)
+        expect(Expansion.find_by(scryfall_set_code: 'MH3')).to be_present
+        expect(Rails.logger).to have_received(:error).with(include('Set code is nil or empty'))
+      end
+
+      it 'handles empty set code gracefully' do
+        response_with_empty_code = {
+          object: 'list',
+          data: [
+            {
+              object: 'set',
+              code: '   ',
+              name: 'Set with empty code',
+              printed_name: nil,
+              set_type: 'expansion',
+              released_at: '2024-01-01'
+            },
+            {
+              object: 'set',
+              code: 'bro',
+              name: 'The Brothers\' War',
+              printed_name: 'ザ・ブラザーズ・ウォー',
+              set_type: 'expansion',
+              released_at: '2022-11-18'
+            }
+          ],
+          has_more: false
+        }
+        stub_scryfall_api_response(response_with_empty_code)
+        allow(Rails.logger).to receive(:error)
+
+        result = importer.call
+
+        # First set should error, second should be created
+        expect(result[:error_count]).to eq(1)
+        expect(result[:created_count]).to eq(1)
+        expect(Expansion.find_by(scryfall_set_code: 'BRO')).to be_present
+        expect(Rails.logger).to have_received(:error).with(include('Set code is nil or empty'))
+      end
+    end
+
+    context 'when uniqueness constraint violation occurs (race condition)' do
+      it 'treats uniqueness violation as skipped, not error' do
+        response = {
+          object: 'list',
+          data: [
+            {
+              object: 'set',
+              code: 'mh3',
+              name: 'Modern Horizons 3',
+              printed_name: 'モダンホライゾン3',
+              set_type: 'expansion',
+              released_at: '2024-06-14'
+            }
+          ],
+          has_more: false
+        }
+        stub_scryfall_api_response(response)
+
+        # Simulate uniqueness violation on create
+        allow(Expansion).to receive(:create) do |attrs|
+          expansion = Expansion.new(attrs)
+          expansion.errors.add(:scryfall_set_code, 'has already been taken')
+          expansion
+        end
+
+        result = importer.call
+
+        # Should be counted as skipped, not error
+        expect(result[:skipped_count]).to eq(1)
+        expect(result[:error_count]).to eq(0)
+      end
+
+      it 'treats other validation errors as errors, not skipped' do
+        response = {
+          object: 'list',
+          data: [
+            {
+              object: 'set',
+              code: 'mh3',
+              name: 'Modern Horizons 3',
+              printed_name: 'モダンホライゾン3',
+              set_type: 'expansion',
+              released_at: '2024-06-14'
+            }
+          ],
+          has_more: false
+        }
+        stub_scryfall_api_response(response)
+
+        # Simulate other validation error on create
+        allow(Expansion).to receive(:create) do |attrs|
+          expansion = Expansion.new(attrs)
+          expansion.errors.add(:name, "can't be blank")
+          expansion
+        end
+
+        result = importer.call
+
+        # Should be counted as error, not skipped
+        expect(result[:error_count]).to eq(1)
+        expect(result[:skipped_count]).to eq(0)
+      end
+
+      it 'processes multiple sets with race condition in middle' do
+        response = {
+          object: 'list',
+          data: [
+            {
+              object: 'set',
+              code: 'mh3',
+              name: 'Modern Horizons 3',
+              printed_name: 'モダンホライゾン3',
+              set_type: 'expansion',
+              released_at: '2024-06-14'
+            },
+            {
+              object: 'set',
+              code: 'bro',
+              name: 'The Brothers\' War',
+              printed_name: 'ザ・ブラザーズ・ウォー',
+              set_type: 'expansion',
+              released_at: '2022-11-18'
+            },
+            {
+              object: 'set',
+              code: 'grn',
+              name: 'Guilds of Ravnica',
+              printed_name: 'ラヴニカのギルド',
+              set_type: 'expansion',
+              released_at: '2018-10-05'
+            }
+          ],
+          has_more: false
+        }
+        stub_scryfall_api_response(response)
+
+        # Simulate race condition on second set
+        allow(Expansion).to receive(:create).and_wrap_original do |method, attrs|
+          if attrs[:scryfall_set_code] == 'BRO'
+            expansion = Expansion.new(attrs)
+            expansion.errors.add(:scryfall_set_code, 'has already been taken')
+            expansion
+          else
+            method.call(attrs)
+          end
+        end
+
+        result = importer.call
+
+        # MH3 and GRN created, BRO skipped due to race condition
+        expect(result[:created_count]).to eq(2)
+        expect(result[:skipped_count]).to eq(1)
+        expect(result[:error_count]).to eq(0)
+        expect(Expansion.find_by(scryfall_set_code: 'MH3')).to be_present
+        expect(Expansion.find_by(scryfall_set_code: 'GRN')).to be_present
       end
     end
 

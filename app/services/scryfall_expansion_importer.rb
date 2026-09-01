@@ -21,7 +21,7 @@ class ScryfallExpansionImporter
 
     sets_data.each do |set_data|
       if should_skip_set?(set_data)
-        Rails.logger.debug("Skipping #{set_data['code']} (set_type: #{set_data['set_type']})")
+        Rails.logger.info("Skipping set #{set_data['code']} (set_type: #{set_data['set_type']})")
         skipped_count += 1
         next
       end
@@ -70,6 +70,14 @@ class ScryfallExpansionImporter
     case response.code.to_i
     when 200
       data = JSON.parse(response.body)
+
+      # Validate response structure: 'data' key must exist and be an array
+      unless data.is_a?(Hash) && data["data"].is_a?(Array)
+        error_msg = "Invalid Scryfall API response structure: 'data' key missing or not an array. Response: #{data.inspect}"
+        Rails.logger.error(error_msg)
+        raise ScryfallApiError, error_msg
+      end
+
       Rails.logger.info("Successfully fetched #{data['data'].length} sets from Scryfall")
       data["data"]
     else
@@ -88,28 +96,46 @@ class ScryfallExpansionImporter
   end
 
   def process_set(set_data)
-    code = set_data["code"].upcase
+    # Validate that code exists and is not empty
+    code = set_data["code"]
+    if code.nil? || code.to_s.strip.empty?
+      error_msg = "Set code is nil or empty for set data: #{set_data.inspect}"
+      Rails.logger.error(error_msg)
+      return :error
+    end
+
+    code = code.upcase
     name = set_data["name"]
     name_ja = set_data["printed_name"]
 
     existing = Expansion.find_by(scryfall_set_code: code)
     if existing.present?
-      Rails.logger.debug("Expansion #{code} already exists, skipping")
+      Rails.logger.info("Expansion #{code} already exists, skipping")
       return :skipped
     end
 
-    Expansion.create!(
+    expansion = Expansion.create(
       scryfall_set_code: code,
       name: name,
       name_ja: name_ja
     )
 
-    Rails.logger.info("Created expansion: #{code} - #{name}")
-    :created
-  rescue ActiveRecord::RecordInvalid => e
-    error_msg = "Failed to create expansion #{set_data['code']}: #{e.message}"
-    Rails.logger.error(error_msg)
-    :error
+    if expansion.persisted?
+      Rails.logger.info("Created expansion: #{code} - #{name}")
+      :created
+    else
+      # Handle validation errors
+      if expansion.errors[:scryfall_set_code].any? { |e| e.include?("has already been taken") }
+        # Uniqueness constraint violation (race condition) - treat as skipped
+        Rails.logger.info("Expansion #{code} already exists (race condition), skipping")
+        :skipped
+      else
+        # Other validation errors
+        error_msg = "Failed to create expansion #{code}: #{expansion.errors.full_messages.join(', ')}"
+        Rails.logger.error(error_msg)
+        :error
+      end
+    end
   rescue StandardError => e
     error_msg = "Unexpected error processing set #{set_data['code']}: #{e.message}"
     Rails.logger.error(error_msg)

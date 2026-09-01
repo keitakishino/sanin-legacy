@@ -3,7 +3,13 @@ namespace :expansions do
   task import_from_scryfall: :environment do
     importer = ScryfallExpansionImporter.new
     result = importer.call
-    puts result[:message]
+
+    if result[:success]
+      puts result[:message]
+    else
+      warn result[:message]
+    end
+
     exit(1) unless result[:success]
   end
 end
