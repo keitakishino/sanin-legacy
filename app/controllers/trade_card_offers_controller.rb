@@ -44,7 +44,11 @@ class TradeCardOffersController < ApplicationController
   private
 
   def set_trade
-    @trade = Trade.find_by!(event_id: params[:event_id], user_id: current_user.id)
+    if current_user.role_admin?
+      @trade = Trade.find_by!(event_id: params[:event_id])
+    else
+      @trade = Trade.find_by!(event_id: params[:event_id], user_id: current_user.id)
+    end
   end
 
   def authorize_user_or_admin!

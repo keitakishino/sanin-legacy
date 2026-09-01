@@ -47,6 +47,8 @@ Rails.application.routes.draw do
 
   namespace :admin do
     resources :invitations, only: [ :index, :create ]
-    resources :events, only: [ :index, :new, :create, :edit, :update, :destroy ]
+    resources :events, only: [ :index, :new, :create, :edit, :update, :destroy ] do
+      resources :trades, only: [ :show, :update ]
+    end
   end
 end

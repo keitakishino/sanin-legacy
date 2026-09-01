@@ -1,6 +1,7 @@
 class Event < ApplicationRecord
   # Associations
   belongs_to :created_by, class_name: "User"
+  has_many :trades, dependent: :destroy
 
   # Validations
   validates :created_by, presence: true

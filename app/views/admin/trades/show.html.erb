@@ -1,0 +1,123 @@
+<div class="container mx-auto px-4 py-8 max-w-5xl">
+  <!-- Header -->
+  <div class="mb-8">
+    <%= link_to "← 戻る", admin_events_path, class: "text-blue-600 hover:text-blue-800 mb-4 inline-block" %>
+    <h1 class="text-3xl font-bold text-gray-800 mb-2"><%= @event.title %></h1>
+    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
+      <p class="text-gray-700 mb-2"><strong>ユーザー:</strong> <%= @trade.user.username %> (<%= @trade.user.email %>)</p>
+      <p class="text-gray-600 text-sm">
+        開催日: <%= @event.event_date.strftime("%Y年%m月%d日") %>
+      </p>
+    </div>
+  </div>
+
+  <!-- Trade Status Section -->
+  <div class="bg-gray-50 rounded-lg p-6 mb-8 border border-gray-200">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">トレード状態管理</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <p class="text-gray-600 mb-2">現在のステータス</p>
+        <p class="text-2xl font-bold text-blue-600">
+          <%= I18n.t("activerecord.enums.trade.status.#{@trade.status}") %>
+        </p>
+      </div>
+      <div>
+        <%= form_with url: admin_event_trade_path(@event, @trade), method: :patch, local: true, class: "space-y-3" do |f| %>
+          <div>
+            <label for="trade_status" class="block text-sm font-semibold text-gray-700 mb-2">ステータス変更</label>
+            <%= f.select :status,
+              Trade.statuses.keys.map { |k| [I18n.t("activerecord.enums.trade.status.#{k}"), k] },
+              { prompt: "選択してください" },
+              id: "trade_status",
+              class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+          </div>
+
+          <!-- Cancelled Reason (conditional) -->
+          <div id="cancelled_reason_section" style="display: none;">
+            <label for="trade_cancelled_reason" class="block text-sm font-semibold text-gray-700 mb-2">キャンセル理由</label>
+            <%= f.text_area :cancelled_reason,
+              id: "trade_cancelled_reason",
+              rows: 3,
+              class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+          </div>
+
+          <%= f.submit "更新", class: "px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aggregated Amounts Section -->
+  <div class="bg-yellow-50 rounded-lg p-6 mb-8 border border-yellow-200">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">集計値（表示のみ）</h2>
+    <p class="text-sm text-gray-600 mb-4">
+      <strong>注:</strong> 下記の値はデータベースに保存されている値です。自動計算ロジックはIssue #47で実装予定です。
+    </p>
+    <div class="grid grid-cols-3 gap-4">
+      <div class="bg-white p-4 rounded border border-gray-200">
+        <p class="text-gray-600 text-sm mb-1">出すカード合計</p>
+        <p class="text-2xl font-bold text-blue-600">¥<%= number_with_delimiter(@trade.offers_total_amount) %></p>
+      </div>
+      <div class="bg-white p-4 rounded border border-gray-200">
+        <p class="text-gray-600 text-sm mb-1">欲しいカード合計</p>
+        <p class="text-2xl font-bold text-green-600">¥<%= number_with_delimiter(@trade.wants_total_amount) %></p>
+      </div>
+      <div class="bg-white p-4 rounded border border-gray-200">
+        <p class="text-gray-600 text-sm mb-1">差額（出す - 欲しい）</p>
+        <p class="text-2xl font-bold text-purple-600">¥<%= number_with_delimiter(@trade.net_amount) %></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card Offers Section -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-bold text-gray-800">出すカード一覧</h2>
+    </div>
+
+    <div id="trade_card_offers" class="space-y-4">
+      <% if @trade.trade_card_offers.any? %>
+        <% @trade.trade_card_offers.each do |offer| %>
+          <%= render "trade_card_offers/trade_card_offer", trade_card_offer: offer %>
+        <% end %>
+      <% else %>
+        <p class="text-gray-500 text-center py-8">カード明細はまだありません</p>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Card Wants Section -->
+  <div>
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-2xl font-bold text-gray-800">欲しいカード一覧</h2>
+    </div>
+
+    <div id="trade_card_wants" class="space-y-4">
+      <% if @trade.trade_card_wants.any? %>
+        <% @trade.trade_card_wants.each do |want| %>
+          <%= render "trade_card_wants/trade_card_want", trade_card_want: want %>
+        <% end %>
+      <% else %>
+        <p class="text-gray-500 text-center py-8">カード明細はまだありません</p>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  const statusSelect = document.getElementById('trade_status');
+  const cancelledReasonSection = document.getElementById('cancelled_reason_section');
+
+  function toggleCancelledReasonSection() {
+    if (statusSelect.value === 'cancelled') {
+      cancelledReasonSection.style.display = 'block';
+    } else {
+      cancelledReasonSection.style.display = 'none';
+    }
+  }
+
+  statusSelect.addEventListener('change', toggleCancelledReasonSection);
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', toggleCancelledReasonSection);
+</script>
