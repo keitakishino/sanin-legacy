@@ -40,8 +40,8 @@ RSpec.describe "Sessions Controller", type: :request do
     it "shows the user is logged in on the home page" do
       post signin_path, params: { email: user.email, password: "password123" }
       follow_redirect!
-      expect(response.body).to include("You are logged in as")
       expect(response.body).to include(user.username)
+      expect(response.body).to include("Signout")
     end
   end
 
@@ -93,12 +93,12 @@ RSpec.describe "Sessions Controller", type: :request do
 
     it "maintains login across requests" do
       get root_path
-      expect(response.body).to include("You are logged in as")
       expect(response.body).to include(user.username)
+      expect(response.body).to include("Signout")
 
       get root_path
-      expect(response.body).to include("You are logged in as")
       expect(response.body).to include(user.username)
+      expect(response.body).to include("Signout")
     end
   end
 end
