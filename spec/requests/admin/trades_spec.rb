@@ -186,17 +186,125 @@ RSpec.describe "Admin::Trades", type: :request do
           patch admin_event_trade_path(event, trade), params: { trade: { status: :cancelled } }
           expect(trade.reload.status).to eq("cancelled")
         end
+
+        # Disallowed transitions tests
+        context "with disallowed transitions" do
+          it "rejects completed -> pending" do
+            trade.update!(status: :completed)
+            patch admin_event_trade_path(event, trade), params: { trade: { status: :pending } }
+            expect(response).to have_http_status(:unprocessable_entity)
+            expect(trade.reload.status).to eq("completed")
+            expect(response.body).to include("ステータス")
+          end
+
+          it "rejects completed -> in_progress" do
+            trade.update!(status: :completed)
+            patch admin_event_trade_path(event, trade), params: { trade: { status: :in_progress } }
+            expect(response).to have_http_status(:unprocessable_entity)
+            expect(trade.reload.status).to eq("completed")
+            expect(response.body).to include("ステータス")
+          end
+
+          it "rejects completed -> cancelled" do
+            trade.update!(status: :completed)
+            patch admin_event_trade_path(event, trade), params: { trade: { status: :cancelled } }
+            expect(response).to have_http_status(:unprocessable_entity)
+            expect(trade.reload.status).to eq("completed")
+            expect(response.body).to include("ステータス")
+          end
+
+          it "rejects cancelled -> pending" do
+            trade.update!(status: :cancelled)
+            patch admin_event_trade_path(event, trade), params: { trade: { status: :pending } }
+            expect(response).to have_http_status(:unprocessable_entity)
+            expect(trade.reload.status).to eq("cancelled")
+            expect(response.body).to include("ステータス")
+          end
+
+          it "rejects cancelled -> in_progress" do
+            trade.update!(status: :cancelled)
+            patch admin_event_trade_path(event, trade), params: { trade: { status: :in_progress } }
+            expect(response).to have_http_status(:unprocessable_entity)
+            expect(trade.reload.status).to eq("cancelled")
+            expect(response.body).to include("ステータス")
+          end
+
+          it "rejects cancelled -> completed" do
+            trade.update!(status: :cancelled)
+            patch admin_event_trade_path(event, trade), params: { trade: { status: :completed } }
+            expect(response).to have_http_status(:unprocessable_entity)
+            expect(trade.reload.status).to eq("cancelled")
+            expect(response.body).to include("ステータス")
+          end
+        end
+
+        context "with turbo_stream format" do
+          it "rejects completed -> pending with turbo_stream and returns 422" do
+            trade.update!(status: :completed)
+            patch admin_event_trade_path(event, trade),
+              params: { trade: { status: :pending } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+            expect(response).to have_http_status(:unprocessable_entity)
+            expect(response.content_type).to include("text/vnd.turbo-stream.html")
+            expect(trade.reload.status).to eq("completed")
+          end
+
+          it "rejects cancelled -> in_progress with turbo_stream and returns 422" do
+            trade.update!(status: :cancelled)
+            patch admin_event_trade_path(event, trade),
+              params: { trade: { status: :in_progress } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+            expect(response).to have_http_status(:unprocessable_entity)
+            expect(response.content_type).to include("text/vnd.turbo-stream.html")
+            expect(trade.reload.status).to eq("cancelled")
+          end
+        end
       end
 
-      it "redirects to show page after successful update" do
-        patch admin_event_trade_path(event, trade), params: { trade: { status: :in_progress } }
-        expect(response).to redirect_to(admin_event_trade_path(event, trade))
-      end
+      describe "format negotiation" do
+        context "when requesting HTML format" do
+          it "redirects to show page after successful update" do
+            patch admin_event_trade_path(event, trade), params: { trade: { status: :in_progress } }
+            expect(response).to redirect_to(admin_event_trade_path(event, trade))
+          end
 
-      it "displays success notice after update" do
-        patch admin_event_trade_path(event, trade), params: { trade: { status: :in_progress } }
-        follow_redirect!
-        expect(response.body).to include("トレード情報を更新しました")
+          it "displays success notice after update" do
+            patch admin_event_trade_path(event, trade), params: { trade: { status: :in_progress } }
+            follow_redirect!
+            expect(response.body).to include("トレード情報を更新しました")
+          end
+        end
+
+        context "when requesting turbo_stream format" do
+          it "returns turbo_stream response with correct content type" do
+            patch admin_event_trade_path(event, trade),
+              params: { trade: { status: :in_progress } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+            expect(response.content_type).to include("text/vnd.turbo-stream.html")
+          end
+
+          it "replaces trade_status_display in turbo_stream response" do
+            trade.update!(status: :in_progress)
+            patch admin_event_trade_path(event, trade),
+              params: { trade: { status: :completed } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+            expect(response.body).to include('<turbo-stream action="replace" target="trade_status_display">')
+          end
+
+          it "replaces trade_aggregates_section in turbo_stream response" do
+            patch admin_event_trade_path(event, trade),
+              params: { trade: { status: :in_progress } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+            expect(response.body).to include('<turbo-stream action="replace" target="trade_aggregates_section">')
+          end
+
+          it "updates trade status correctly with turbo_stream request" do
+            patch admin_event_trade_path(event, trade),
+              params: { trade: { status: :in_progress } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+            expect(trade.reload.status).to eq("in_progress")
+          end
+        end
       end
     end
   end

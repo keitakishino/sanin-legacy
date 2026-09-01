@@ -1,0 +1,7 @@
+<%= turbo_stream.replace "trade_status_display" do %>
+  <%= render "status_display", trade: @trade %>
+<% end %>
+
+<%= turbo_stream.replace "trade_aggregates_section" do %>
+  <%= render "aggregates_section", trade: @trade %>
+<% end %>

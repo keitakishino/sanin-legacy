@@ -22,9 +22,15 @@ class Admin::TradesController < Admin::BaseController
     end
 
     if @trade.update(trade_params)
-      redirect_to admin_event_trade_path(@event, @trade), notice: "トレード情報を更新しました"
+      respond_to do |format|
+        format.turbo_stream
+        format.html { redirect_to admin_event_trade_path(@event, @trade), notice: "トレード情報を更新しました" }
+      end
     else
-      render :show, status: :unprocessable_entity
+      respond_to do |format|
+        format.turbo_stream { render :show, status: :unprocessable_entity }
+        format.html { render :show, status: :unprocessable_entity }
+      end
     end
   end
 
