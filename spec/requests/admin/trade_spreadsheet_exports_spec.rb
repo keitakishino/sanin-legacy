@@ -311,16 +311,17 @@ RSpec.describe "Admin::TradeSpreadsheetExports", type: :request do
     end
 
     context "when tab does not exist (new tab creation)" do
+      let(:sheets_service) { instance_double(Google::Apis::SheetsV4::SheetsService) }
+
       before do
         post signin_path, params: { email: admin_user.email, password: "password123" }
-      end
 
-      it "creates new tab with user username" do
-        sheets_service = instance_double(Google::Apis::SheetsV4::SheetsService)
         allow(GoogleSheetsConfig).to receive(:sheets_client).and_return(sheets_service)
         # Tabs list is empty (no matching tab exists)
         setup_google_api_mocks(sheets_service, tabs: [], add_sheet: true)
+      end
 
+      it "creates new tab with user username" do
         expect(sheets_service).to receive(:batch_update_spreadsheet).at_least(:once)
 
         post admin_event_trade_spreadsheet_export_path(event_id: event.id, user_id: trade.user_id),
@@ -329,10 +330,6 @@ RSpec.describe "Admin::TradeSpreadsheetExports", type: :request do
       end
 
       it "updates trade with new tab name" do
-        sheets_service = instance_double(Google::Apis::SheetsV4::SheetsService)
-        allow(GoogleSheetsConfig).to receive(:sheets_client).and_return(sheets_service)
-        setup_google_api_mocks(sheets_service, tabs: [], add_sheet: true)
-
         post admin_event_trade_spreadsheet_export_path(event_id: event.id, user_id: trade.user_id),
              headers: turbo_stream_headers
         trade.reload
@@ -341,12 +338,13 @@ RSpec.describe "Admin::TradeSpreadsheetExports", type: :request do
     end
 
     context "when spreadsheet and tab already exist (reusing existing resources)" do
+      let(:sheets_service) { instance_double(Google::Apis::SheetsV4::SheetsService) }
+
       before do
         post signin_path, params: { email: admin_user.email, password: "password123" }
 
         event.update!(spreadsheet_id: 'existing-spreadsheet-id')
 
-        sheets_service = instance_double(Google::Apis::SheetsV4::SheetsService)
         allow(GoogleSheetsConfig).to receive(:sheets_client).and_return(sheets_service)
         # Tab exists with general_user.username
         setup_google_api_mocks(sheets_service, add_sheet: false)
@@ -359,10 +357,6 @@ RSpec.describe "Admin::TradeSpreadsheetExports", type: :request do
       end
 
       it "reuses existing tab without creating new sheet" do
-        sheets_service = instance_double(Google::Apis::SheetsV4::SheetsService)
-        allow(GoogleSheetsConfig).to receive(:sheets_client).and_return(sheets_service)
-        setup_google_api_mocks(sheets_service, add_sheet: false)
-
         expect(sheets_service).not_to receive(:batch_update_spreadsheet)
 
         post admin_event_trade_spreadsheet_export_path(event_id: event.id, user_id: trade.user_id),
@@ -427,8 +421,8 @@ RSpec.describe "Admin::TradeSpreadsheetExports", type: :request do
     end
 
     context "with different trade statuses" do
-      shared_examples "allows export regardless of status" do
-        it "allows export for #{described_class}" do
+      shared_examples "allows export regardless of status" do |status_name|
+        it "allows export when trade status is #{status_name}" do
           post signin_path, params: { email: admin_user.email, password: "password123" }
 
           sheets_service = instance_double(Google::Apis::SheetsV4::SheetsService)
@@ -446,19 +440,19 @@ RSpec.describe "Admin::TradeSpreadsheetExports", type: :request do
       context "when trade status is pending" do
         before { trade.update!(status: :pending) }
 
-        it_behaves_like "allows export regardless of status"
+        it_behaves_like "allows export regardless of status", "pending"
       end
 
       context "when trade status is in_progress" do
         before { trade.update!(status: :in_progress) }
 
-        it_behaves_like "allows export regardless of status"
+        it_behaves_like "allows export regardless of status", "in_progress"
       end
 
       context "when trade status is completed" do
         before { trade.update!(status: :completed) }
 
-        it_behaves_like "allows export regardless of status"
+        it_behaves_like "allows export regardless of status", "completed"
       end
     end
 
