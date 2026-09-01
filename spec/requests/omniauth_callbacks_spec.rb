@@ -337,8 +337,8 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
   describe "GET /auth/twitter/callback" do
     context "when creating a new OAuth user" do
       before do
-        mock_twitter_auth(uid: "twitter_123", email: "newuser@example.com")
-      end
+        mock_twitter_auth(uid: "123456789012", email: "newuser@example.com")
+end
 
       it "creates a new user with the OAuth email" do
         expect {
@@ -363,7 +363,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
 
         identity = Identity.last
         expect(identity.provider).to eq("twitter")
-        expect(identity.uid).to eq("twitter_123")
+        expect(identity.uid).to eq("123456789012")
         expect(identity.user_id).to eq(User.last.id)
       end
 
@@ -380,10 +380,10 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
 
     context "when logging in with existing identity" do
       let(:user) { create(:user, email: "existing@example.com") }
-      let!(:identity) { create(:twitter_identity, user: user, uid: "twitter_456") }
+      let!(:identity) { create(:twitter_identity, user: user, uid: "987654321098") }
 
       before do
-        mock_twitter_auth(uid: "twitter_456", email: "existing@example.com")
+        mock_twitter_auth(uid: "987654321098", email: "existing@example.com")
       end
 
       it "does not create a new user" do
@@ -427,7 +427,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
 
     context "when email is nil" do
       before do
-        mock_twitter_auth_with_nil_email(uid: "twitter_789")
+        mock_twitter_auth_with_nil_email(uid: "555666777888")
       end
 
       it "creates a new user without email" do
@@ -458,7 +458,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
       let!(:existing_user) { create(:user, username: "conflict") }
 
       before do
-        mock_twitter_auth(uid: "twitter_999", email: "conflict@example.com")
+        mock_twitter_auth(uid: "444333222111", email: "conflict@example.com")
       end
 
       it "creates a new user with a suffixed username" do
@@ -511,15 +511,15 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
 
     context "when identity creation fails due to TOCTOU race condition" do
       let(:existing_user) { create(:user, email: "existing@example.com") }
-      let!(:existing_identity) { create(:twitter_identity, user: existing_user, uid: "twitter_race") }
+      let!(:existing_identity) { create(:twitter_identity, user: existing_user, uid: "111222333444") }
 
       before do
-        mock_twitter_auth(uid: "twitter_race", email: "newemail@example.com")
+        mock_twitter_auth(uid: "111222333444", email: "newemail@example.com")
 
         find_by_call_count = 0
         allow(Identity).to receive(:find_by) do |**kwargs|
           find_by_call_count += 1
-          if find_by_call_count == 1 && kwargs[:uid] == "twitter_race"
+          if find_by_call_count == 1 && kwargs[:uid] == "111222333444"
             nil
           else
             Identity.where(kwargs).first

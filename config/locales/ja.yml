@@ -87,6 +87,13 @@ ja:
           borderless: "ボーダーレス"
           showcase: "ショーケース"
           retro: "レトロ"
+    enums:
+      trade:
+        status:
+          pending: "未処理"
+          in_progress: "進行中"
+          completed: "完了"
+          cancelled: "キャンセル"
     errors:
       messages:
         invalid: "は無効です"
@@ -118,6 +125,29 @@ ja:
       updated: "イベントを更新しました"
       deleted: "イベントを削除しました"
       confirm_delete: "本当に削除してもよろしいですか？"
+    users:
+      title: "ユーザー管理"
+      nav_label: "ユーザー管理"
+      search_placeholder: "ユーザー名またはメールアドレス"
+      search_button: "検索"
+      no_users: "ユーザーはまだ登録されていません"
+      username: "ユーザー名"
+      email: "メールアドレス"
+      role: "ロール"
+      general: "一般ユーザー"
+      admin_label: "管理者"
+      registered_at: "登録日"
+      external_accounts: "外部アカウント連携"
+      google: "Google"
+      twitter: "Twitter(X)"
+      trades: "トレード一覧"
+      event_title: "イベント名"
+      event_date: "イベント日時"
+      no_trades: "トレード履歴はありません"
+      view_details: "詳細"
+      registered_info: "登録情報"
+      no_external_accounts: "外部アカウント連携がありません"
+      view_profile: "プロフィール"
     invitations:
       title: "招待コード発行"
       new_code_section: "新規コード発行"
