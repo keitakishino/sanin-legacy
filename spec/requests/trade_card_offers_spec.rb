@@ -252,6 +252,12 @@ RSpec.describe "TradeCardOffers", type: :request do
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to include("text/vnd.turbo-stream.html")
         expect(response.body).to include('target="trade_aggregates"')
+
+        # Verify the updated amount is rendered in the aggregates section
+        admin_trade.reload
+        expect(admin_trade.offers_total_amount).to eq(5000)
+        # The aggregates template renders amounts with ¥ symbol and number_with_delimiter formatting
+        expect(response.body).to include("¥5,000")
       end
 
       it "recalculates trade totals when amount is updated" do
