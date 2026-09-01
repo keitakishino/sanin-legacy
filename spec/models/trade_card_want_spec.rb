@@ -25,6 +25,11 @@ describe TradeCardWant, type: :model do
         expect(subject).to be_invalid
       end
 
+      it 'validates quantity < 0' do
+        subject.quantity = -1
+        expect(subject).to be_invalid
+      end
+
       it 'validates quantity is a positive integer' do
         subject.quantity = 1
         expect(subject).to be_valid
