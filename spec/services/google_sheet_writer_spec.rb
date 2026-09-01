@@ -224,4 +224,91 @@ RSpec.describe GoogleSheetWriter, type: :service do
       end
     end
   end
+
+  describe '#sanitize_tab_name' do
+    let(:event) { create(:event, spreadsheet_id: 'test-spreadsheet-id') }
+    let(:trade) { create(:trade, event: event, user: user) }
+
+    before do
+      allow(Rails.application.credentials).to receive(:google_sheets).and_return(mock_credentials)
+    end
+
+    context 'with special characters' do
+      it 'replaces forward slash with underscore' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        result = writer.send(:sanitize_tab_name, 'user/name')
+        expect(result).to eq('user_name')
+      end
+
+      it 'replaces backslash with underscore' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        result = writer.send(:sanitize_tab_name, 'user\\name')
+        expect(result).to eq('user_name')
+      end
+
+      it 'replaces question mark with underscore' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        result = writer.send(:sanitize_tab_name, 'user?name')
+        expect(result).to eq('user_name')
+      end
+
+      it 'replaces asterisk with underscore' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        result = writer.send(:sanitize_tab_name, 'user*name')
+        expect(result).to eq('user_name')
+      end
+
+      it 'replaces square brackets with underscores' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        result = writer.send(:sanitize_tab_name, 'user[name]')
+        expect(result).to eq('user_name_')
+      end
+
+      it 'replaces multiple special characters at once' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        result = writer.send(:sanitize_tab_name, 'user/with\\special?chars*[test]')
+        expect(result).to eq('user_with_special_chars__test_')
+      end
+    end
+
+    context 'with character length constraints' do
+      it 'truncates to 100 characters' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        long_name = 'a' * 101
+        result = writer.send(:sanitize_tab_name, long_name)
+        expect(result.length).to eq(100)
+        expect(result).to eq('a' * 100)
+      end
+
+      it 'preserves content when under 100 characters' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        name = 'a' * 50
+        result = writer.send(:sanitize_tab_name, name)
+        expect(result).to eq('a' * 50)
+      end
+
+      it 'truncates exactly at 100 characters' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        name = 'a' * 100
+        result = writer.send(:sanitize_tab_name, name)
+        expect(result.length).to eq(100)
+      end
+
+      it 'truncates special characters when combined with length' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        long_name_with_special = 'a' * 50 + '/' + 'b' * 50 + '?'
+        result = writer.send(:sanitize_tab_name, long_name_with_special)
+        expect(result.length).to eq(100)
+        expect(result).to include('_')
+      end
+    end
+
+    context 'with normal names' do
+      it 'returns unchanged name for valid input' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        result = writer.send(:sanitize_tab_name, 'valid_username')
+        expect(result).to eq('valid_username')
+      end
+    end
+  end
 end
