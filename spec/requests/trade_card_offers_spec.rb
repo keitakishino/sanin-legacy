@@ -86,6 +86,56 @@ RSpec.describe "TradeCardOffers", type: :request do
       end
     end
 
+    context "with duplicate card entry" do
+      let(:duplicate_params) do
+        {
+          trade_card_offer: {
+            card_name: "Black Lotus",
+            quantity: 1,
+            language: :ja,
+            condition: :nm,
+            foil: :foil,
+            frame: :normal,
+            pw_mark: false,
+            expansion_id: nil
+          }
+        }
+      end
+
+      before do
+        create(:trade_card_offer,
+          trade: trade,
+          card_name: "Black Lotus",
+          quantity: 1,
+          language: :ja,
+          condition: :nm,
+          foil: :foil,
+          frame: :normal,
+          pw_mark: false,
+          expansion_id: nil)
+      end
+
+      it "does not create the duplicate trade card offer" do
+        trade
+        expect {
+          post "/trades/#{event.id}/card_offers", params: duplicate_params
+        }.not_to change { TradeCardOffer.count }
+      end
+
+      it "returns unprocessable_entity status for turbo_stream" do
+        trade
+        post "/trades/#{event.id}/card_offers", params: duplicate_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "returns HTML redirect on duplicate error" do
+        trade
+        post "/trades/#{event.id}/card_offers", params: duplicate_params
+        expect(response).to redirect_to(trade_path(event))
+        expect(flash[:alert]).to include("このカード明細は既に登録されています")
+      end
+    end
+
     context "when user is not logged in" do
       before do
         delete "/signout"
