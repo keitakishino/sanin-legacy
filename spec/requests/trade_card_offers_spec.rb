@@ -347,5 +347,63 @@ RSpec.describe "TradeCardOffers", type: :request do
       expect(response).to redirect_to(trade_path(event))
       expect(flash[:notice]).to include("カード明細を削除しました")
     end
+
+    context "when offer with amount is deleted" do
+      let(:admin_user) { create(:admin_user) }
+
+      before do
+        delete "/signout"
+        post signin_path, params: { email: admin_user.email, password: "password123" }
+      end
+
+      let(:admin_trade) { create(:trade, event: event, user: admin_user) }
+      let(:admin_offer) { create(:trade_card_offer, trade: admin_trade, amount: 3000) }
+
+      it "recalculates offers_total_amount after deletion" do
+        admin_offer
+        # Ensure the trade has the correct initial amount
+        admin_trade.reload
+        expect(admin_trade.offers_total_amount).to eq(3000)
+
+        # Delete the offer
+        delete "/trades/#{event.id}/card_offers/#{admin_offer.id}"
+
+        # Verify the offer was deleted and totals were recalculated
+        admin_trade.reload
+        expect(admin_trade.offers_total_amount).to eq(0)
+      end
+    end
+
+    context "when offer is deleted with both offers and wants having amounts" do
+      let(:admin_user) { create(:admin_user) }
+
+      before do
+        delete "/signout"
+        post signin_path, params: { email: admin_user.email, password: "password123" }
+      end
+
+      let(:admin_trade) { create(:trade, event: event, user: admin_user) }
+      let(:admin_offer) { create(:trade_card_offer, trade: admin_trade, amount: 5000) }
+      let(:admin_want) { create(:trade_card_want, trade: admin_trade, amount: 2000) }
+
+      it "recalculates net_amount correctly after deleting offer" do
+        admin_offer
+        admin_want
+        # Ensure the trade has the correct initial amounts
+        admin_trade.reload
+        expect(admin_trade.offers_total_amount).to eq(5000)
+        expect(admin_trade.wants_total_amount).to eq(2000)
+        expect(admin_trade.net_amount).to eq(3000)
+
+        # Delete the offer
+        delete "/trades/#{event.id}/card_offers/#{admin_offer.id}"
+
+        # Verify net_amount is recalculated correctly (0 - 2000 = -2000)
+        admin_trade.reload
+        expect(admin_trade.offers_total_amount).to eq(0)
+        expect(admin_trade.wants_total_amount).to eq(2000)
+        expect(admin_trade.net_amount).to eq(-2000)
+      end
+    end
   end
 end
