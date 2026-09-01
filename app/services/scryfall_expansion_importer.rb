@@ -125,7 +125,7 @@ class ScryfallExpansionImporter
       :created
     else
       # Handle validation errors
-      if expansion.errors[:scryfall_set_code].any? { |e| e.include?("has already been taken") }
+      if expansion.errors.of_kind?(:scryfall_set_code, :taken)
         # Uniqueness constraint violation (race condition) - treat as skipped
         Rails.logger.info("Expansion #{code} already exists (race condition), skipping")
         :skipped

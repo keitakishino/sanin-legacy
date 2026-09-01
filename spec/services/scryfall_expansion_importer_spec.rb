@@ -415,7 +415,7 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
         # Simulate uniqueness violation on create
         allow(Expansion).to receive(:create) do |attrs|
           expansion = Expansion.new(attrs)
-          expansion.errors.add(:scryfall_set_code, 'has already been taken')
+          expansion.errors.add(:scryfall_set_code, :taken)
           expansion
         end
 
@@ -494,7 +494,7 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
         allow(Expansion).to receive(:create).and_wrap_original do |method, attrs|
           if attrs[:scryfall_set_code] == 'BRO'
             expansion = Expansion.new(attrs)
-            expansion.errors.add(:scryfall_set_code, 'has already been taken')
+            expansion.errors.add(:scryfall_set_code, :taken)
             expansion
           else
             method.call(attrs)
@@ -509,6 +509,44 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
         expect(result[:error_count]).to eq(0)
         expect(Expansion.find_by(scryfall_set_code: 'MH3')).to be_present
         expect(Expansion.find_by(scryfall_set_code: 'GRN')).to be_present
+      end
+
+      it 'correctly identifies race condition error regardless of locale (Japanese)' do
+        original_locale = I18n.locale
+        begin
+          I18n.locale = :ja
+
+          response = {
+            object: 'list',
+            data: [
+              {
+                object: 'set',
+                code: 'test_ja',
+                name: 'Test Set',
+                printed_name: 'テストセット',
+                set_type: 'expansion',
+                released_at: '2024-01-01'
+              }
+            ],
+            has_more: false
+          }
+          stub_scryfall_api_response(response)
+
+          # Simulate uniqueness violation with Japanese locale active
+          allow(Expansion).to receive(:create) do |attrs|
+            expansion = Expansion.new(attrs)
+            expansion.errors.add(:scryfall_set_code, :taken)
+            expansion
+          end
+
+          result = importer.call
+
+          # Should be counted as skipped, not error, even in Japanese locale
+          expect(result[:skipped_count]).to eq(1)
+          expect(result[:error_count]).to eq(0)
+        ensure
+          I18n.locale = original_locale
+        end
       end
     end
 
