@@ -15,12 +15,7 @@
   <div class="bg-gray-50 rounded-lg p-6 mb-8 border border-gray-200">
     <h2 class="text-lg font-semibold text-gray-800 mb-4">トレード状態管理</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <p class="text-gray-600 mb-2">現在のステータス</p>
-        <p class="text-2xl font-bold text-blue-600">
-          <%= I18n.t("activerecord.enums.trade.status.#{@trade.status}") %>
-        </p>
-      </div>
+      <%= render "status_display", trade: @trade %>
       <div>
         <%= form_with url: admin_event_trade_path(@event, @trade), method: :patch, local: true, class: "space-y-3" do |f| %>
           <div>
@@ -48,26 +43,7 @@
   </div>
 
   <!-- Aggregated Amounts Section -->
-  <div class="bg-yellow-50 rounded-lg p-6 mb-8 border border-yellow-200">
-    <h2 class="text-lg font-semibold text-gray-800 mb-4">集計値（表示のみ）</h2>
-    <p class="text-sm text-gray-600 mb-4">
-      <strong>注:</strong> 下記の値はデータベースに保存されている値です。自動計算ロジックはIssue #47で実装予定です。
-    </p>
-    <div class="grid grid-cols-3 gap-4">
-      <div class="bg-white p-4 rounded border border-gray-200">
-        <p class="text-gray-600 text-sm mb-1">出すカード合計</p>
-        <p class="text-2xl font-bold text-blue-600">¥<%= number_with_delimiter(@trade.offers_total_amount) %></p>
-      </div>
-      <div class="bg-white p-4 rounded border border-gray-200">
-        <p class="text-gray-600 text-sm mb-1">欲しいカード合計</p>
-        <p class="text-2xl font-bold text-green-600">¥<%= number_with_delimiter(@trade.wants_total_amount) %></p>
-      </div>
-      <div class="bg-white p-4 rounded border border-gray-200">
-        <p class="text-gray-600 text-sm mb-1">差額（出す - 欲しい）</p>
-        <p class="text-2xl font-bold text-purple-600">¥<%= number_with_delimiter(@trade.net_amount) %></p>
-      </div>
-    </div>
-  </div>
+  <%= render "aggregates_section", trade: @trade %>
 
   <!-- Card Offers Section -->
   <div class="mb-8">
