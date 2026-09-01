@@ -1,0 +1,38 @@
+<% if users.empty? %>
+  <div class="bg-white shadow rounded-lg p-6">
+    <p class="text-gray-600"><%= t("admin.users.no_users") %></p>
+  </div>
+<% else %>
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <table class="w-full">
+      <thead class="bg-gray-100 border-b">
+        <tr>
+          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("admin.users.username") %></th>
+          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("admin.users.email") %></th>
+          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("admin.users.role") %></th>
+          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("admin.users.registered_at") %></th>
+          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("admin.users.view_details") %></th>
+        </tr>
+      </thead>
+      <tbody id="users">
+        <% users.each do |user| %>
+          <tr class="border-b hover:bg-gray-50">
+            <td class="px-6 py-4 text-sm"><%= user.username %></td>
+            <td class="px-6 py-4 text-sm"><%= user.email || "－" %></td>
+            <td class="px-6 py-4 text-sm">
+              <% if user.role_admin? %>
+                <span class="bg-red-100 text-red-800 px-3 py-1 rounded text-xs font-semibold"><%= t("admin.users.admin_label") %></span>
+              <% else %>
+                <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded text-xs font-semibold"><%= t("admin.users.general") %></span>
+              <% end %>
+            </td>
+            <td class="px-6 py-4 text-sm"><%= user.created_at.strftime("%Y年%m月%d日") %></td>
+            <td class="px-6 py-4 text-sm">
+              <%= link_to t("admin.users.view_details"), admin_user_path(user), class: "text-blue-600 hover:text-blue-800" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
