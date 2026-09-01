@@ -28,6 +28,9 @@ class GoogleSheetWriter
     raise SpreadsheetError, "Google Sheets認証情報が設定されていません"
   rescue Google::Apis::Error => e
     handle_google_api_error(e)
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.error("Database update failed after API success: #{e.message}")
+    raise SpreadsheetError, "スプレッドシート設定中にデータベースエラーが発生しました: #{e.message}"
   end
 
   private
@@ -175,20 +178,42 @@ class GoogleSheetWriter
     )
 
     Rails.logger.info("Updated trade #{@trade.id} spreadsheet metadata")
+  rescue ActiveRecord::RecordInvalid => e
+    Rails.logger.error("Failed to update trade metadata for trade #{@trade.id}: #{e.message}")
+    raise SpreadsheetError, "スプレッドシート情報の保存に失敗しました: #{e.message}"
   end
 
   def handle_google_api_error(error)
     error_message = error.message
+    status_code = error.respond_to?(:status_code) ? error.status_code : nil
 
+    # Check by status code first for more reliable detection
+    case status_code
+    when 429
+      Rails.logger.warn("Rate limit exceeded (429): #{error_message}")
+      raise RateLimitError, "APIレート制限に達しました。しばらく待ってから再度お試しください"
+    when 404
+      Rails.logger.error("Spreadsheet not found (404): #{@event.spreadsheet_id}")
+      @event.update!(spreadsheet_id: nil)
+      raise SpreadsheetError, "スプレッドシートが見つかりません。新規に作成してください"
+    when 403
+      Rails.logger.error("Permission denied (403): #{error_message}")
+      raise SpreadsheetError, "スプレッドシートへのアクセス権がありません"
+    end
+
+    # Fallback to message pattern matching for other cases
     case error_message
-    when /quota.*exceeded|rateLimitExceeded/i
+    when /quota.*exceeded/i
+      Rails.logger.warn("Quota exceeded: #{error_message}")
+      raise RateLimitError, "APIクォータを超過しました。しばらく待ってから再度お試しください"
+    when /rateLimitExceeded|too_many_requests/i
       Rails.logger.warn("Rate limit exceeded: #{error_message}")
       raise RateLimitError, "APIレート制限に達しました。しばらく待ってから再度お試しください"
-    when /notFound|404/i
+    when /notFound/i
       Rails.logger.error("Spreadsheet not found: #{@event.spreadsheet_id}")
-      @event.update(spreadsheet_id: nil)
+      @event.update!(spreadsheet_id: nil)
       raise SpreadsheetError, "スプレッドシートが見つかりません。新規に作成してください"
-    when /forbidden|403/i
+    when /forbidden|permission.*denied/i
       Rails.logger.error("Permission denied: #{error_message}")
       raise SpreadsheetError, "スプレッドシートへのアクセス権がありません"
     else

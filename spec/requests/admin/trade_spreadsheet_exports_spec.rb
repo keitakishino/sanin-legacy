@@ -136,6 +136,26 @@ RSpec.describe "Admin::TradeSpreadsheetExports", type: :request do
         end
       end
 
+      context "IDOR: accessing trade from different event" do
+        let(:other_event) { create(:event, spreadsheet_id: 'other-spreadsheet-id') }
+        let(:other_user) { create(:user, email: "other@example.com", password: "password123") }
+        let(:other_trade) { create(:trade, event: other_event, user: other_user) }
+
+        it "returns not found status" do
+          # Trying to access other_event's trade via event's endpoint
+          post admin_event_trade_spreadsheet_export_path(event_id: event.id, user_id: other_user.id),
+               headers: turbo_stream_headers
+          expect(response).to have_http_status(:not_found)
+        end
+
+        it "does not update other trade's metadata" do
+          expect {
+            post admin_event_trade_spreadsheet_export_path(event_id: event.id, user_id: other_user.id),
+                 headers: turbo_stream_headers
+          }.not_to change { other_trade.reload.spreadsheet_exported_at }
+        end
+      end
+
       context "when Google API error occurs" do
         before do
           sheets_service = instance_double(Google::Apis::SheetsV4::SheetsService)
