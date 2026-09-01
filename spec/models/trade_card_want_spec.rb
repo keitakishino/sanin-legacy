@@ -95,4 +95,301 @@ describe TradeCardWant, type: :model do
       expect(want).to be_invalid
     end
   end
+
+  describe 'duplicate card entry validation (A18)' do
+    let(:trade) { create(:trade) }
+
+    context 'when no duplicate exists' do
+      it 'allows saving a new want' do
+        want = build(:trade_card_want, trade: trade)
+        expect(want).to be_valid
+        expect { want.save }.to change { TradeCardWant.count }.by(1)
+      end
+    end
+
+    context 'when duplicate card entry exists in the same trade' do
+      let(:existing_want) do
+        create(:trade_card_want,
+          trade: trade,
+          card_name: "Ancestral Recall",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 0, 1, 2 ],
+          expansion_id: nil)
+      end
+
+      it 'rejects duplicate card entry' do
+        existing_want
+        duplicate = build(:trade_card_want,
+          trade: trade,
+          card_name: "Ancestral Recall",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 0, 1, 2 ],
+          expansion_id: nil)
+        expect(duplicate).to be_invalid
+        expect(duplicate.errors[:base]).to include("このカード明細は既に登録されています")
+      end
+
+      it 'does not create the duplicate record' do
+        existing_want
+        duplicate = build(:trade_card_want,
+          trade: trade,
+          card_name: "Ancestral Recall",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 0, 1, 2 ],
+          expansion_id: nil)
+        expect { duplicate.save }.not_to change { TradeCardWant.count }
+      end
+    end
+
+    context 'when conditions array element order differs' do
+      let(:existing_want) do
+        create(:trade_card_want,
+          trade: trade,
+          card_name: "Card",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 0, 1, 2 ],
+          expansion_id: nil)
+      end
+
+      it 'treats different order as duplicate (sorted internally)' do
+        existing_want
+        same_different_order = build(:trade_card_want,
+          trade: trade,
+          card_name: "Card",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 2, 0, 1 ],
+          expansion_id: nil)
+        expect(same_different_order).to be_invalid
+      end
+    end
+
+    context 'when conditions: nil and conditions: [] both exist' do
+      let(:existing_with_nil) do
+        create(:trade_card_want,
+          trade: trade,
+          card_name: "Card",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: nil,
+          expansion_id: nil)
+      end
+
+      it 'treats nil and empty array as the same' do
+        existing_with_nil
+        same_with_empty = build(:trade_card_want,
+          trade: trade,
+          card_name: "Card",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: [],
+          expansion_id: nil)
+        expect(same_with_empty).to be_invalid
+      end
+    end
+
+    context 'when language is nil (representing "不問")' do
+      let(:existing_want) do
+        create(:trade_card_want,
+          trade: trade,
+          card_name: "Card",
+          language: nil,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 0 ],
+          expansion_id: nil)
+      end
+
+      it 'treats nil language value as matching nil' do
+        existing_want
+        duplicate = build(:trade_card_want,
+          trade: trade,
+          card_name: "Card",
+          language: nil,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 0 ],
+          expansion_id: nil)
+        expect(duplicate).to be_invalid
+      end
+
+      it 'allows specific language when existing has nil' do
+        existing_want
+        different = build(:trade_card_want,
+          trade: trade,
+          card_name: "Card",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 0 ],
+          expansion_id: nil)
+        expect(different).to be_valid
+      end
+    end
+
+    context 'when expansion_id is nil for both records' do
+      let(:existing_want) do
+        create(:trade_card_want,
+          trade: trade,
+          card_name: "Beta Card",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: nil,
+          expansion_id: nil)
+      end
+
+      it 'correctly identifies duplicates with nil expansion_id' do
+        existing_want
+        duplicate = build(:trade_card_want,
+          trade: trade,
+          card_name: "Beta Card",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: nil,
+          expansion_id: nil)
+        expect(duplicate).to be_invalid
+      end
+    end
+
+    context 'when records are in different trades' do
+      let(:other_trade) { create(:trade) }
+
+      it 'allows the same card in different trades' do
+        create(:trade_card_want,
+          trade: trade,
+          card_name: "Card A",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 0, 1 ],
+          expansion_id: nil)
+
+        same_card = build(:trade_card_want,
+          trade: other_trade,
+          card_name: "Card A",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 0, 1 ],
+          expansion_id: nil)
+
+        expect(same_card).to be_valid
+      end
+    end
+
+    context 'when updating an existing record' do
+      let(:want) { create(:trade_card_want, trade: trade) }
+
+      it 'allows re-saving the same record without duplication error' do
+        want.quantity = 2
+        expect(want).to be_valid
+        expect { want.save }.not_to raise_error
+      end
+    end
+
+    context 'when any key attribute differs from existing duplicate key' do
+      let(:existing_want) do
+        create(:trade_card_want,
+          trade: trade,
+          card_name: "Card",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 0 ],
+          expansion_id: nil)
+      end
+
+      it 'allows different card_name' do
+        existing_want
+        different = build(:trade_card_want,
+          trade: trade,
+          card_name: "Different Card",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 0 ],
+          expansion_id: nil)
+        expect(different).to be_valid
+      end
+
+      it 'allows different language' do
+        existing_want
+        different = build(:trade_card_want,
+          trade: trade,
+          card_name: "Card",
+          language: :en,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 0 ],
+          expansion_id: nil)
+        expect(different).to be_valid
+      end
+
+      it 'allows different foil status' do
+        existing_want
+        different = build(:trade_card_want,
+          trade: trade,
+          card_name: "Card",
+          language: :ja,
+          foil: :non_foil,
+          frame: :normal,
+          conditions: [ 0 ],
+          expansion_id: nil)
+        expect(different).to be_valid
+      end
+
+      it 'allows different frame' do
+        existing_want
+        different = build(:trade_card_want,
+          trade: trade,
+          card_name: "Card",
+          language: :ja,
+          foil: :foil,
+          frame: :extended,
+          conditions: [ 0 ],
+          expansion_id: nil)
+        expect(different).to be_valid
+      end
+
+      it 'allows different conditions array content' do
+        existing_want
+        different = build(:trade_card_want,
+          trade: trade,
+          card_name: "Card",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 1, 2 ],
+          expansion_id: nil)
+        expect(different).to be_valid
+      end
+
+      it 'allows different expansion_id' do
+        existing_want
+        expansion = create(:expansion)
+        different = build(:trade_card_want,
+          trade: trade,
+          card_name: "Card",
+          language: :ja,
+          foil: :foil,
+          frame: :normal,
+          conditions: [ 0 ],
+          expansion_id: expansion.id)
+        expect(different).to be_valid
+      end
+    end
+  end
 end
