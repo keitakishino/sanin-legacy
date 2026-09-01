@@ -122,6 +122,38 @@ RSpec.describe "HistoriesController", type: :request do
         end
       end
 
+      context "with newer cancelled trade than completed trade" do
+        let(:event2) { create(:event) }
+        let!(:completed_trade) do
+          create(:trade, user:, event:, status: :completed, completed_at: 2.hours.ago,
+                         offers_total_amount: 1000, wants_total_amount: 900, net_amount: 100)
+        end
+        let!(:newer_cancelled_trade) do
+          create(:trade, user:, event: event2, status: :cancelled,
+                         cancelled_reason: "cancelled_newer", offers_total_amount: 500,
+                         wants_total_amount: 400, net_amount: 100).tap do |trade|
+            trade.update_column(:updated_at, 1.hour.ago)
+          end
+        end
+
+        it "sorts by coalesced timestamp (cancelled_at or updated_at) descending" do
+          get "/histories"
+
+          # Extract the tbody content to check trade order
+          tbody_match = response.body.match(/<tbody[^>]*>(.*?)<\/tbody>/m)
+          tbody_content = tbody_match[1] if tbody_match
+
+          # Use event titles to identify trades in the correct order
+          # The newer cancelled_trade (event2) should appear before completed_trade (event)
+          event2_index = tbody_content.index(event2.title) if tbody_content
+          event_index = tbody_content.index(event.title) if tbody_content
+
+          expect(event2_index).to be_present, "event2 title should be present"
+          expect(event_index).to be_present, "event title should be present"
+          expect(event2_index).to be < event_index, "cancelled trade (event2) should appear before completed trade (event)"
+        end
+      end
+
       context "with discarded event" do
         let!(:discarded_event) { create(:event, discarded_at: 1.day.ago) }
         let!(:trade) do

@@ -3,7 +3,7 @@ class HistoriesController < ApplicationController
 
   def index
     @trades = Trade.where(user: current_user, status: [ :completed, :cancelled ])
-                   .order(completed_at: :desc, updated_at: :desc)
+                   .order(Arel.sql("COALESCE(trades.completed_at, trades.updated_at) DESC"))
                    .includes(:event, :user, :trade_card_offers, :trade_card_wants)
                    .page(params[:page])
                    .per(20)

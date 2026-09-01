@@ -533,7 +533,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   kamal
-  kaminari
+  kaminari (~> 1.2.2)
   omniauth (~> 2.1)
   omniauth-google-oauth2 (~> 1.1)
   omniauth-rails_csrf_protection (~> 1.0)
