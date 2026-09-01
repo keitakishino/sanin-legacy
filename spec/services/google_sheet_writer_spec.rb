@@ -45,7 +45,7 @@ RSpec.describe GoogleSheetWriter, type: :service do
         allow(sheet).to receive(:properties).and_return(sheet_properties)
 
         spreadsheet_get_result = instance_double(Google::Apis::SheetsV4::Spreadsheet)
-        allow(spreadsheet_get_result).to receive(:sheets).and_return([sheet])
+        allow(spreadsheet_get_result).to receive(:sheets).and_return([ sheet ])
         allow(sheets_service).to receive(:get_spreadsheet).and_return(spreadsheet_get_result)
 
         # Mock clear_values and batch_update_values
@@ -78,7 +78,7 @@ RSpec.describe GoogleSheetWriter, type: :service do
         allow(sheet).to receive(:properties).and_return(sheet_properties)
 
         spreadsheet_get_result = instance_double(Google::Apis::SheetsV4::Spreadsheet)
-        allow(spreadsheet_get_result).to receive(:sheets).and_return([sheet])
+        allow(spreadsheet_get_result).to receive(:sheets).and_return([ sheet ])
         allow(sheets_service).to receive(:get_spreadsheet).and_return(spreadsheet_get_result)
 
         # Mock clear_values and batch_update_values
@@ -111,7 +111,7 @@ RSpec.describe GoogleSheetWriter, type: :service do
         allow(sheet).to receive(:properties).and_return(sheet_properties)
 
         spreadsheet_get_result = instance_double(Google::Apis::SheetsV4::Spreadsheet)
-        allow(spreadsheet_get_result).to receive(:sheets).and_return([sheet])
+        allow(spreadsheet_get_result).to receive(:sheets).and_return([ sheet ])
         allow(sheets_service).to receive(:get_spreadsheet).and_return(spreadsheet_get_result)
 
         # Mock clear_values and batch_update_values
@@ -150,7 +150,7 @@ RSpec.describe GoogleSheetWriter, type: :service do
         allow(sheet).to receive(:properties).and_return(sheet_properties)
 
         spreadsheet_get_result = instance_double(Google::Apis::SheetsV4::Spreadsheet)
-        allow(spreadsheet_get_result).to receive(:sheets).and_return([sheet])
+        allow(spreadsheet_get_result).to receive(:sheets).and_return([ sheet ])
         allow(sheets_service).to receive(:get_spreadsheet).and_return(spreadsheet_get_result)
 
         # Mock clear_values and batch_update_values
