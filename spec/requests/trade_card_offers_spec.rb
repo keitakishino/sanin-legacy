@@ -238,9 +238,35 @@ RSpec.describe "TradeCardOffers", type: :request do
 
       it "allows admin to set amount" do
         admin_offer
-        patch "/trades/#{event.id}/card_offers/#{admin_offer.id}", params: params_with_amount
+        patch "/trades/#{event.id}/card_offers/#{admin_offer.id}", params: params_with_amount.merge(trade_id: admin_trade.id)
         admin_offer.reload
         expect(admin_offer.amount).to eq(5000)
+      end
+    end
+
+    context "IDOR protection: multiple trades in same event" do
+      before do
+        delete "/signout"
+        post signin_path, params: { email: admin_user.email, password: "password123" }
+      end
+
+      let(:another_user) { create(:user, email: "another@example.com", password: "password123") }
+      let(:another_trade) { create(:trade, event: event, user: another_user) }
+      let(:main_offer) { create(:trade_card_offer, trade: trade, amount: 2000) }
+      let(:another_offer) { create(:trade_card_offer, trade: another_trade, amount: 1000) }
+
+      context "when admin edits one user's offer with correct trade_id" do
+        it "updates only that user's offer and not other user's offer" do
+          main_offer
+          another_offer
+
+          expect(Trade.where(event_id: event.id).count).to eq(2)  # Verify two trades exist for same event
+
+          patch "/trades/#{event.id}/card_offers/#{main_offer.id}", params: valid_params.merge(trade_id: trade.id)
+
+          expect(main_offer.reload.card_name).to eq("Updated Card")
+          expect(another_offer.reload.amount).to eq(1000)
+        end
       end
     end
   end

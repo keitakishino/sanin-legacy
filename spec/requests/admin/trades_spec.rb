@@ -208,14 +208,49 @@ RSpec.describe "Admin::Trades", type: :request do
 
     it "admin can edit trade card offer amount through existing controller" do
       offer = create(:trade_card_offer, trade: trade)
-      patch trade_card_offer_path(trade.event, offer), params: { trade_card_offer: { amount: 5000 } }
+      patch trade_card_offer_path(trade.event, offer), params: { trade_card_offer: { amount: 5000 }, trade_id: trade.id }
       expect(offer.reload.amount).to eq(5000)
     end
 
     it "admin can edit trade card want amount through existing controller" do
       want = create(:trade_card_want, trade: trade)
-      patch trade_card_want_path(trade.event, want), params: { trade_card_want: { amount: 3000 } }
+      patch trade_card_want_path(trade.event, want), params: { trade_card_want: { amount: 3000 }, trade_id: trade.id }
       expect(want.reload.amount).to eq(3000)
+    end
+
+    describe "IDOR protection: multiple trades in same event" do
+      let(:other_user) { create(:user, email: "other@example.com", password: "password123") }
+      let(:other_trade) { create(:trade, event: event, user: other_user) }
+      let(:other_offer) { create(:trade_card_offer, trade: other_trade, amount: 1000) }
+      let(:other_want) { create(:trade_card_want, trade: other_trade, amount: 500) }
+
+      context "when admin edits one user's offer with correct trade_id" do
+        it "updates only that user's offer and not other user's offer" do
+          main_offer = create(:trade_card_offer, trade: trade, amount: 2000)
+          other_offer
+
+          expect(Trade.where(event_id: event.id).count).to eq(2)  # Verify two trades exist for same event
+
+          patch trade_card_offer_path(event, main_offer), params: { trade_card_offer: { amount: 5000 }, trade_id: trade.id }
+
+          expect(main_offer.reload.amount).to eq(5000)
+          expect(other_offer.reload.amount).to eq(1000)
+        end
+      end
+
+      context "when admin edits one user's want with correct trade_id" do
+        it "updates only that user's want and not other user's want" do
+          main_want = create(:trade_card_want, trade: trade, amount: 1500)
+          other_want
+
+          expect(Trade.where(event_id: event.id).count).to eq(2)  # Verify two trades exist for same event
+
+          patch trade_card_want_path(event, main_want), params: { trade_card_want: { amount: 3000 }, trade_id: trade.id }
+
+          expect(main_want.reload.amount).to eq(3000)
+          expect(other_want.reload.amount).to eq(500)
+        end
+      end
     end
   end
 end

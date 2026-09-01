@@ -319,9 +319,35 @@ RSpec.describe "TradeCardWants", type: :request do
 
       it "allows admin to set amount" do
         admin_want
-        patch "/trades/#{event.id}/card_wants/#{admin_want.id}", params: params_with_amount
+        patch "/trades/#{event.id}/card_wants/#{admin_want.id}", params: params_with_amount.merge(trade_id: admin_trade.id)
         admin_want.reload
         expect(admin_want.amount).to eq(5000)
+      end
+    end
+
+    context "IDOR protection: multiple trades in same event" do
+      before do
+        delete "/signout"
+        post signin_path, params: { email: admin_user.email, password: "password123" }
+      end
+
+      let(:another_user) { create(:user, email: "another@example.com", password: "password123") }
+      let(:another_trade) { create(:trade, event: event, user: another_user) }
+      let(:main_want) { create(:trade_card_want, trade: trade, amount: 1500) }
+      let(:another_want) { create(:trade_card_want, trade: another_trade, amount: 500) }
+
+      context "when admin edits one user's want with correct trade_id" do
+        it "updates only that user's want and not other user's want" do
+          main_want
+          another_want
+
+          expect(Trade.where(event_id: event.id).count).to eq(2)  # Verify two trades exist for same event
+
+          patch "/trades/#{event.id}/card_wants/#{main_want.id}", params: valid_params.merge(trade_id: trade.id)
+
+          expect(main_want.reload.card_name).to eq("Updated Card")
+          expect(another_want.reload.amount).to eq(500)
+        end
       end
     end
   end

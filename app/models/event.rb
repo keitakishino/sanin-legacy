@@ -1,7 +1,10 @@
 class Event < ApplicationRecord
   # Associations
   belongs_to :created_by, class_name: "User"
-  has_many :trades, dependent: :destroy
+  # Note: Trades are kept even if Event is physically deleted (rare), to maintain trade history integrity.
+  # Design: Events use soft delete (discarded_at), so dependent: :destroy doesn't actually execute.
+  # If physical deletion ever occurs, DB foreign key constraint (ON DELETE RESTRICT) will prevent cascade deletion.
+  has_many :trades
 
   # Validations
   validates :created_by, presence: true
