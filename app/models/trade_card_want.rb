@@ -17,7 +17,14 @@ class TradeCardWant < ApplicationRecord
   validate :conditions_values_valid
   validate :no_duplicate_card_entry
 
+  after_save :recalculate_trade_totals
+  after_destroy :recalculate_trade_totals
+
   private
+
+  def recalculate_trade_totals
+    trade.recalculate_totals! if trade.present?
+  end
 
   def conditions_values_valid
     return if conditions.nil? || conditions.empty?

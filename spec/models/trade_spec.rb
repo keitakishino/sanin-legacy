@@ -37,4 +37,65 @@ describe Trade, type: :model do
       end.to raise_error(ActiveRecord::RecordNotUnique)
     end
   end
+
+  describe '#recalculate_totals!' do
+    let(:trade) { create(:trade) }
+
+    context 'with no card entries' do
+      it 'sets all totals to 0' do
+        trade.recalculate_totals!
+        expect(trade.offers_total_amount).to eq(0)
+        expect(trade.wants_total_amount).to eq(0)
+        expect(trade.net_amount).to eq(0)
+      end
+    end
+
+    context 'with multiple offers' do
+      it 'calculates offers_total_amount as sum of trade_card_offers amount' do
+        create(:trade_card_offer, trade: trade, amount: 1000)
+        create(:trade_card_offer, trade: trade, amount: 2000)
+        trade.recalculate_totals!
+        expect(trade.offers_total_amount).to eq(3000)
+      end
+    end
+
+    context 'with multiple wants' do
+      it 'calculates wants_total_amount as sum of trade_card_wants amount' do
+        create(:trade_card_want, trade: trade, amount: 500)
+        create(:trade_card_want, trade: trade, amount: 1500)
+        trade.recalculate_totals!
+        expect(trade.wants_total_amount).to eq(2000)
+      end
+    end
+
+    context 'with both offers and wants' do
+      it 'calculates net_amount as offers_total_amount - wants_total_amount' do
+        create(:trade_card_offer, trade: trade, amount: 5000)
+        create(:trade_card_want, trade: trade, amount: 2000)
+        trade.recalculate_totals!
+        expect(trade.net_amount).to eq(3000)
+      end
+    end
+
+    context 'with nil amounts' do
+      it 'treats nil amounts as 0' do
+        create(:trade_card_offer, trade: trade, amount: 1000)
+        create(:trade_card_offer, trade: trade, amount: nil)
+        create(:trade_card_want, trade: trade, amount: nil)
+        trade.recalculate_totals!
+        expect(trade.offers_total_amount).to eq(1000)
+        expect(trade.wants_total_amount).to eq(0)
+        expect(trade.net_amount).to eq(1000)
+      end
+    end
+
+    context 'when net_amount becomes negative' do
+      it 'correctly calculates negative net_amount' do
+        create(:trade_card_offer, trade: trade, amount: 1000)
+        create(:trade_card_want, trade: trade, amount: 3000)
+        trade.recalculate_totals!
+        expect(trade.net_amount).to eq(-2000)
+      end
+    end
+  end
 end
