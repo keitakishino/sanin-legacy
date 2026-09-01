@@ -49,10 +49,11 @@
         <% @user.identities.each do |identity| %>
           <div class="flex justify-between items-center py-2 border-b">
             <span class="font-semibold text-gray-700"><%= identity.provider_display_name %>:</span>
-            <% if identity.provider_twitter? %>
-              <%= link_to identity.uid, identity.twitter_profile_url, target: "_blank", class: "text-blue-600 hover:text-blue-800" %>
+            <% if identity.provider_twitter? && identity.uid.match?(/\A\d+\z/) %>
+              <% url = "https://twitter.com/intent/user?user_id=#{ERB::Util.url_encode(identity.uid)}" %>
+              <%= link_to h(identity.uid), url, target: "_blank", class: "text-blue-600 hover:text-blue-800" %>
             <% else %>
-              <span class="text-gray-600"><%= identity.uid %></span>
+              <span class="text-gray-600"><%= h(identity.uid) %></span>
             <% end %>
           </div>
         <% end %>

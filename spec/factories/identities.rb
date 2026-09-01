@@ -10,7 +10,7 @@ FactoryBot.define do
 
     factory :twitter_identity do
       provider { :twitter }
-      sequence(:uid) { |n| "twitter_uid_#{n}" }
+      sequence(:uid) { |n| "#{100000000000000000 + n}" }
     end
   end
 end

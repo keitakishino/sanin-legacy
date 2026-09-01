@@ -16,7 +16,7 @@ RSpec.describe Identity, type: :model do
       let!(:identity) { create(:identity, provider: :google, uid: 'unique_uid') }
 
       it 'allows same uid for different providers' do
-        new_identity = build(:twitter_identity, uid: 'unique_uid')
+        new_identity = build(:twitter_identity, uid: '123456789')
         expect(new_identity).to be_valid
       end
 
@@ -24,6 +24,33 @@ RSpec.describe Identity, type: :model do
         new_identity = build(:identity, provider: :google, uid: 'unique_uid', user: create(:user))
         expect(new_identity).not_to be_valid
         expect(new_identity.errors[:uid]).to include('has already been taken')
+      end
+    end
+
+    describe 'twitter_uid_must_be_numeric' do
+      context 'when provider is twitter and uid is not numeric' do
+        let(:identity) { build(:twitter_identity, uid: 'invalid_uid') }
+
+        it 'is invalid' do
+          expect(identity).not_to be_valid
+          expect(identity.errors[:uid]).to include('must be numeric for Twitter identities')
+        end
+      end
+
+      context 'when provider is twitter and uid is numeric' do
+        let(:identity) { build(:twitter_identity, uid: '987654321012345678') }
+
+        it 'is valid' do
+          expect(identity).to be_valid
+        end
+      end
+
+      context 'when provider is google and uid is not numeric' do
+        let(:identity) { build(:google_identity, uid: 'abc123def456') }
+
+        it 'is valid (no numeric validation for google)' do
+          expect(identity).to be_valid
+        end
       end
     end
   end
@@ -74,12 +101,28 @@ RSpec.describe Identity, type: :model do
   end
 
   describe '#twitter_profile_url' do
-    context 'when provider is twitter' do
+    context 'when provider is twitter and uid is valid numeric ID' do
       let(:identity) { build(:twitter_identity, uid: '987654321012345678') }
 
       it 'returns Twitter profile intent URL with user_id' do
         expected_url = 'https://twitter.com/intent/user?user_id=987654321012345678'
         expect(identity.twitter_profile_url).to eq(expected_url)
+      end
+    end
+
+    context 'when provider is twitter and uid is invalid (not numeric)' do
+      let(:identity) { build(:twitter_identity, uid: 'invalid_uid_with_letters') }
+
+      it 'returns nil' do
+        expect(identity.twitter_profile_url).to be_nil
+      end
+    end
+
+    context 'when provider is twitter and uid contains special characters' do
+      let(:identity) { build(:twitter_identity, uid: '123456789@invalid') }
+
+      it 'returns nil' do
+        expect(identity.twitter_profile_url).to be_nil
       end
     end
 
