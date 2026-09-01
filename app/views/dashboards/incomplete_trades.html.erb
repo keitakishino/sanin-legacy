@@ -28,17 +28,17 @@
                 <div class="grid grid-cols-3 gap-4 text-sm">
                   <div>
                     <p class="text-gray-600 text-xs uppercase"><%= t("dashboards.show.offers_total") %></p>
-                    <p class="text-lg font-semibold text-gray-800"><%= number_with_delimiter(trade.offers_total_amount) %> 円</p>
+                    <p class="text-lg font-semibold text-gray-800"><%= number_with_delimiter(trade.offers_total_amount) %> <%= t("dashboards.show.yen") %></p>
                   </div>
                   <div>
                     <p class="text-gray-600 text-xs uppercase"><%= t("dashboards.show.wants_total") %></p>
-                    <p class="text-lg font-semibold text-gray-800"><%= number_with_delimiter(trade.wants_total_amount) %> 円</p>
+                    <p class="text-lg font-semibold text-gray-800"><%= number_with_delimiter(trade.wants_total_amount) %> <%= t("dashboards.show.yen") %></p>
                   </div>
                   <div>
                     <p class="text-gray-600 text-xs uppercase"><%= t("dashboards.show.net_amount") %></p>
                     <% net_class = trade.net_amount >= 0 ? "text-green-600" : "text-red-600" %>
                     <p class="text-lg font-semibold <%= net_class %>">
-                      <%= number_with_delimiter(trade.net_amount) %> 円
+                      <%= number_with_delimiter(trade.net_amount) %> <%= t("dashboards.show.yen") %>
                     </p>
                   </div>
                 </div>
