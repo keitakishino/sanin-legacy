@@ -109,6 +109,20 @@ ja:
               invalid: "が正しくありません"
             password_confirmation:
               confirmation: "とパスワードが一致しません"
+  dashboards:
+    show:
+      title: "ダッシュボード"
+      subtitle: "未完了のトレード一覧です。進捗状況を確認して管理してください。"
+      incomplete_trades_title: "未完了トレード"
+      no_trades_message: "トレードはまだありません"
+      no_trades_guidance: "イベント一覧からトレードを開始してください。"
+      view_details: "詳細を表示"
+      view_events: "イベント一覧を見る"
+      event_date_label: "開催日"
+      offers_total: "出す合計"
+      wants_total: "欲しい合計"
+      net_amount: "差分"
+      yen: "円"
   admin:
     events:
       title: "イベント管理"

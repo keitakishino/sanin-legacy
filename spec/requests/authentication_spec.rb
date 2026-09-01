@@ -11,14 +11,16 @@ RSpec.describe "Authentication helpers", type: :request do
   describe "current_user helper" do
     it "returns nil when not logged in" do
       get root_path
-      expect(response.body).not_to include("You are logged in as")
+      follow_redirect!
+      expect(response.body).to include("Sign In")
+      expect(response.body).not_to include("Signout")
     end
 
     it "returns the logged-in user after sign in" do
       post signin_path, params: { email: user.email, password: "password123" }
       follow_redirect!
-      expect(response.body).to include("You are logged in as")
       expect(response.body).to include(user.username)
+      expect(response.body).to include("Signout")
     end
 
     it "displays current user in header when logged in" do
@@ -32,14 +34,16 @@ RSpec.describe "Authentication helpers", type: :request do
       post signin_path, params: { email: user.email, password: "password123" }
       delete signout_path
       get root_path
-      expect(response.body).not_to include("You are logged in as")
+      follow_redirect!
       expect(response.body).to include("Sign In")
+      expect(response.body).not_to include("Signout")
     end
   end
 
   describe "user_signed_in? helper" do
     it "returns false when not logged in" do
       get root_path
+      follow_redirect!
       expect(response.body).to include("Sign In")
       expect(response.body).not_to include("Signout")
     end
@@ -55,6 +59,7 @@ RSpec.describe "Authentication helpers", type: :request do
       post signin_path, params: { email: user.email, password: "password123" }
       delete signout_path
       get root_path
+      follow_redirect!
       expect(response.body).to include("Sign In")
       expect(response.body).not_to include("Signout")
     end
@@ -70,6 +75,7 @@ RSpec.describe "Authentication helpers", type: :request do
     it "complete sign in and sign out flow works correctly" do
       # Start unauthenticated
       get root_path
+      follow_redirect!
       expect(response.body).to include("Sign In")
 
       # Sign in
@@ -78,8 +84,8 @@ RSpec.describe "Authentication helpers", type: :request do
 
       # Verify logged in
       follow_redirect!
-      expect(response.body).to include("You are logged in as")
       expect(response.body).to include(user.username)
+      expect(response.body).to include("Signout")
       expect(session[:user_id]).to eq(user.id)
 
       # Sign out

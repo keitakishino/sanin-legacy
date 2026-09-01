@@ -9,7 +9,8 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  root "pages#home"
+  root "dashboards#show"
+  get "/dashboards/incomplete_trades", to: "dashboards#incomplete_trades", as: :dashboards_incomplete_trades
 
   get "/signin", to: "sessions#new"
   post "/signin", to: "sessions#create"
