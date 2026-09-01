@@ -242,6 +242,35 @@ RSpec.describe "TradeCardOffers", type: :request do
         admin_offer.reload
         expect(admin_offer.amount).to eq(5000)
       end
+
+      it "returns turbo_stream response with aggregates section update" do
+        admin_offer
+        patch "/trades/#{event.id}/card_offers/#{admin_offer.id}",
+          params: params_with_amount.merge(trade_id: admin_trade.id),
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to include("text/vnd.turbo-stream.html")
+        expect(response.body).to include('target="trade_aggregates"')
+      end
+
+      it "recalculates trade totals when amount is updated" do
+        # Create an offer with an initial amount
+        admin_offer_with_amount = create(:trade_card_offer, trade: admin_trade, amount: 1000)
+        initial_offers_total = admin_trade.reload.offers_total_amount
+        expect(initial_offers_total).to eq(1000)
+
+        # Update the amount
+        patch "/trades/#{event.id}/card_offers/#{admin_offer_with_amount.id}",
+          params: params_with_amount.merge(trade_id: admin_trade.id)
+
+        admin_trade.reload
+        admin_offer_with_amount.reload
+        # Verify the amount was updated
+        expect(admin_offer_with_amount.amount).to eq(5000)
+        # Verify the trade totals were recalculated
+        expect(admin_trade.offers_total_amount).to eq(5000)
+      end
     end
 
     context "IDOR protection: multiple trades in same event" do

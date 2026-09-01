@@ -323,6 +323,35 @@ RSpec.describe "TradeCardWants", type: :request do
         admin_want.reload
         expect(admin_want.amount).to eq(5000)
       end
+
+      it "returns turbo_stream response with aggregates section update" do
+        admin_want
+        patch "/trades/#{event.id}/card_wants/#{admin_want.id}",
+          params: params_with_amount.merge(trade_id: admin_trade.id),
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to include("text/vnd.turbo-stream.html")
+        expect(response.body).to include('target="trade_aggregates"')
+      end
+
+      it "recalculates trade totals when amount is updated" do
+        # Create a want with an initial amount
+        admin_want_with_amount = create(:trade_card_want, trade: admin_trade, amount: 2000)
+        initial_wants_total = admin_trade.reload.wants_total_amount
+        expect(initial_wants_total).to eq(2000)
+
+        # Update the amount
+        patch "/trades/#{event.id}/card_wants/#{admin_want_with_amount.id}",
+          params: params_with_amount.merge(trade_id: admin_trade.id)
+
+        admin_trade.reload
+        admin_want_with_amount.reload
+        # Verify the amount was updated
+        expect(admin_want_with_amount.amount).to eq(5000)
+        # Verify the trade totals were recalculated
+        expect(admin_trade.wants_total_amount).to eq(5000)
+      end
     end
 
     context "IDOR protection: multiple trades in same event" do

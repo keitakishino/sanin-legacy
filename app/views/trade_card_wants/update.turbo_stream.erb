@@ -1,3 +1,7 @@
 <turbo-stream action="replace" target="<%= dom_id(@trade_card_want) %>">
   <template><%= render 'trade_card_want', trade_card_want: @trade_card_want %></template>
 </turbo-stream>
+
+<turbo-stream action="replace" target="trade_aggregates">
+  <template><%= render "admin/trades/aggregates_section", trade: @trade_card_want.trade %></template>
+</turbo-stream>
