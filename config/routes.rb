@@ -42,6 +42,9 @@ Rails.application.routes.draw do
   put "/trades/:event_id/card_wants/:id", to: "trade_card_wants#update"
   delete "/trades/:event_id/card_wants/:id", to: "trade_card_wants#destroy"
 
+  # User-facing trade history
+  get "/histories", to: "histories#index", as: :histories
+
   namespace :admin do
     resources :invitations, only: [ :index, :create ]
     resources :events, only: [ :index, :new, :create, :edit, :update, :destroy ]
