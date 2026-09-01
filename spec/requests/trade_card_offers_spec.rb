@@ -268,6 +268,24 @@ RSpec.describe "TradeCardOffers", type: :request do
           expect(another_offer.reload.amount).to eq(1000)
         end
       end
+
+      context "when admin tries to update with mismatched trade_id" do
+        let(:other_event) { create(:event) }
+        let(:other_trade) { create(:trade, event: other_event, user: other_user) }
+        let(:main_offer) { create(:trade_card_offer, trade: trade, amount: 2000) }
+
+        it "returns 404 when trade_id belongs to different event" do
+          main_offer
+          expect(Trade.where(event_id: event.id).count).to be >= 1
+
+          patch "/trades/#{event.id}/card_offers/#{main_offer.id}",
+            params: valid_params.merge(trade_id: other_trade.id)
+
+          expect(response).to have_http_status(:not_found)
+          expect(main_offer.reload.card_name).not_to eq("Updated Card")
+          expect(main_offer.reload.amount).to eq(2000)
+        end
+      end
     end
   end
 
