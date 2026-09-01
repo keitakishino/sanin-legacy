@@ -41,6 +41,7 @@ class TradeCardWant < ApplicationRecord
     )
     duplicate_candidates = duplicate_candidates.where.not(id: id) if persisted?
 
+    # Each loop is acceptable here as duplicate_candidates are expected to be few per trade
     duplicate_candidates.each do |candidate|
       if normalize_conditions(candidate.conditions) == normalized_conditions
         errors.add(:base, "このカード明細は既に登録されています")
