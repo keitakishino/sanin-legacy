@@ -15,9 +15,7 @@ class TradeCardWant < ApplicationRecord
   #      conditions is an integer array where nil or empty array means "不問"
   #      Values: nm(0)/sp(1)/mp(2)/hp(3)/poor(4)
   validate :conditions_values_valid
-
-  # A18: Custom validation for duplicate card entries within the same trade
-  #      will be implemented in Issue #45
+  validate :no_duplicate_card_entry
 
   private
 
@@ -27,5 +25,33 @@ class TradeCardWant < ApplicationRecord
     unless conditions.all? { |val| val.is_a?(Integer) && (0..4).include?(val) }
       errors.add(:conditions, "must contain only integers between 0 and 4")
     end
+  end
+
+  def no_duplicate_card_entry
+    return if trade.blank?
+
+    normalized_conditions = normalize_conditions(conditions)
+
+    duplicate_candidates = trade.trade_card_wants.where(
+      card_name: card_name,
+      language: language,
+      foil: foil,
+      frame: frame,
+      expansion_id: expansion_id
+    )
+    duplicate_candidates = duplicate_candidates.where.not(id: id) if persisted?
+
+    # Each loop is acceptable here as duplicate_candidates are expected to be few per trade
+    duplicate_candidates.each do |candidate|
+      if normalize_conditions(candidate.conditions) == normalized_conditions
+        errors.add(:base, "このカード明細は既に登録されています")
+        break
+      end
+    end
+  end
+
+  def normalize_conditions(conds)
+    return nil if conds.nil? || conds.empty?
+    conds.sort
   end
 end
