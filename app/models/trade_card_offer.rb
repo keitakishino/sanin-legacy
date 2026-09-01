@@ -13,6 +13,26 @@ class TradeCardOffer < ApplicationRecord
   validates :pw_mark, inclusion: { in: [ true, false ] }
   validates :amount, numericality: { only_integer: true }, allow_nil: true
 
-  # A18: Custom validation for duplicate card entries within the same trade
-  #      will be implemented in Issue #45
+  validate :no_duplicate_card_entry
+
+  private
+
+  def no_duplicate_card_entry
+    return if trade.blank?
+
+    duplicate_key = {
+      card_name: card_name,
+      language: language,
+      condition: condition,
+      foil: foil,
+      frame: frame,
+      pw_mark: pw_mark,
+      expansion_id: expansion_id
+    }
+
+    scope = trade.trade_card_offers.where(duplicate_key)
+    scope = scope.where.not(id: id) if persisted?
+
+    errors.add(:base, "このカード明細は既に登録されています") if scope.exists?
+  end
 end
