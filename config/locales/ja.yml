@@ -127,6 +127,7 @@ ja:
       confirm_delete: "本当に削除してもよろしいですか？"
     users:
       title: "ユーザー管理"
+      nav_label: "ユーザー管理"
       search_placeholder: "ユーザー名またはメールアドレス"
       search_button: "検索"
       no_users: "ユーザーはまだ登録されていません"
@@ -140,6 +141,8 @@ ja:
       google: "Google"
       twitter: "Twitter(X)"
       trades: "トレード一覧"
+      event_title: "イベント名"
+      event_date: "イベント日時"
       no_trades: "トレード履歴はありません"
       view_details: "詳細"
       registered_info: "登録情報"
