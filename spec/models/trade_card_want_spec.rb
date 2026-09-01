@@ -392,4 +392,73 @@ describe TradeCardWant, type: :model do
       end
     end
   end
+
+  describe 'automatic trade totals recalculation (Issue #47)' do
+    let(:trade) { create(:trade) }
+
+    context 'after_save callback' do
+      it 'recalculates trade totals when a new want is saved' do
+        expect_any_instance_of(Trade).to receive(:recalculate_totals!).once
+        create(:trade_card_want, trade: trade, amount: 1000)
+      end
+
+      it 'recalculates trade totals when an existing want is updated' do
+        want = create(:trade_card_want, trade: trade, amount: 1000)
+        trade.reload
+
+        expect_any_instance_of(Trade).to receive(:recalculate_totals!).once
+        want.update(amount: 2000)
+      end
+
+      it 'updates trade totals correctly after saving want with amount' do
+        create(:trade_card_want, trade: trade, amount: 1000)
+        trade.reload
+        expect(trade.wants_total_amount).to eq(1000)
+        expect(trade.offers_total_amount).to eq(0)
+        expect(trade.net_amount).to eq(-1000)
+      end
+
+      it 'updates trade totals correctly after saving multiple wants' do
+        create(:trade_card_want, trade: trade, amount: 1000)
+        create(:trade_card_want, trade: trade, amount: 500)
+        trade.reload
+        expect(trade.wants_total_amount).to eq(1500)
+      end
+    end
+
+    context 'after_destroy callback' do
+      it 'recalculates trade totals when a want is destroyed' do
+        want = create(:trade_card_want, trade: trade, amount: 1000)
+        trade.reload
+
+        expect_any_instance_of(Trade).to receive(:recalculate_totals!).once
+        want.destroy
+      end
+
+      it 'updates trade totals correctly after destroying want' do
+        want1 = create(:trade_card_want, trade: trade, amount: 1000)
+        create(:trade_card_want, trade: trade, amount: 500)
+        trade.reload
+        initial_total = trade.wants_total_amount
+
+        want1.destroy
+        trade.reload
+
+        expect(trade.wants_total_amount).to eq(initial_total - 1000)
+      end
+
+      it 'sets trade totals to 0 when all wants are destroyed' do
+        want1 = create(:trade_card_want, trade: trade, amount: 1000)
+        want2 = create(:trade_card_want, trade: trade, amount: 500)
+        trade.reload
+
+        want1.destroy
+        want2.destroy
+        trade.reload
+
+        expect(trade.wants_total_amount).to eq(0)
+        expect(trade.net_amount).to eq(0)
+      end
+    end
+  end
 end

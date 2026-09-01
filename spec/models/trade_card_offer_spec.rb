@@ -247,4 +247,73 @@ describe TradeCardOffer, type: :model do
       end
     end
   end
+
+  describe 'automatic trade totals recalculation (Issue #47)' do
+    let(:trade) { create(:trade) }
+
+    context 'after_save callback' do
+      it 'recalculates trade totals when a new offer is saved' do
+        expect_any_instance_of(Trade).to receive(:recalculate_totals!).once
+        create(:trade_card_offer, trade: trade, amount: 1000)
+      end
+
+      it 'recalculates trade totals when an existing offer is updated' do
+        offer = create(:trade_card_offer, trade: trade, amount: 1000)
+        trade.reload
+
+        expect_any_instance_of(Trade).to receive(:recalculate_totals!).once
+        offer.update(amount: 2000)
+      end
+
+      it 'updates trade totals correctly after saving offer with amount' do
+        create(:trade_card_offer, trade: trade, amount: 1000)
+        trade.reload
+        expect(trade.offers_total_amount).to eq(1000)
+        expect(trade.wants_total_amount).to eq(0)
+        expect(trade.net_amount).to eq(1000)
+      end
+
+      it 'updates trade totals correctly after saving multiple offers' do
+        create(:trade_card_offer, trade: trade, amount: 1000)
+        create(:trade_card_offer, trade: trade, amount: 500)
+        trade.reload
+        expect(trade.offers_total_amount).to eq(1500)
+      end
+    end
+
+    context 'after_destroy callback' do
+      it 'recalculates trade totals when an offer is destroyed' do
+        offer = create(:trade_card_offer, trade: trade, amount: 1000)
+        trade.reload
+
+        expect_any_instance_of(Trade).to receive(:recalculate_totals!).once
+        offer.destroy
+      end
+
+      it 'updates trade totals correctly after destroying offer' do
+        offer1 = create(:trade_card_offer, trade: trade, amount: 1000)
+        create(:trade_card_offer, trade: trade, amount: 500)
+        trade.reload
+        initial_total = trade.offers_total_amount
+
+        offer1.destroy
+        trade.reload
+
+        expect(trade.offers_total_amount).to eq(initial_total - 1000)
+      end
+
+      it 'sets trade totals to 0 when all offers are destroyed' do
+        offer1 = create(:trade_card_offer, trade: trade, amount: 1000)
+        offer2 = create(:trade_card_offer, trade: trade, amount: 500)
+        trade.reload
+
+        offer1.destroy
+        offer2.destroy
+        trade.reload
+
+        expect(trade.offers_total_amount).to eq(0)
+        expect(trade.net_amount).to eq(0)
+      end
+    end
+  end
 end

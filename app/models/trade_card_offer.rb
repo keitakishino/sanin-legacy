@@ -15,7 +15,14 @@ class TradeCardOffer < ApplicationRecord
 
   validate :no_duplicate_card_entry
 
+  after_save :recalculate_trade_totals
+  after_destroy :recalculate_trade_totals
+
   private
+
+  def recalculate_trade_totals
+    trade.recalculate_totals! if trade.present?
+  end
 
   def no_duplicate_card_entry
     return if trade.blank?

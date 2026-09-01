@@ -12,6 +12,18 @@ class Trade < ApplicationRecord
   validates :status, presence: true
   validates :offers_total_amount, :wants_total_amount, :net_amount, numericality: { only_integer: true }
 
+  def recalculate_totals!
+    new_offers_total = trade_card_offers.sum(:amount) || 0
+    new_wants_total = trade_card_wants.sum(:amount) || 0
+    new_net = new_offers_total - new_wants_total
+
+    update!(
+      offers_total_amount: new_offers_total,
+      wants_total_amount: new_wants_total,
+      net_amount: new_net
+    )
+  end
+
   # A18: Custom validation for duplicate card entries will be implemented in Issue #45
   # A17: Automatic calculation of offers_total_amount, wants_total_amount, and net_amount
   #      will be implemented in Issue #47
