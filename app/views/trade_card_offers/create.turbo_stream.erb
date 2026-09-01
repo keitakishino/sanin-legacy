@@ -1,0 +1,11 @@
+<turbo-stream action="append" target="trade_card_offers">
+  <template><%= render 'trade_card_offer', trade_card_offer: @trade_card_offer %></template>
+</turbo-stream>
+
+<turbo-stream action="replace" target="new_trade_card_offer">
+  <template>
+    <turbo-frame id="new_trade_card_offer" style="display: none;" class="mt-4 bg-gray-50 p-4 rounded-lg">
+      <%= render 'form', trade_card_offer: @trade.trade_card_offers.build %>
+    </turbo-frame>
+  </template>
+</turbo-stream>

@@ -25,6 +25,68 @@ ja:
           used: "使用済み"
           expired: "期限切れ"
           revoked: "取り消し"
+      trade:
+        status: "トレード状態"
+        statuses:
+          pending: "未処理"
+          in_progress: "進行中"
+          completed: "完了"
+          cancelled: "キャンセル"
+      trade_card_offer:
+        card_name: "カード名"
+        quantity: "数量"
+        language: "言語"
+        condition: "状態"
+        foil: "フォイル"
+        frame: "フレーム"
+        pw_mark: "PWマーク"
+        expansion_id: "セット"
+        note: "備考"
+        amount: "金額"
+        languages:
+          ja: "日本語"
+          en: "英語"
+          other: "その他"
+        conditions:
+          nm: "NM（ニアミント）"
+          sp: "SP（スライトプレイ）"
+          mp: "MP（モデレートプレイ）"
+          hp: "HP（ヘビープレイ）"
+          poor: "POOR（悪い）"
+          none: "未定義"
+        foils:
+          foil: "フォイル"
+          non_foil: "ノンフォイル"
+          special: "スペシャル"
+        frames:
+          normal: "ノーマル"
+          extended: "拡張アート"
+          borderless: "ボーダーレス"
+          showcase: "ショーケース"
+      trade_card_want:
+        card_name: "カード名"
+        quantity: "数量"
+        language: "言語"
+        conditions: "状態"
+        foil: "フォイル"
+        frame: "フレーム"
+        expansion_id: "セット"
+        note: "備考"
+        amount: "金額"
+        languages:
+          ja: "日本語"
+          en: "英語"
+          other: "その他"
+        foils:
+          foil: "フォイル"
+          non_foil: "ノンフォイル"
+          special: "スペシャル"
+        frames:
+          normal: "ノーマル"
+          extended: "拡張アート"
+          borderless: "ボーダーレス"
+          showcase: "ショーケース"
+          retro: "レトロ"
     errors:
       messages:
         invalid: "は無効です"

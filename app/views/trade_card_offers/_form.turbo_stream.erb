@@ -1,0 +1,100 @@
+<% if trade_card_offer.persisted? %>
+  <% form_url = trade_card_offer_path(@trade.event, trade_card_offer) %>
+  <% form_method = :patch %>
+<% else %>
+  <% form_url = trade_card_offers_path(@trade.event) %>
+  <% form_method = :post %>
+<% end %>
+
+<%= form_with url: form_url, method: form_method, local: true, data: { turbo: true } do |f| %>
+  <% if trade_card_offer.errors.any? %>
+    <div id="error_explanation" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+      <h2 class="text-red-800 font-semibold mb-2">
+        <%= pluralize(trade_card_offer.errors.count, "error") %> prohibited this record from being saved:
+      </h2>
+      <ul class="list-disc list-inside space-y-1 text-red-700">
+        <% trade_card_offer.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="space-y-4">
+    <!-- Card Name -->
+    <div>
+      <%= f.label :card_name, "カード名" %>
+      <%= f.text_field :card_name, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <!-- Quantity -->
+    <div>
+      <%= f.label :quantity, "数量" %>
+      <%= f.number_field :quantity, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <!-- Language -->
+    <div>
+      <%= f.label :language, "言語" %>
+      <%= f.select :language, TradeCardOffer.languages.keys.map { |k| [I18n.t("activerecord.enums.trade_card_offer.language.#{k}"), k] }, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <!-- Condition -->
+    <div>
+      <%= f.label :condition, "状態" %>
+      <%= f.select :condition, TradeCardOffer.conditions.keys.map { |k| [I18n.t("activerecord.enums.trade_card_offer.condition.#{k}"), k] }, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <!-- Foil -->
+    <div>
+      <%= f.label :foil, "フォイル" %>
+      <%= f.select :foil, TradeCardOffer.foils.keys.map { |k| [I18n.t("activerecord.enums.trade_card_offer.foil.#{k}"), k] }, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <!-- Frame -->
+    <div>
+      <%= f.label :frame, "フレーム" %>
+      <%= f.select :frame, TradeCardOffer.frames.keys.map { |k| [I18n.t("activerecord.enums.trade_card_offer.frame.#{k}"), k] }, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <!-- PW Mark -->
+    <div>
+      <%= f.label :pw_mark, "PWマーク" %>
+      <div class="flex items-center space-x-4 mt-2">
+        <%= f.radio_button :pw_mark, true %>
+        <%= f.label :pw_mark_true, "あり", for: "trade_card_offer_pw_mark_true" %>
+        <%= f.radio_button :pw_mark, false %>
+        <%= f.label :pw_mark_false, "なし", for: "trade_card_offer_pw_mark_false" %>
+      </div>
+    </div>
+
+    <!-- Expansion -->
+    <div>
+      <%= f.label :expansion_id, "セット" %>
+      <%= f.collection_select :expansion_id, Expansion.all, :id, :name, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <!-- Note -->
+    <div>
+      <%= f.label :note, "備考" %>
+      <%= f.text_area :note, rows: 3, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+    </div>
+
+    <!-- Amount (admin only) -->
+    <% if current_user.role_admin? %>
+      <div>
+        <%= f.label :amount, "金額 (管理者のみ)" %>
+        <%= f.number_field :amount, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+      </div>
+    <% end %>
+
+    <!-- Submit buttons -->
+    <div class="flex gap-2 pt-4">
+      <%= f.submit trade_card_offer.persisted? ? "更新" : "追加", class: "px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold" %>
+      <button type="button" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 font-semibold"
+              onclick="document.getElementById('<%= dom_id(trade_card_offer, :edit_form) %>').style.display = 'none'">
+        キャンセル
+      </button>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,7 @@
+<turbo-stream action="replace" target="<%= dom_id(@trade_card_offer, :edit_form) %>">
+  <template>
+    <turbo-frame id="<%= dom_id(@trade_card_offer, :edit_form) %>" class="mt-4 border-t pt-4">
+      <%= render 'form', trade_card_offer: @trade_card_offer %>
+    </turbo-frame>
+  </template>
+</turbo-stream>
