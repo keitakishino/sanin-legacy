@@ -20,6 +20,20 @@ class TradeCardWant < ApplicationRecord
   after_save :recalculate_trade_totals
   after_destroy :recalculate_trade_totals
 
+  def conditions_to_display
+    return "不問" if conditions.nil? || conditions.empty?
+
+    labels = {
+      0 => "NM",
+      1 => "SP",
+      2 => "MP",
+      3 => "HP",
+      4 => "Poor"
+    }
+
+    conditions.map { |c| labels[c] }.join("/")
+  end
+
   private
 
   def recalculate_trade_totals
