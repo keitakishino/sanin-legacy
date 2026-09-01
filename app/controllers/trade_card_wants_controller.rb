@@ -44,7 +44,18 @@ class TradeCardWantsController < ApplicationController
   private
 
   def set_trade
-    @trade = Trade.find_by!(event_id: params[:event_id], user_id: current_user.id)
+    if current_user.role_admin?
+      # For admin: if trade_id is provided, validate it matches the event_id in the URL
+      if params[:trade_id].present?
+        @trade = Trade.find_by!(id: params[:trade_id], event_id: params[:event_id])
+      else
+        # Fallback for routes that don't provide trade_id
+        raise ActiveRecord::RecordNotFound if Trade.where(event_id: params[:event_id]).count > 1
+        @trade = Trade.find_by!(event_id: params[:event_id])
+      end
+    else
+      @trade = Trade.find_by!(event_id: params[:event_id], user_id: current_user.id)
+    end
   end
 
   def authorize_user_or_admin!
