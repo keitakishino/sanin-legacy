@@ -314,6 +314,20 @@ RSpec.describe "Admin::Trades", type: :request do
       post signin_path, params: { email: admin_user.email, password: "password123" }
     end
 
+    it "admin can create trade card offer with amount" do
+      expansion = create(:expansion)
+      offer = create(:trade_card_offer, trade: trade, amount: nil)
+      patch trade_card_offer_path(trade.event, offer), params: { trade_card_offer: { amount: 5000 }, trade_id: trade.id }
+      expect(offer.reload.amount).to eq(5000)
+    end
+
+    it "admin can create trade card want with amount" do
+      expansion = create(:expansion)
+      want = create(:trade_card_want, trade: trade, amount: nil)
+      patch trade_card_want_path(trade.event, want), params: { trade_card_want: { amount: 3000 }, trade_id: trade.id }
+      expect(want.reload.amount).to eq(3000)
+    end
+
     it "admin can edit trade card offer amount through existing controller" do
       offer = create(:trade_card_offer, trade: trade)
       patch trade_card_offer_path(trade.event, offer), params: { trade_card_offer: { amount: 5000 }, trade_id: trade.id }
