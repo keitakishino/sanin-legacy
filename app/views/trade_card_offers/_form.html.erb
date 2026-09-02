@@ -9,8 +9,10 @@
 <% frame_id ||= "new_trade_card_offer" %>
 
 <%= form_with url: form_url, method: form_method, local: true, data: { turbo: true } do |f| %>
-  <!-- Hidden trade_id for admin operations -->
-  <%= hidden_field_tag :trade_id, @trade.id %>
+  <!-- Hidden trade_id for admin operations only -->
+  <% if current_user.role_admin? %>
+    <%= hidden_field_tag :trade_id, @trade.id %>
+  <% end %>
 
   <% if trade_card_offer.errors.any? %>
     <div id="error_explanation" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
