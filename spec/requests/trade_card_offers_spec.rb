@@ -43,6 +43,15 @@ RSpec.describe "TradeCardOffers", type: :request do
       expect(response.content_type).to include("text/vnd.turbo-stream.html")
     end
 
+    it "returns turbo_stream with correct target frame for general user" do
+      trade
+      post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:ok)
+      # General user must target 'new_trade_card_offer' frame, NOT 'new_trade_card_offer_admin'
+      expect(response.body).to include('target="new_trade_card_offer"')
+      expect(response.body).not_to include('target="new_trade_card_offer_admin"')
+    end
+
     it "returns HTML redirect on success" do
       trade
       post "/trades/#{event.id}/card_offers", params: valid_params

@@ -1,11 +1,14 @@
+<% admin_context = @trade_id.present? %>
+<% frame_id = admin_context ? 'new_trade_card_want_admin' : 'new_trade_card_want' %>
+
 <turbo-stream action="append" target="trade_card_wants">
   <template><%= render 'trade_card_want', trade_card_want: @trade_card_want %></template>
 </turbo-stream>
 
-<turbo-stream action="replace" target="new_trade_card_want">
+<turbo-stream action="replace" target="<%= frame_id %>">
   <template>
-    <turbo-frame id="new_trade_card_want" style="display: none;" class="mt-4 bg-gray-50 p-4 rounded-lg">
-      <%= render 'form', trade_card_want: @trade.trade_card_wants.build %>
+    <turbo-frame id="<%= frame_id %>" style="display: none;" class="mt-4 bg-gray-50 p-4 rounded-lg">
+      <%= render 'form', trade_card_want: @trade.trade_card_wants.build, frame_id: frame_id %>
     </turbo-frame>
   </template>
 </turbo-stream>
