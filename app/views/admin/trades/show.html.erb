@@ -114,7 +114,7 @@
     </div>
 
     <turbo-frame id="new_trade_card_offer_admin" style="display: none;" class="mt-4 bg-gray-50 p-4 rounded-lg">
-      <%= render 'trade_card_offers/form', trade_card_offer: @trade.trade_card_offers.build %>
+      <%= render 'trade_card_offers/form', trade_card_offer: @trade.trade_card_offers.build, frame_id: 'new_trade_card_offer_admin' %>
     </turbo-frame>
   </div>
 
@@ -144,7 +144,7 @@
     </div>
 
     <turbo-frame id="new_trade_card_want_admin" style="display: none;" class="mt-4 bg-gray-50 p-4 rounded-lg">
-      <%= render 'trade_card_wants/form', trade_card_want: @trade.trade_card_wants.build %>
+      <%= render 'trade_card_wants/form', trade_card_want: @trade.trade_card_wants.build, frame_id: 'new_trade_card_want_admin' %>
     </turbo-frame>
   </div>
 </div>

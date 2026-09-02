@@ -6,6 +6,8 @@ class TradeCardWantsController < ApplicationController
 
   def create
     @trade_card_want = @trade.trade_card_wants.build(trade_card_want_params)
+    # Store trade_id for turbo_stream template context awareness
+    @trade_id = params[:trade_id].present? ? params[:trade_id].to_i : nil
     if @trade_card_want.save
       respond_to do |format|
         format.turbo_stream { render :create }
