@@ -1,12 +1,12 @@
 <div class="container mx-auto px-4 py-8 max-w-2xl">
-  <h1 class="text-3xl font-bold mb-6">プロフィール編集</h1>
+  <h1 class="text-3xl font-bold text-stone-800 mb-6">プロフィール編集</h1>
 
   <% if @user.errors.any? %>
-    <div id="error_explanation" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-      <h2 class="text-red-800 font-semibold text-lg mb-2">
+    <div id="error_explanation" class="bg-danger-soft border border-red-300 rounded-lg p-4 mb-6">
+      <h2 class="text-danger font-bold text-sm mb-2">
         <%= pluralize(@user.errors.count, "件") %>のエラーがあります
       </h2>
-      <ul class="list-disc list-inside text-red-700">
+      <ul class="list-disc list-inside space-y-1 text-danger text-xs">
         <% @user.errors.full_messages.each do |message| %>
           <li><%= message %></li>
         <% end %>
@@ -17,43 +17,43 @@
   <%= form_with model: @user, local: true, url: "/mypage", method: :patch, class: "space-y-6" do |form| %>
     <!-- ユーザー名 -->
     <div>
-      <%= form.label :username, "ユーザー名", class: "block text-sm font-semibold text-gray-700 mb-2" %>
-      <%= form.text_field :username, class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+      <%= form.label :username, "ユーザー名", class: "block text-xs font-bold text-stone-500 uppercase mb-2" %>
+      <%= form.text_field :username, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
     </div>
 
     <!-- メールアドレス -->
     <div>
-      <%= form.label :email, "メールアドレス", class: "block text-sm font-semibold text-gray-700 mb-2" %>
-      <%= form.email_field :email, class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
-      <p class="text-gray-500 text-sm mt-1">空欄のままにすると、メールアドレスは未設定になります</p>
+      <%= form.label :email, "メールアドレス", class: "block text-xs font-bold text-stone-500 uppercase mb-2" %>
+      <%= form.email_field :email, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+      <p class="text-stone-400 text-xs mt-1">空欄のままにすると、メールアドレスは未設定になります</p>
     </div>
 
     <!-- パスワード変更 -->
-    <fieldset class="border-t pt-6">
-      <legend class="text-sm font-semibold text-gray-700 mb-4">パスワード変更（オプション）</legend>
+    <fieldset class="border-t border-stone-200 pt-6">
+      <legend class="text-xs font-bold text-stone-700 uppercase mb-4">パスワード変更（オプション）</legend>
 
       <div>
-        <%= form.label :current_password, "現在のパスワード", class: "block text-sm font-semibold text-gray-700 mb-2" %>
-        <%= password_field_tag "user[current_password]", nil, class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
-        <p class="text-gray-500 text-sm mt-1">パスワード変更時は入力が必須です</p>
+        <%= form.label :current_password, "現在のパスワード", class: "block text-xs font-bold text-stone-500 uppercase mb-2" %>
+        <%= password_field_tag "user[current_password]", nil, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+        <p class="text-stone-400 text-xs mt-1">パスワード変更時は入力が必須です</p>
       </div>
 
       <div class="mt-4">
-        <%= form.label :password, "新しいパスワード", class: "block text-sm font-semibold text-gray-700 mb-2" %>
-        <%= form.password_field :password, class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
-        <p class="text-gray-500 text-sm mt-1">8文字以上で入力してください</p>
+        <%= form.label :password, "新しいパスワード", class: "block text-xs font-bold text-stone-500 uppercase mb-2" %>
+        <%= form.password_field :password, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+        <p class="text-stone-400 text-xs mt-1">8文字以上で入力してください</p>
       </div>
 
       <div class="mt-4">
-        <%= form.label :password_confirmation, "パスワード確認", class: "block text-sm font-semibold text-gray-700 mb-2" %>
-        <%= form.password_field :password_confirmation, class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" %>
+        <%= form.label :password_confirmation, "パスワード確認", class: "block text-xs font-bold text-stone-500 uppercase mb-2" %>
+        <%= form.password_field :password_confirmation, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
       </div>
     </fieldset>
 
     <!-- ボタン -->
     <div class="flex gap-4 pt-4">
-      <%= form.submit "保存", class: "px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold" %>
-      <%= link_to "キャンセル", mypage_path, class: "px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-semibold" %>
+      <%= form.submit "保存", class: "px-6 py-2 bg-accent text-white rounded-md hover:bg-accent-hover font-bold text-xs" %>
+      <%= link_to "キャンセル", mypage_path, class: "px-6 py-2 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs" %>
     </div>
   <% end %>
 </div>
