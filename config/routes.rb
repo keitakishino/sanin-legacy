@@ -32,6 +32,9 @@ Rails.application.routes.draw do
   # User-facing events (listing and detail view)
   resources :events, only: [ :index, :show ]
 
+  # Expansion search endpoint for autocomplete
+  get "/expansions", to: "expansions#index"
+
   # User trade view and editing
   get "/trades/:event_id", to: "trades#show", as: :trade
   post "/trades/:event_id/card_offers", to: "trade_card_offers#create", as: :trade_card_offers
