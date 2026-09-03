@@ -9,7 +9,7 @@ class DashboardsController < ApplicationController
   def incomplete_trades
     @incomplete_trades = current_user.trades
                                       .where(status: [ :pending, :in_progress ])
-                                      .includes(:event)
+                                      .includes(:event, :trade_card_offers, :trade_card_wants)
                                       .order(created_at: :desc)
                                       .limit(3)
     render :incomplete_trades, layout: false

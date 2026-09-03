@@ -40,22 +40,42 @@
                   </span>
                 </div>
 
-                <!-- Aggregates -->
-                <div class="grid grid-cols-3 gap-4 text-xs">
-                  <div>
-                    <p class="text-stone-400 text-xs uppercase font-bold"><%= t("dashboards.show.offers_total") %></p>
-                    <p class="text-lg font-bold text-stone-800 mt-1"><%= number_with_delimiter(trade.offers_total_amount) %> <%= t("dashboards.show.yen") %></p>
+                <!-- Card Name Chips -->
+                <div class="space-y-3">
+                  <!-- Offer Cards -->
+                  <div class="flex flex-wrap gap-2 items-center">
+                    <span class="text-xs font-bold text-stone-500 mr-2">出すカード:</span>
+                    <% offers_limited = trade.trade_card_offers.limit(5) %>
+                    <% offers_total = trade.trade_card_offers.count %>
+                    <% offers_limited.each do |offer| %>
+                      <div class="inline-flex items-center gap-2 bg-offer-soft text-offer-text px-3 py-1.5 rounded-md text-xs font-semibold">
+                        <div class="w-2 h-2 bg-offer rounded-sm flex-shrink-0"></div>
+                        <%= offer.card_name %>
+                      </div>
+                    <% end %>
+                    <% if offers_total > 5 %>
+                      <div class="inline-flex items-center bg-neutral-soft text-stone-500 px-3 py-1.5 rounded-md text-xs font-semibold">
+                        +<%= offers_total - 5 %>件
+                      </div>
+                    <% end %>
                   </div>
-                  <div>
-                    <p class="text-stone-400 text-xs uppercase font-bold"><%= t("dashboards.show.wants_total") %></p>
-                    <p class="text-lg font-bold text-stone-800 mt-1"><%= number_with_delimiter(trade.wants_total_amount) %> <%= t("dashboards.show.yen") %></p>
-                  </div>
-                  <div>
-                    <p class="text-stone-400 text-xs uppercase font-bold"><%= t("dashboards.show.net_amount") %></p>
-                    <% net_class = trade.net_amount >= 0 ? "text-success" : "text-danger" %>
-                    <p class="text-lg font-bold <%= net_class %> mt-1">
-                      <%= number_with_delimiter(trade.net_amount) %> <%= t("dashboards.show.yen") %>
-                    </p>
+
+                  <!-- Want Cards -->
+                  <div class="flex flex-wrap gap-2 items-center">
+                    <span class="text-xs font-bold text-stone-500 mr-2">欲しいカード:</span>
+                    <% wants_limited = trade.trade_card_wants.limit(5) %>
+                    <% wants_total = trade.trade_card_wants.count %>
+                    <% wants_limited.each do |want| %>
+                      <div class="inline-flex items-center gap-2 bg-want-soft text-want-text px-3 py-1.5 rounded-md text-xs font-semibold">
+                        <div class="w-2 h-2 bg-want rounded-full flex-shrink-0"></div>
+                        <%= want.card_name %>
+                      </div>
+                    <% end %>
+                    <% if wants_total > 5 %>
+                      <div class="inline-flex items-center bg-neutral-soft text-stone-500 px-3 py-1.5 rounded-md text-xs font-semibold">
+                        +<%= wants_total - 5 %>件
+                      </div>
+                    <% end %>
                   </div>
                 </div>
               </div>
