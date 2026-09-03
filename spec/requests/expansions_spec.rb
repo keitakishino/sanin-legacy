@@ -53,8 +53,10 @@ RSpec.describe "Expansions", type: :request do
 
         it "displays scryfall_set_code in uppercase" do
           get "/expansions", params: { q: "mh" }
-          expect(response.body).to include("<span class=\"font-bold text-stone-800\">MH2</span>")
-          expect(response.body).to include("<span class=\"font-bold text-stone-800\">MH1</span>")
+          # With highlighting, codes are split into prefix (highlighted) and suffix
+          # "MH2" becomes: <span class="text-accent font-bold">MH</span><span class="font-bold text-stone-800">2</span>
+          expect(response.body).to include('<span class="text-accent font-bold">MH</span><span class="font-bold text-stone-800">2</span>')
+          expect(response.body).to include('<span class="text-accent font-bold">MH</span><span class="font-bold text-stone-800">1</span>')
         end
 
         it "displays name" do
@@ -194,6 +196,70 @@ RSpec.describe "Expansions", type: :request do
           expect(response.body).not_to include("MA2")
           expect(response.body).not_to include("MX2")
           expect(response.body).not_to include("M_2")
+        end
+      end
+
+      context "with highlighting (prefix match highlight)" do
+        before do
+          create(:expansion, scryfall_set_code: "MH2", name: "Modern Horizons 2", name_ja: nil)
+          create(:expansion, scryfall_set_code: "MH1", name: "Modern Horizons", name_ja: nil)
+          create(:expansion, scryfall_set_code: "M00", name: "Magic 00", name_ja: nil)
+        end
+
+        it "highlights matching prefix in span with text-accent class" do
+          get "/expansions", params: { q: "MH" }
+          # Check that "MH" is wrapped in a span with text-accent class
+          expect(response.body).to include('<span class="text-accent font-bold">MH</span>')
+        end
+
+        it "wraps the non-matching suffix in default styled span" do
+          get "/expansions", params: { q: "MH" }
+          # "MH2" should be split as "MH" (highlighted) + "2" (default)
+          expect(response.body).to include('<span class="text-accent font-bold">MH</span><span class="font-bold text-stone-800">2</span>')
+          # "MH1" should be split as "MH" (highlighted) + "1" (default)
+          expect(response.body).to include('<span class="text-accent font-bold">MH</span><span class="font-bold text-stone-800">1</span>')
+        end
+
+        it "highlights correctly with case-insensitive queries" do
+          get "/expansions", params: { q: "mh" }
+          # Lowercase query should still highlight "MH" in uppercase code
+          expect(response.body).to include('<span class="text-accent font-bold">MH</span>')
+        end
+
+        it "highlights correctly with mixed case queries" do
+          get "/expansions", params: { q: "Mh" }
+          # Mixed case query should still highlight "MH" in uppercase code
+          expect(response.body).to include('<span class="text-accent font-bold">MH</span>')
+        end
+
+        it "does not add highlight span when query is empty" do
+          get "/expansions", params: { q: "" }
+          # With empty query, should render the full code without accent span
+          # (but turbo-frame should still be empty since no results match empty string)
+          expect(response.body).not_to include('<span class="text-accent font-bold">')
+        end
+
+        it "highlights full code when query equals code length" do
+          get "/expansions", params: { q: "MH2" }
+          # When query matches entire code, the whole thing is highlighted
+          expect(response.body).to include('<span class="text-accent font-bold">MH2</span><span class="font-bold text-stone-800"></span>')
+        end
+
+        it "handles query longer than code (no highlight, just display)" do
+          get "/expansions", params: { q: "MH2X" }
+          # Query is longer than any code, so no matches should be returned
+          # (This is handled by the model's search_by_code prefix matching)
+          expect(response.body).not_to include("MH2")
+        end
+
+        it "highlights with single character query" do
+          get "/expansions", params: { q: "M" }
+          # All three expansions start with M, should be highlighted
+          expect(response.body).to include('<span class="text-accent font-bold">M</span>')
+          # Check that each has their suffix properly displayed
+          expect(response.body).to include('<span class="text-accent font-bold">M</span><span class="font-bold text-stone-800">H2</span>')
+          expect(response.body).to include('<span class="text-accent font-bold">M</span><span class="font-bold text-stone-800">H1</span>')
+          expect(response.body).to include('<span class="text-accent font-bold">M</span><span class="font-bold text-stone-800">00</span>')
         end
       end
     end

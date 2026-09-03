@@ -7,7 +7,7 @@
              data-expansion-id="<%= expansion.id %>"
              data-action="click->expansion-select#selectExpansion">
           <div class="flex items-baseline gap-3">
-            <span class="font-bold text-stone-800"><%= expansion.scryfall_set_code.upcase %></span>
+            <%= highlight_set_code(expansion.scryfall_set_code, @query) %>
             <span class="text-stone-700"><%= expansion.name %></span>
             <% if expansion.name_ja.present? %>
               <span class="text-xs text-stone-500"><%= expansion.name_ja %></span>
