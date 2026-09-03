@@ -2,12 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-@theme {
+@theme static {
+  --color-bg: oklch(97.3% 0.004 90);
+  --color-surface: oklch(100% 0 0);
+  --color-border: oklch(89% 0.006 90);
+  --color-border-strong: oklch(78% 0.01 90);
+  --color-text: oklch(24% 0.012 260);
+  --color-text-secondary: oklch(46% 0.012 260);
+  --color-text-muted: oklch(62% 0.01 260);
   --color-accent: oklch(48% 0.14 264);
+  --color-accent-hover: oklch(40% 0.14 264);
+  --color-accent-soft: oklch(94% 0.025 264);
+  --color-offer: oklch(52% 0.12 231);
+  --color-offer-soft: oklch(95% 0.02 231);
+  --color-offer-text: oklch(38% 0.1 231);
+  --color-want: oklch(52% 0.1 150);
+  --color-want-soft: oklch(95% 0.025 150);
+  --color-want-text: oklch(38% 0.09 150);
+  --color-danger: oklch(50% 0.16 25);
+  --color-danger-soft: oklch(95% 0.03 25);
+  --color-success: oklch(48% 0.12 165);
+  --color-success-soft: oklch(94% 0.035 165);
+  --color-warning: oklch(50% 0.12 75);
+  --color-warning-soft: oklch(95% 0.045 75);
+  --color-neutral-soft: oklch(93% 0.006 90);
 }
 
 @layer base {
+  /* Font family */
   body {
+    color: rgb(41, 37, 36);
     font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: rgb(41, 37, 36);
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: rgb(41, 37, 36);
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: rgb(41, 37, 36);
+  }
+
+  h4, h5, h6 {
+    font-weight: 700;
+    color: rgb(41, 37, 36);
+  }
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: rgb(120, 113, 108);
   }
 }
