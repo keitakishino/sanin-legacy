@@ -6,6 +6,10 @@ class TradeCardOffersController < ApplicationController
 
   def create
     @trade_card_offer = @trade.trade_card_offers.build(trade_card_offer_params)
+    # Store trade_id for turbo_stream template context awareness
+    # Only set @trade_id if current user is admin AND trade_id param is present
+    # This prevents general users (even if they manually send trade_id param) from being treated as admin context
+    @trade_id = current_user.role_admin? && params[:trade_id].present? ? params[:trade_id].to_i : nil
     if @trade_card_offer.save
       respond_to do |format|
         format.turbo_stream { render :create }

@@ -8,6 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap">
 
     <!-- Google Fonts: Noto Sans JP -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap">
@@ -64,6 +65,8 @@
             <div class="flex items-center gap-6">
               <%= link_to t("dashboards.show.title", default: "ダッシュボード"), root_path,
                   class: "text-sm font-semibold #{current_page?(root_path) ? 'text-accent' : 'text-stone-800 hover:text-accent'}" %>
+              <%= link_to "イベント管理", admin_events_path,
+                  class: "text-sm font-semibold #{current_page?(admin_events_path) ? 'text-accent' : 'text-stone-800 hover:text-accent'}" %>
               <%= link_to t("admin.users.nav_label"), admin_users_path,
                   class: "text-sm font-semibold #{current_page?(admin_users_path) ? 'text-accent' : 'text-stone-800 hover:text-accent'}" %>
               <%= link_to "招待コード管理", admin_invitations_path,

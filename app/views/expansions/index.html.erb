@@ -1,0 +1,17 @@
+<turbo-frame id="expansion_suggestions">
+  <% if @expansions.any? %>
+    <ul class="border border-gray-300 rounded-md shadow-sm bg-white divide-y divide-gray-100">
+      <% @expansions.each do |expansion| %>
+        <li class="p-3 hover:bg-gray-50 cursor-pointer transition" data-expansion-code="<%= expansion.scryfall_set_code %>">
+          <div class="flex items-baseline gap-3">
+            <span class="font-bold text-gray-900"><%= expansion.scryfall_set_code.upcase %></span>
+            <span class="text-gray-700"><%= expansion.name %></span>
+            <% if expansion.name_ja.present? %>
+              <span class="text-sm text-gray-500"><%= expansion.name_ja %></span>
+            <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+</turbo-frame>

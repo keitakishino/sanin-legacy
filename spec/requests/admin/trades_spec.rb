@@ -314,6 +314,214 @@ RSpec.describe "Admin::Trades", type: :request do
       post signin_path, params: { email: admin_user.email, password: "password123" }
     end
 
+    it "admin can create trade card offer with amount" do
+      expansion = create(:expansion)
+      offer = create(:trade_card_offer, trade: trade, amount: nil)
+      patch trade_card_offer_path(trade.event, offer), params: { trade_card_offer: { amount: 5000 }, trade_id: trade.id }
+      expect(offer.reload.amount).to eq(5000)
+    end
+
+    it "admin can create trade card want with amount" do
+      expansion = create(:expansion)
+      want = create(:trade_card_want, trade: trade, amount: nil)
+      patch trade_card_want_path(trade.event, want), params: { trade_card_want: { amount: 3000 }, trade_id: trade.id }
+      expect(want.reload.amount).to eq(3000)
+    end
+
+    describe "POST turbo_stream for card offer creation" do
+      it "creates a new trade card offer and returns turbo_stream response" do
+        expansion = create(:expansion)
+        expect {
+          post trade_card_offers_path(trade.event),
+            params: {
+              trade_card_offer: {
+                card_name: "Test Card",
+                quantity: 2,
+                language: "ja",
+                condition: "nm",
+                foil: "non_foil",
+                frame: "normal",
+                pw_mark: false,
+                expansion_id: expansion.id,
+                note: "Test note"
+              },
+              trade_id: trade.id
+            },
+            headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        }.to change(TradeCardOffer, :count).by(1)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to include("text/vnd.turbo-stream.html")
+      end
+
+      it "includes new trade card offer in turbo_stream append" do
+        expansion = create(:expansion)
+        post trade_card_offers_path(trade.event),
+          params: {
+            trade_card_offer: {
+              card_name: "Test Card",
+              quantity: 2,
+              language: "ja",
+              condition: "nm",
+              foil: "non_foil",
+              frame: "normal",
+              pw_mark: false,
+              expansion_id: expansion.id,
+              note: "Test note"
+            },
+            trade_id: trade.id
+          },
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response.body).to include('<turbo-stream action="append" target="trade_card_offers">')
+        expect(response.body).to include("Test Card")
+      end
+
+      it "replaces admin form frame in turbo_stream response" do
+        expansion = create(:expansion)
+        post trade_card_offers_path(trade.event),
+          params: {
+            trade_card_offer: {
+              card_name: "Test Card",
+              quantity: 2,
+              language: "ja",
+              condition: "nm",
+              foil: "non_foil",
+              frame: "normal",
+              pw_mark: false,
+              expansion_id: expansion.id,
+              note: "Test note"
+            },
+            trade_id: trade.id
+          },
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response.body).to include('<turbo-stream action="replace" target="new_trade_card_offer_admin">')
+        expect(response.body).to include('id="new_trade_card_offer_admin"')
+      end
+
+      it "allows admin to set amount field when creating offer" do
+        expansion = create(:expansion)
+        expect {
+          post trade_card_offers_path(trade.event),
+            params: {
+              trade_card_offer: {
+                card_name: "Expensive Card",
+                quantity: 1,
+                language: "ja",
+                condition: "nm",
+                foil: "non_foil",
+                frame: "normal",
+                pw_mark: false,
+                expansion_id: expansion.id,
+                note: "High value card",
+                amount: 10000
+              },
+              trade_id: trade.id
+            },
+            headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        }.to change(TradeCardOffer, :count).by(1)
+
+        new_offer = TradeCardOffer.last
+        expect(new_offer.amount).to eq(10000)
+      end
+    end
+
+    describe "POST turbo_stream for card want creation" do
+      it "creates a new trade card want and returns turbo_stream response" do
+        expansion = create(:expansion)
+        expect {
+          post trade_card_wants_path(trade.event),
+            params: {
+              trade_card_want: {
+                card_name: "Desired Card",
+                quantity: 3,
+                language: "ja",
+                conditions: [ "nm", "sp" ],
+                foil: nil,
+                frame: nil,
+                expansion_id: expansion.id,
+                note: "Looking for this"
+              },
+              trade_id: trade.id
+            },
+            headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        }.to change(TradeCardWant, :count).by(1)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to include("text/vnd.turbo-stream.html")
+      end
+
+      it "includes new trade card want in turbo_stream append" do
+        expansion = create(:expansion)
+        post trade_card_wants_path(trade.event),
+          params: {
+            trade_card_want: {
+              card_name: "Desired Card",
+              quantity: 3,
+              language: "ja",
+              conditions: [ "nm", "sp" ],
+              foil: nil,
+              frame: nil,
+              expansion_id: expansion.id,
+              note: "Looking for this"
+            },
+            trade_id: trade.id
+          },
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response.body).to include('<turbo-stream action="append" target="trade_card_wants">')
+        expect(response.body).to include("Desired Card")
+      end
+
+      it "replaces admin form frame in turbo_stream response" do
+        expansion = create(:expansion)
+        post trade_card_wants_path(trade.event),
+          params: {
+            trade_card_want: {
+              card_name: "Desired Card",
+              quantity: 3,
+              language: "ja",
+              conditions: [ "nm", "sp" ],
+              foil: nil,
+              frame: nil,
+              expansion_id: expansion.id,
+              note: "Looking for this"
+            },
+            trade_id: trade.id
+          },
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response.body).to include('<turbo-stream action="replace" target="new_trade_card_want_admin">')
+        expect(response.body).to include('id="new_trade_card_want_admin"')
+      end
+
+      it "allows admin to set amount field when creating want" do
+        expansion = create(:expansion)
+        expect {
+          post trade_card_wants_path(trade.event),
+            params: {
+              trade_card_want: {
+                card_name: "Expensive Desired Card",
+                quantity: 1,
+                language: "ja",
+                conditions: [ "nm" ],
+                foil: nil,
+                frame: nil,
+                expansion_id: expansion.id,
+                note: "High value want",
+                amount: 5000
+              },
+              trade_id: trade.id
+            },
+            headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        }.to change(TradeCardWant, :count).by(1)
+
+        new_want = TradeCardWant.last
+        expect(new_want.amount).to eq(5000)
+      end
+    end
+
     it "admin can edit trade card offer amount through existing controller" do
       offer = create(:trade_card_offer, trade: trade)
       patch trade_card_offer_path(trade.event, offer), params: { trade_card_offer: { amount: 5000 }, trade_id: trade.id }
