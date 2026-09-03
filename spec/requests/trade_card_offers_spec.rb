@@ -93,6 +93,20 @@ RSpec.describe "TradeCardOffers", type: :request do
         expect(response).to redirect_to(trade_path(event))
         expect(flash[:alert]).to be_present
       end
+
+      it "renders combobox UI elements in turbo_stream response" do
+        trade
+        post "/trades/#{event.id}/card_offers", params: invalid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+        # Check that the expansion combobox controller is present
+        expect(response.body).to include('data-controller="expansion-select"')
+        # Check that the text input field is present
+        expect(response.body).to include('data-target="expansion-select.input"')
+        # Check that the hidden field is present
+        expect(response.body).to include('data-target="expansion-select.select"')
+        # Check that the turbo-frame for suggestions is present
+        expect(response.body).to include('id="expansion_suggestions"')
+      end
     end
 
     context "with duplicate card entry" do
