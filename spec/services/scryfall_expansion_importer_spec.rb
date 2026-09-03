@@ -12,7 +12,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
             object: 'set',
             code: 'mh3',
             name: 'Modern Horizons 3',
-            printed_name: 'モダンホライゾン3',
             set_type: 'expansion',
             released_at: '2024-06-14'
           },
@@ -20,7 +19,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
             object: 'set',
             code: 'bro',
             name: 'The Brothers\' War',
-            printed_name: 'ザ・ブラザーズ・ウォー',
             set_type: 'expansion',
             released_at: '2022-11-18'
           },
@@ -28,7 +26,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
             object: 'set',
             code: 'prm',
             name: 'Premium Deck Series',
-            printed_name: nil,
             set_type: 'promo',
             released_at: '2010-01-01'
           },
@@ -36,7 +33,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
             object: 'set',
             code: 't20',
             name: 'Tokens (2020)',
-            printed_name: nil,
             set_type: 'token',
             released_at: '2020-01-01'
           }
@@ -66,18 +62,42 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
         expect(Expansion.find_by(scryfall_set_code: 'BRO')).to be_present
       end
 
-      it 'saves English and Japanese names correctly' do
-        stub_scryfall_api_response(sample_sets_response)
+      it 'ignores printed_name and does not set name_ja' do
+        response_with_printed_name = {
+          object: 'list',
+          data: [
+            {
+              object: 'set',
+              code: 'mh3',
+              name: 'Modern Horizons 3',
+              printed_name: 'モダンホライゾン3',
+              set_type: 'expansion',
+              released_at: '2024-06-14'
+            },
+            {
+              object: 'set',
+              code: 'bro',
+              name: 'The Brothers\' War',
+              printed_name: 'ザ・ブラザーズ・ウォー',
+              set_type: 'expansion',
+              released_at: '2022-11-18'
+            }
+          ],
+          has_more: false
+        }
+        stub_scryfall_api_response(response_with_printed_name)
 
         importer.call
 
         mh3 = Expansion.find_by(scryfall_set_code: 'MH3')
+        expect(mh3).to be_present
         expect(mh3.name).to eq('Modern Horizons 3')
-        expect(mh3.name_ja).to eq('モダンホライゾン3')
+        expect(mh3.name_ja).to be_nil
 
         bro = Expansion.find_by(scryfall_set_code: 'BRO')
+        expect(bro).to be_present
         expect(bro.name).to eq('The Brothers\' War')
-        expect(bro.name_ja).to eq('ザ・ブラザーズ・ウォー')
+        expect(bro.name_ja).to be_nil
       end
 
       it 'handles missing Japanese names (nil)' do
@@ -112,7 +132,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
               object: 'set',
               code: 'prm',
               name: 'Premium Deck Series',
-              printed_name: nil,
               set_type: 'promo',
               released_at: '2010-01-01'
             }
@@ -134,7 +153,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
               object: 'set',
               code: 't20',
               name: 'Tokens (2020)',
-              printed_name: nil,
               set_type: 'token',
               released_at: '2020-01-01'
             }
@@ -258,7 +276,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
               object: 'set',
               code: 'inv1',
               name: 'Invalid Set 1',
-              printed_name: nil,
               set_type: 'expansion',
               released_at: '2024-01-01'
             },
@@ -266,7 +283,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
               object: 'set',
               code: 'mh3',
               name: 'Modern Horizons 3',
-              printed_name: 'モダンホライゾン3',
               set_type: 'expansion',
               released_at: '2024-06-14'
             }
@@ -302,7 +318,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
               object: 'set',
               code: 'bad',
               name: 'Bad Set',
-              printed_name: nil,
               set_type: 'expansion',
               released_at: '2024-01-01'
             }
@@ -331,7 +346,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
               object: 'set',
               code: nil,
               name: 'Set with nil code',
-              printed_name: nil,
               set_type: 'expansion',
               released_at: '2024-01-01'
             },
@@ -339,7 +353,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
               object: 'set',
               code: 'mh3',
               name: 'Modern Horizons 3',
-              printed_name: 'モダンホライゾン3',
               set_type: 'expansion',
               released_at: '2024-06-14'
             }
@@ -366,7 +379,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
               object: 'set',
               code: '   ',
               name: 'Set with empty code',
-              printed_name: nil,
               set_type: 'expansion',
               released_at: '2024-01-01'
             },
@@ -374,7 +386,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
               object: 'set',
               code: 'bro',
               name: 'The Brothers\' War',
-              printed_name: 'ザ・ブラザーズ・ウォー',
               set_type: 'expansion',
               released_at: '2022-11-18'
             }
@@ -403,7 +414,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
               object: 'set',
               code: 'mh3',
               name: 'Modern Horizons 3',
-              printed_name: 'モダンホライゾン3',
               set_type: 'expansion',
               released_at: '2024-06-14'
             }
@@ -434,7 +444,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
               object: 'set',
               code: 'mh3',
               name: 'Modern Horizons 3',
-              printed_name: 'モダンホライゾン3',
               set_type: 'expansion',
               released_at: '2024-06-14'
             }
@@ -465,7 +474,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
               object: 'set',
               code: 'mh3',
               name: 'Modern Horizons 3',
-              printed_name: 'モダンホライゾン3',
               set_type: 'expansion',
               released_at: '2024-06-14'
             },
@@ -473,7 +481,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
               object: 'set',
               code: 'bro',
               name: 'The Brothers\' War',
-              printed_name: 'ザ・ブラザーズ・ウォー',
               set_type: 'expansion',
               released_at: '2022-11-18'
             },
@@ -481,7 +488,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
               object: 'set',
               code: 'grn',
               name: 'Guilds of Ravnica',
-              printed_name: 'ラヴニカのギルド',
               set_type: 'expansion',
               released_at: '2018-10-05'
             }
@@ -523,7 +529,6 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
                 object: 'set',
                 code: 'test_ja',
                 name: 'Test Set',
-                printed_name: 'テストセット',
                 set_type: 'expansion',
                 released_at: '2024-01-01'
               }
