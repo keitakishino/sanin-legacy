@@ -53,6 +53,7 @@ export default class extends Controller {
       `
     }).join("")
 
+    this.dropdownTarget.classList.add("shadow-lg")
     this.dropdownTarget.innerHTML = html
     this.dropdownTarget.style.display = "block"
 

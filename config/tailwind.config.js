@@ -23,6 +23,8 @@ module.exports = {
         'success-soft': 'oklch(94% 0.035 165)',
         warning: 'oklch(50% 0.12 75)',
         'warning-soft': 'oklch(95% 0.045 75)',
+        danger: 'oklch(50% 0.16 25)',
+        'danger-soft': 'oklch(95% 0.03 25)',
         'neutral-soft': 'oklch(93% 0.006 90)',
       },
     },
