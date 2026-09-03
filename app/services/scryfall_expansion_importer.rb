@@ -106,7 +106,6 @@ class ScryfallExpansionImporter
 
     code = code.upcase
     name = set_data["name"]
-    name_ja = set_data["printed_name"]
 
     existing = Expansion.find_by(scryfall_set_code: code)
     if existing.present?
@@ -116,8 +115,7 @@ class ScryfallExpansionImporter
 
     expansion = Expansion.create(
       scryfall_set_code: code,
-      name: name,
-      name_ja: name_ja
+      name: name
     )
 
     if expansion.persisted?

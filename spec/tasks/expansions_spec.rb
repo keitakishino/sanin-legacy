@@ -21,7 +21,6 @@ RSpec.describe 'expansions:import_from_scryfall', type: :task do
           object: 'set',
           code: 'mh3',
           name: 'Modern Horizons 3',
-          printed_name: 'モダンホライゾン3',
           set_type: 'expansion',
           released_at: '2024-06-14'
         },
@@ -29,7 +28,6 @@ RSpec.describe 'expansions:import_from_scryfall', type: :task do
           object: 'set',
           code: 'bro',
           name: 'The Brothers\' War',
-          printed_name: 'ザ・ブラザーズ・ウォー',
           set_type: 'expansion',
           released_at: '2022-11-18'
         }
