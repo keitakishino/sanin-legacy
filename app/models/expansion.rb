@@ -5,6 +5,7 @@ class Expansion < ApplicationRecord
 
   scope :search_by_code, ->(query) {
     return none if query.blank?
-    where("LOWER(scryfall_set_code) LIKE LOWER(?)", "#{query}%").limit(8)
+    escaped_query = sanitize_sql_like(query)
+    where("LOWER(scryfall_set_code) LIKE LOWER(?)", "#{escaped_query}%").limit(8)
   }
 end

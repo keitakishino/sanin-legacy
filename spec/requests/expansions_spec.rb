@@ -154,6 +154,48 @@ RSpec.describe "Expansions", type: :request do
           expect(count).to eq(8)
         end
       end
+
+      context "with SQL LIKE wildcard characters" do
+        before do
+          create(:expansion, scryfall_set_code: "MH2", name: "Modern Horizons 2", name_ja: nil)
+          create(:expansion, scryfall_set_code: "MA2", name: "Magic Alliance 2", name_ja: nil)
+          create(:expansion, scryfall_set_code: "MX2", name: "Magic X 2", name_ja: nil)
+          create(:expansion, scryfall_set_code: "M_2", name: "Magic Underscore 2", name_ja: nil)
+          create(:expansion, scryfall_set_code: "MH%", name: "Magic Hash Percent", name_ja: nil)
+        end
+
+        it "escapes underscore wildcard in query" do
+          # When searching for "M_2", the underscore should be treated as a literal character
+          # not as a SQL wildcard (which matches any single character)
+          get "/expansions", params: { q: "M_2" }
+          # Should match only "M_2" (literal underscore in the code)
+          expect(response.body).to include("M_2")
+          # Should NOT match "MH2", "MA2", or "MX2" (where underscore would match any char)
+          expect(response.body).not_to include("MH2")
+          expect(response.body).not_to include("MA2")
+          expect(response.body).not_to include("MX2")
+        end
+
+        it "escapes percent wildcard in query" do
+          # When searching for "MH%", the percent should be treated as a literal character
+          # not as a SQL wildcard (which matches zero or more characters)
+          get "/expansions", params: { q: "MH%" }
+          # Should match only "MH%" (literal percent in the code)
+          expect(response.body).to include("MH%")
+          # Should NOT match "MH2" (where % would match the "2" or anything after)
+          expect(response.body).not_to include("MH2")
+        end
+
+        it "handles queries without special characters normally" do
+          # Ensure normal prefix matching still works
+          get "/expansions", params: { q: "MH" }
+          expect(response.body).to include("MH2")
+          expect(response.body).to include("MH%")
+          expect(response.body).not_to include("MA2")
+          expect(response.body).not_to include("MX2")
+          expect(response.body).not_to include("M_2")
+        end
+      end
     end
   end
 end
