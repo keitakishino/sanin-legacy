@@ -189,7 +189,7 @@ RSpec.describe "Dashboards", type: :request do
           # Verify no overflow chips are displayed (no "+N件" for this trade)
           # Count the occurrence of the overflow pattern for this trade
           response_text = response.body
-          expect(response_text).not_to include("+")
+          expect(response_text).not_to match(/\+\d+件/)
         end
 
         it "handles edge case with more than 5 cards (e.g., 12 cards)" do
