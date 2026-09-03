@@ -25,12 +25,14 @@ export default class extends Controller {
     // If input is empty, clear frame src and hide dropdown
     if (query.length === 0) {
       this.frameTarget.src = ""
+      this.frameTarget.style.display = "none"
       return
     }
 
     // Debounce API request by 300ms
     this.debounceTimer = setTimeout(() => {
       this.frameTarget.src = `/expansions?q=${encodeURIComponent(query)}`
+      this.frameTarget.style.display = "block"
     }, 300)
   }
 
@@ -48,9 +50,11 @@ export default class extends Controller {
     this.selectTarget.value = expansionId
     this.inputTarget.value = expansionCode
     this.frameTarget.src = ""
+    this.frameTarget.style.display = "none"
   }
 
   hideDropdown() {
     this.frameTarget.src = ""
+    this.frameTarget.style.display = "none"
   }
 }

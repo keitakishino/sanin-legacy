@@ -78,6 +78,7 @@
              data-target="expansion-select.input"
              data-action="keyup->expansion-select#search blur->expansion-select#hideDropdown"
              placeholder="セットコードで検索（例: VOW）"
+             value="<%= trade_card_want.expansion&.scryfall_set_code&.upcase %>"
              class="w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" />
       <%= f.hidden_field :expansion_id, data: { target: "expansion-select.select" } %>
 
