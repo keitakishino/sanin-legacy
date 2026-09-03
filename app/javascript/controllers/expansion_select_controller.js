@@ -1,64 +1,41 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["input", "dropdown", "select"]
+  static targets = ["input", "frame", "select"]
 
   connect() {
-    this.expansions = []
-    this.fetchExpansions()
+    this.debounceTimer = null
+    this.frameTarget.addEventListener("turbo:load", () => this.attachDropdownHandlers())
   }
 
-  async fetchExpansions() {
-    try {
-      const response = await fetch("/api/expansions")
-      this.expansions = await response.json()
-    } catch (error) {
-      console.error("Failed to fetch expansions:", error)
+  disconnect() {
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer)
     }
   }
 
   search(event) {
-    const query = event.target.value.trim().toUpperCase()
+    const query = event.target.value.trim()
 
+    // Clear previous debounce timer
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer)
+    }
+
+    // If input is empty, clear frame src and hide dropdown
     if (query.length === 0) {
-      this.dropdownTarget.innerHTML = ""
-      this.dropdownTarget.style.display = "none"
+      this.frameTarget.src = ""
       return
     }
 
-    // Filter expansions by prefix match on scryfall_set_code
-    const matches = this.expansions.filter(exp =>
-      exp.scryfall_set_code.toUpperCase().startsWith(query)
-    ).slice(0, 10) // Limit to 10 results
+    // Debounce API request by 300ms
+    this.debounceTimer = setTimeout(() => {
+      this.frameTarget.src = `/expansions?q=${encodeURIComponent(query)}`
+    }, 300)
+  }
 
-    if (matches.length === 0) {
-      this.dropdownTarget.innerHTML = ""
-      this.dropdownTarget.style.display = "none"
-      return
-    }
-
-    // Build dropdown HTML with highlighted matching part
-    const html = matches.map(exp => {
-      const highlighted = exp.scryfall_set_code.substring(0, query.length)
-      const rest = exp.scryfall_set_code.substring(query.length)
-      const display = `<span class="font-bold text-accent">${highlighted}</span>${rest}`
-      const label = exp.name_ja ? `${display} — ${exp.name_ja}` : `${display} — ${exp.name}`
-
-      return `
-        <div class="px-4 py-2 cursor-pointer hover:bg-neutral-soft border-b border-stone-200 last:border-b-0"
-             data-expansion-id="${exp.id}"
-             data-expansion-code="${exp.scryfall_set_code}">
-          ${label}
-        </div>
-      `
-    }).join("")
-
-    this.dropdownTarget.classList.add("shadow-lg")
-    this.dropdownTarget.innerHTML = html
-    this.dropdownTarget.style.display = "block"
-
-    // Add click handlers to dropdown items
-    this.dropdownTarget.querySelectorAll("[data-expansion-id]").forEach(item => {
+  attachDropdownHandlers() {
+    this.frameTarget.querySelectorAll("[data-expansion-code]").forEach(item => {
       item.addEventListener("click", (e) => this.selectExpansion(e))
     })
   }
@@ -70,13 +47,10 @@ export default class extends Controller {
 
     this.selectTarget.value = expansionId
     this.inputTarget.value = expansionCode
-    this.dropdownTarget.style.display = "none"
+    this.frameTarget.src = ""
   }
 
   hideDropdown() {
-    // Hide dropdown when clicking outside (after a short delay to allow selection)
-    setTimeout(() => {
-      this.dropdownTarget.style.display = "none"
-    }, 100)
+    this.frameTarget.src = ""
   }
 }
