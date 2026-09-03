@@ -60,14 +60,6 @@ RSpec.describe "HistoriesController", type: :request do
           expect(response.body).to include("完了")
         end
 
-        it "displays trade amounts" do
-          get "/histories"
-
-          expect(response.body).to include("1,000")
-          expect(response.body).to include("900")
-          expect(response.body).to include("100")
-        end
-
         it "displays completed_at date" do
           get "/histories"
 
@@ -219,7 +211,7 @@ RSpec.describe "HistoriesController", type: :request do
 
           # Count the number of table rows (excluding header)
           # Each trade row has a unique "完了" badge
-          rows = response.body.scan(/<tr class="border-b hover:bg-gray-50">/).count
+          rows = response.body.scan(/<tr class="border-b border-stone-200 hover:bg-stone-50">/).count
           expect(rows).to eq(20)
         end
 
@@ -254,26 +246,16 @@ RSpec.describe "HistoriesController", type: :request do
         let!(:trade) do
           create(:trade, user:, event:, status: :completed, completed_at: 1.day.ago)
         end
-        let!(:offer) { create(:trade_card_offer, trade:, card_name: "Lightning Bolt") }
-        let!(:want) { create(:trade_card_want, trade:, card_name: "Black Lotus") }
+        let!(:offer1) { create(:trade_card_offer, trade:, card_name: "Lightning Bolt", quantity: 2) }
+        let!(:offer2) { create(:trade_card_offer, trade:, card_name: "Mox Sapphire", quantity: 1) }
+        let!(:want1) { create(:trade_card_want, trade:, card_name: "Black Lotus", quantity: 1) }
 
-        it "displays trade card offers and wants" do
+        it "does not display individual card names in history table" do
           get "/histories"
 
-          expect(response.body).to include("Lightning Bolt")
-          expect(response.body).to include("Black Lotus")
-        end
-
-        it "displays '出:' prefix for offers" do
-          get "/histories"
-
-          expect(response.body).to include("出:")
-        end
-
-        it "displays '欲:' prefix for wants" do
-          get "/histories"
-
-          expect(response.body).to include("欲:")
+          # Individual card names should NOT be in the history view (掲示内容 column removed)
+          expect(response.body).not_to include("Lightning Bolt")
+          expect(response.body).not_to include("Black Lotus")
         end
       end
 

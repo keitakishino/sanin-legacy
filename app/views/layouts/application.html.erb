@@ -10,6 +10,9 @@
     <%= csp_meta_tag %>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap">
 
+    <!-- Google Fonts: Noto Sans JP -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap">
+
     <%= yield :head %>
 
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
@@ -24,37 +27,74 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body class="bg-stone-50">
     <header class="bg-white border-b border-stone-200">
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-stone-800">Sanin Legacy</h1>
+        <!-- Logo and app name -->
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-accent rounded-[7px] flex items-center justify-center">
+            <!-- Simplified card stack icon SVG -->
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/>
+            </svg>
+          </div>
+          <h1 class="text-base font-bold text-stone-800" style="font-weight: 800; font-size: 17px;">Sanin Legacy</h1>
+        </div>
+
+        <!-- Navigation and user menu -->
         <nav class="flex items-center gap-6">
-          <% if user_signed_in? && current_user.role_admin? %>
-            <div class="flex items-center gap-4">
-              <%= link_to "イベント管理", admin_events_path, class: "text-indigo-700 hover:text-indigo-800 font-medium" %>
-              <%= link_to t("admin.users.nav_label"), admin_users_path, class: "text-indigo-700 hover:text-indigo-800 font-medium" %>
-              <%= link_to "招待コード管理", admin_invitations_path, class: "text-indigo-700 hover:text-indigo-800 font-medium" %>
-              <span class="inline-block bg-red-50 text-red-700 text-xs font-bold px-2 py-1 rounded">管理者</span>
+          <% if user_signed_in? && !current_user.role_admin? %>
+            <!-- User screen navigation -->
+            <div class="flex items-center gap-6">
+              <%= link_to t("dashboards.show.title", default: "ダッシュボード"), root_path,
+                  class: "text-sm font-semibold #{current_page?(root_path) ? 'text-accent' : 'text-stone-800 hover:text-accent'}" %>
+              <%= link_to t("events.title", default: "イベント"), events_path,
+                  class: "text-sm font-semibold #{current_page?(events_path) ? 'text-accent' : 'text-stone-800 hover:text-accent'}" %>
+              <%= link_to t("histories.title", default: "トレード履歴"), histories_path,
+                  class: "text-sm font-semibold #{current_page?(histories_path) ? 'text-accent' : 'text-stone-800 hover:text-accent'}" %>
             </div>
-          <% end %>
-          <% if user_signed_in? %>
-            <span class="text-sm text-stone-500"><%= current_user.username %></span>
-            <%= button_to "Signout", signout_path, method: :delete, class: "text-stone-600 hover:text-stone-800 text-sm" %>
+
+            <div class="flex items-center gap-4 ml-4 pl-4 border-l border-stone-200">
+              <span class="text-sm text-stone-800"><%= current_user.username %></span>
+              <%= link_to "マイページ", mypage_path, class: "text-sm text-stone-800 hover:text-accent font-semibold" %>
+              <%= button_to "Sign Out", signout_path, method: :delete,
+                  class: "px-4 py-2 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs" %>
+            </div>
+          <% elsif user_signed_in? && current_user.role_admin? %>
+            <!-- Admin navigation -->
+            <div class="flex items-center gap-6">
+              <%= link_to t("dashboards.show.title", default: "ダッシュボード"), root_path,
+                  class: "text-sm font-semibold #{current_page?(root_path) ? 'text-accent' : 'text-stone-800 hover:text-accent'}" %>
+              <%= link_to "イベント管理", admin_events_path,
+                  class: "text-sm font-semibold #{current_page?(admin_events_path) ? 'text-accent' : 'text-stone-800 hover:text-accent'}" %>
+              <%= link_to t("admin.users.nav_label"), admin_users_path,
+                  class: "text-sm font-semibold #{current_page?(admin_users_path) ? 'text-accent' : 'text-stone-800 hover:text-accent'}" %>
+              <%= link_to "招待コード管理", admin_invitations_path,
+                  class: "text-sm font-semibold #{current_page?(admin_invitations_path) ? 'text-accent' : 'text-stone-800 hover:text-accent'}" %>
+            </div>
+            <div class="flex items-center gap-4 ml-4 pl-4 border-l border-stone-200">
+              <span class="text-sm text-stone-800"><%= current_user.username %></span>
+              <%= button_to "Sign Out", signout_path, method: :delete,
+                  class: "px-4 py-2 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs" %>
+            </div>
           <% else %>
-            <%= link_to "Sign In", signin_path, class: "text-stone-600 hover:text-stone-800 text-sm" %>
+            <!-- Not signed in -->
+            <%= link_to "Sign In", signin_path,
+                class: "px-4 py-2 bg-accent text-white rounded-md hover:bg-accent-hover font-bold text-xs" %>
           <% end %>
         </nav>
       </div>
     </header>
 
     <main class="container mx-auto px-4 py-8">
+      <!-- Flash messages with design-token colors -->
       <% if flash[:alert] %>
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div class="bg-danger-soft border border-red-300 text-danger px-4 py-3 rounded-md mb-4 font-semibold text-sm">
           <%= flash[:alert] %>
         </div>
       <% end %>
       <% if flash[:notice] %>
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        <div class="bg-success-soft border border-emerald-300 text-success px-4 py-3 rounded-md mb-4 font-semibold text-sm">
           <%= flash[:notice] %>
         </div>
       <% end %>

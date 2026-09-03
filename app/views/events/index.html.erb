@@ -1,29 +1,29 @@
 <div class="container mx-auto px-4 py-8 max-w-4xl">
-  <h1 class="text-3xl font-bold mb-6">イベント一覧</h1>
+  <h1 class="text-3xl font-bold text-stone-800 mb-6">イベント一覧</h1>
 
   <% if @events.any? %>
     <div class="space-y-4">
       <% @events.each do |event| %>
-        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+        <div class="bg-white border border-stone-200 rounded-[10px] p-6 hover:border-stone-300 transition-colors">
           <%= link_to event_path(event),
-              class: "block text-lg font-semibold text-blue-600 hover:text-blue-800",
+              class: "block",
               data: { turbo_frame: "event_modal" } do %>
             <div class="flex items-start justify-between">
               <div>
-                <p class="text-lg font-semibold text-gray-800"><%= event.title %></p>
-                <p class="text-sm text-gray-600 mt-2">
+                <p class="text-lg font-bold text-stone-800"><%= event.title %></p>
+                <p class="text-xs text-stone-500 mt-2">
                   <%= event.event_date.strftime("%Y年%m月%d日") %>
                 </p>
               </div>
-              <span class="text-blue-600 hover:text-blue-800 font-semibold">詳細を表示</span>
+              <span class="text-accent hover:text-accent-hover font-bold text-xs whitespace-nowrap ml-4">詳細を表示</span>
             </div>
           <% end %>
         </div>
       <% end %>
     </div>
   <% else %>
-    <div class="bg-gray-50 rounded-lg p-6 text-center">
-      <p class="text-gray-500 text-lg">イベントはまだありません</p>
+    <div class="bg-stone-50 rounded-lg p-6 text-center">
+      <p class="text-stone-500 text-lg">イベントはまだありません</p>
     </div>
   <% end %>
 

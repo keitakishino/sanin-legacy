@@ -1,63 +1,65 @@
 <div class="container mx-auto px-4 py-8 max-w-6xl">
-  <h1 class="text-3xl font-bold mb-6">トレード履歴</h1>
+  <h1 class="text-3xl font-bold text-stone-800 mb-6">トレード履歴</h1>
 
   <% if @trades.any? %>
-    <div class="bg-white shadow rounded-lg overflow-hidden">
+    <div class="bg-white border border-stone-200 rounded-lg overflow-hidden">
       <table class="w-full">
-        <thead class="bg-gray-100 border-b">
+        <thead class="bg-neutral-soft border-b border-stone-200">
           <tr>
-            <th class="px-6 py-3 text-left text-sm font-semibold">イベント名</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold">日時</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold">掲示内容</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold">出す合計</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold">ほしい合計</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold">差額</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold">ステータス</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold">完了/キャンセル日時</th>
-            <th class="px-6 py-3 text-left text-sm font-semibold">キャンセル理由</th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase">イベント名</th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase">日時</th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase">出す枚数</th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase">ほしい枚数</th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase">差額</th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase">ステータス</th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase">完了/キャンセル日時</th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500 uppercase">キャンセル理由</th>
           </tr>
         </thead>
         <tbody id="trades">
           <% @trades.each do |trade| %>
-            <tr class="border-b hover:bg-gray-50">
-              <td class="px-6 py-4 text-sm"><%= trade.event&.title || "（イベント情報不可）" %></td>
-              <td class="px-6 py-4 text-sm"><%= trade.event&.event_date&.strftime("%Y年%m月%d日") || "—" %></td>
-              <td class="px-6 py-4 text-sm">
-                <% if trade.trade_card_offers.any? || trade.trade_card_wants.any? %>
-                  <div class="space-y-1">
-                    <% if trade.trade_card_offers.any? %>
-                      <p class="text-gray-700">出: <%= trade.trade_card_offers.map(&:card_name).join(", ") %></p>
-                    <% end %>
-                    <% if trade.trade_card_wants.any? %>
-                      <p class="text-gray-700">欲: <%= trade.trade_card_wants.map(&:card_name).join(", ") %></p>
-                    <% end %>
-                  </div>
-                <% else %>
-                  <p class="text-gray-500">—</p>
-                <% end %>
+            <tr class="border-b border-stone-200 hover:bg-stone-50">
+              <td class="px-6 py-4 text-xs text-stone-800"><%= trade.event&.title || "（イベント情報不可）" %></td>
+              <td class="px-6 py-4 text-xs text-stone-800"><%= trade.event&.event_date&.strftime("%Y年%m月%d日") || "—" %></td>
+              <td class="px-6 py-4 text-xs text-stone-800"><%= trade.trade_card_offers.sum(:quantity) %></td>
+              <td class="px-6 py-4 text-xs text-stone-800"><%= trade.trade_card_wants.sum(:quantity) %></td>
+              <td class="px-6 py-4 text-xs text-stone-800"><%= number_with_delimiter(trade.net_amount) %></td>
+              <td class="px-6 py-4 text-xs">
+                <% case trade.status
+                   when "pending"
+                     badge_bg = "bg-neutral-soft"
+                     badge_text = "text-stone-500"
+                   when "in_progress"
+                     badge_bg = "bg-warning-soft"
+                     badge_text = "text-warning"
+                   when "completed"
+                     badge_bg = "bg-success-soft"
+                     badge_text = "text-success"
+                   when "cancelled"
+                     badge_bg = "bg-danger-soft"
+                     badge_text = "text-danger"
+                   else
+                     badge_bg = "bg-neutral-soft"
+                     badge_text = "text-stone-500"
+                   end %>
+                <span class="px-3 py-1 rounded-full font-bold text-xs <%= badge_bg %> <%= badge_text %>">
+                  <%= I18n.t("activerecord.enums.trade.status.#{trade.status}") %>
+                </span>
               </td>
-              <td class="px-6 py-4 text-sm"><%= number_with_delimiter(trade.offers_total_amount) %></td>
-              <td class="px-6 py-4 text-sm"><%= number_with_delimiter(trade.wants_total_amount) %></td>
-              <td class="px-6 py-4 text-sm"><%= number_with_delimiter(trade.net_amount) %></td>
-              <td class="px-6 py-4 text-sm">
-                <% if trade.completed? %>
-                  <span class="px-3 py-1 rounded-full text-white bg-blue-500 text-xs font-semibold">完了</span>
-                <% elsif trade.cancelled? %>
-                  <span class="px-3 py-1 rounded-full text-white bg-gray-400 text-xs font-semibold">キャンセル</span>
-                <% end %>
-              </td>
-              <td class="px-6 py-4 text-sm">
+              <td class="px-6 py-4 text-xs text-stone-800">
                 <% if trade.completed? %>
                   <%= trade.completed_at&.strftime("%Y年%m月%d日 %H:%M") || "—" %>
                 <% elsif trade.cancelled? %>
                   <%= trade.updated_at&.strftime("%Y年%m月%d日 %H:%M") || "—" %>
+                <% else %>
+                  —
                 <% end %>
               </td>
-              <td class="px-6 py-4 text-sm">
+              <td class="px-6 py-4 text-xs text-stone-800">
                 <% if trade.cancelled_reason.present? %>
                   <span class="truncate" title="<%= trade.cancelled_reason %>"><%= trade.cancelled_reason %></span>
                 <% else %>
-                  <p class="text-gray-500">—</p>
+                  <p class="text-stone-400">—</p>
                 <% end %>
               </td>
             </tr>
@@ -71,8 +73,8 @@
       <%= paginate @trades %>
     </div>
   <% else %>
-    <div class="bg-gray-50 rounded-lg p-6 text-center">
-      <p class="text-gray-500 text-lg">完了またはキャンセルされたトレードはありません</p>
+    <div class="bg-stone-50 rounded-lg p-6 text-center">
+      <p class="text-stone-500 text-lg">完了またはキャンセルされたトレードはありません</p>
     </div>
   <% end %>
 </div>

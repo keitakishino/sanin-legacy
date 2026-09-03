@@ -53,8 +53,8 @@ RSpec.describe "Expansions", type: :request do
 
         it "displays scryfall_set_code in uppercase" do
           get "/expansions", params: { q: "mh" }
-          expect(response.body).to include("<span class=\"font-bold text-gray-900\">MH2</span>")
-          expect(response.body).to include("<span class=\"font-bold text-gray-900\">MH1</span>")
+          expect(response.body).to include("<span class=\"font-bold text-stone-800\">MH2</span>")
+          expect(response.body).to include("<span class=\"font-bold text-stone-800\">MH1</span>")
         end
 
         it "displays name" do
