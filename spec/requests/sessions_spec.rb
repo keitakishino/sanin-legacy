@@ -41,7 +41,7 @@ RSpec.describe "Sessions Controller", type: :request do
       post signin_path, params: { email: user.email, password: "password123" }
       follow_redirect!
       expect(response.body).to include(user.username)
-      expect(response.body).to include("Signout")
+      expect(response.body).to include("Sign Out")
     end
   end
 
@@ -82,7 +82,7 @@ RSpec.describe "Sessions Controller", type: :request do
       delete signout_path
       follow_redirect!
       expect(response.body).to include("Sign In")
-      expect(response.body).not_to include("Signout")
+      expect(response.body).not_to include("Sign Out")
     end
   end
 
@@ -94,11 +94,11 @@ RSpec.describe "Sessions Controller", type: :request do
     it "maintains login across requests" do
       get root_path
       expect(response.body).to include(user.username)
-      expect(response.body).to include("Signout")
+      expect(response.body).to include("Sign Out")
 
       get root_path
       expect(response.body).to include(user.username)
-      expect(response.body).to include("Signout")
+      expect(response.body).to include("Sign Out")
     end
   end
 end

@@ -117,7 +117,7 @@ RSpec.describe "Dashboards", type: :request do
 
           # Response should only have incomplete trades, not completed
           # Check by counting trade cards instead of relying on created_at string
-          count = response.body.scan('class="bg-white rounded-lg shadow-md').count
+          count = response.body.scan('class="bg-white border border-stone-200 rounded-[10px]').count
           expect(count).to eq(2) # Only pending and in_progress trades
         end
 
@@ -127,7 +127,7 @@ RSpec.describe "Dashboards", type: :request do
           get "/dashboards/incomplete_trades"
 
           # Response should only have incomplete trades, not cancelled
-          count = response.body.scan('class="bg-white rounded-lg shadow-md').count
+          count = response.body.scan('class="bg-white border border-stone-200 rounded-[10px]').count
           expect(count).to eq(2) # Only pending and in_progress trades
         end
       end

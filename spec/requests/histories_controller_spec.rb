@@ -219,7 +219,7 @@ RSpec.describe "HistoriesController", type: :request do
 
           # Count the number of table rows (excluding header)
           # Each trade row has a unique "完了" badge
-          rows = response.body.scan(/<tr class="border-b hover:bg-gray-50">/).count
+          rows = response.body.scan(/<tr class="border-b border-stone-200 hover:bg-stone-50">/).count
           expect(rows).to eq(20)
         end
 
