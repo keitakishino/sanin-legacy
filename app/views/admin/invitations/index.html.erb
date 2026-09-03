@@ -1,31 +1,31 @@
-<div class="py-8">
-  <h2 class="text-3xl font-bold mb-6"><%= t("admin.invitations.title") %></h2>
+<div class="bg-stone-50 py-8">
+  <h2 class="text-3xl font-bold mb-6 text-stone-800"><%= t("admin.invitations.title") %></h2>
 
   <div id="invitation_form_success"></div>
   <div id="invitation_form_error"></div>
 
-  <div class="bg-white shadow rounded-lg p-6 mb-8">
-    <h3 class="text-xl font-semibold mb-4"><%= t("admin.invitations.new_code_section") %></h3>
+  <div class="bg-white border border-stone-200 rounded-lg p-6 mb-8">
+    <h3 class="text-xl font-semibold mb-4 text-stone-800"><%= t("admin.invitations.new_code_section") %></h3>
 
     <%= form_with model: @invitation, local: true, url: admin_invitations_path, method: :post, class: "space-y-4" do |f| %>
       <div>
-        <%= f.submit t("admin.invitations.generate_button"), class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
+        <%= f.submit t("admin.invitations.generate_button"), class: "bg-indigo-700 text-white px-4 py-2 rounded hover:bg-indigo-800 font-medium" %>
       </div>
     <% end %>
   </div>
 
-  <div class="bg-white shadow rounded-lg overflow-hidden">
-    <h3 class="text-xl font-semibold p-6 border-b"><%= t("admin.invitations.issued_codes_list") %></h3>
+  <div class="bg-white border border-stone-200 rounded-lg overflow-hidden">
+    <h3 class="text-xl font-semibold p-6 border-b border-stone-200 text-stone-800"><%= t("admin.invitations.issued_codes_list") %></h3>
 
     <table class="w-full">
-      <thead class="bg-gray-100 border-b">
+      <thead class="bg-stone-100 border-b border-stone-200">
         <tr>
-          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.invitation.code") %></th>
-          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.invitation.status") %></th>
-          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.invitation.expires_at") %></th>
-          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.invitation.issued_by_id") %></th>
-          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.invitation.used_by_id") %></th>
-          <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.invitation.created_at") %></th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.invitation.code") %></th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.invitation.status") %></th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.invitation.expires_at") %></th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.invitation.issued_by_id") %></th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.invitation.used_by_id") %></th>
+          <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.invitation.created_at") %></th>
         </tr>
       </thead>
       <tbody id="invitations">

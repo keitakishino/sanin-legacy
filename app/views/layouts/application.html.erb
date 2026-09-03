@@ -8,6 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap">
 
     <%= yield :head %>
 
@@ -24,19 +25,23 @@
   </head>
 
   <body>
-    <header class="bg-white shadow">
+    <header class="bg-white border-b border-stone-200">
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold">Sanin Legacy</h1>
-        <nav class="flex items-center gap-4">
+        <h1 class="text-2xl font-bold text-stone-800">Sanin Legacy</h1>
+        <nav class="flex items-center gap-6">
           <% if user_signed_in? && current_user.role_admin? %>
-            <%= link_to t("admin.users.nav_label"), admin_users_path, class: "text-blue-600 hover:underline" %>
-            <%= link_to "招待コード管理", admin_invitations_path, class: "text-blue-600 hover:underline" %>
+            <div class="flex items-center gap-4">
+              <%= link_to "イベント管理", admin_events_path, class: "text-indigo-700 hover:text-indigo-800 font-medium" %>
+              <%= link_to t("admin.users.nav_label"), admin_users_path, class: "text-indigo-700 hover:text-indigo-800 font-medium" %>
+              <%= link_to "招待コード管理", admin_invitations_path, class: "text-indigo-700 hover:text-indigo-800 font-medium" %>
+              <span class="inline-block bg-red-50 text-red-700 text-xs font-bold px-2 py-1 rounded">管理者</span>
+            </div>
           <% end %>
           <% if user_signed_in? %>
-            <span class="mr-2"><%= current_user.username %></span>
-            <%= button_to "Signout", signout_path, method: :delete, class: "text-blue-600 hover:underline" %>
+            <span class="text-sm text-stone-500"><%= current_user.username %></span>
+            <%= button_to "Signout", signout_path, method: :delete, class: "text-stone-600 hover:text-stone-800 text-sm" %>
           <% else %>
-            <%= link_to "Sign In", signin_path, class: "text-blue-600 hover:underline" %>
+            <%= link_to "Sign In", signin_path, class: "text-stone-600 hover:text-stone-800 text-sm" %>
           <% end %>
         </nav>
       </div>

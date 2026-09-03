@@ -1,6 +1,19 @@
 <div id="trade_status_display">
-  <p class="text-gray-600 mb-2">現在のステータス</p>
-  <p class="text-2xl font-bold text-blue-600">
+  <p class="text-stone-500 mb-2">現在のステータス</p>
+  <span class="inline-block text-base font-bold px-3 py-1 rounded
+    <%= case trade.status
+        when "pending"
+          "bg-stone-100 text-stone-500"
+        when "in_progress"
+          "bg-amber-50 text-amber-700"
+        when "completed"
+          "bg-emerald-50 text-emerald-700"
+        when "cancelled"
+          "bg-red-50 text-red-700"
+        else
+          "bg-stone-100 text-stone-500"
+        end %>
+  ">
     <%= I18n.t("activerecord.enums.trade.status.#{trade.status}") %>
-  </p>
+  </span>
 </div>

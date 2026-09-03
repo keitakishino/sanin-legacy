@@ -1,10 +1,10 @@
-<div class="py-8">
-  <h2 class="text-3xl font-bold mb-6"><%= t("admin.events.new_title") %></h2>
+<div class="bg-stone-50 py-8">
+  <h2 class="text-3xl font-bold mb-6 text-stone-800"><%= t("admin.events.new_title") %></h2>
 
-  <div class="bg-white shadow rounded-lg p-6">
+  <div class="bg-white border border-stone-200 rounded-lg p-6">
     <%= form_with model: @event, local: true, url: admin_events_path, method: :post, class: "space-y-4" do |f| %>
       <% if @event.errors.any? %>
-        <div id="error_explanation" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div id="error_explanation" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
           <h2 class="font-bold text-lg"><%= pluralize(@event.errors.count, "error") %> prohibited this event from being saved:</h2>
           <ul class="list-disc list-inside">
             <% @event.errors.full_messages.each do |message| %>
@@ -15,23 +15,23 @@
       <% end %>
 
       <div>
-        <%= f.label :title, t("activerecord.attributes.event.title"), class: "block text-sm font-medium mb-1" %>
-        <%= f.text_field :title, class: "w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500", required: true %>
+        <%= f.label :title, t("activerecord.attributes.event.title"), class: "block text-sm font-medium mb-1 text-stone-800" %>
+        <%= f.text_field :title, class: "w-full px-3 py-2 border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500", required: true %>
       </div>
 
       <div>
-        <%= f.label :description, t("activerecord.attributes.event.description"), class: "block text-sm font-medium mb-1" %>
-        <%= f.text_area :description, class: "w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500", rows: 4 %>
+        <%= f.label :description, t("activerecord.attributes.event.description"), class: "block text-sm font-medium mb-1 text-stone-800" %>
+        <%= f.text_area :description, class: "w-full px-3 py-2 border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500", rows: 4 %>
       </div>
 
       <div>
-        <%= f.label :event_date, t("activerecord.attributes.event.event_date"), class: "block text-sm font-medium mb-1" %>
-        <%= f.date_field :event_date, class: "w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500", required: true %>
+        <%= f.label :event_date, t("activerecord.attributes.event.event_date"), class: "block text-sm font-medium mb-1 text-stone-800" %>
+        <%= f.date_field :event_date, class: "w-full px-3 py-2 border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500", required: true %>
       </div>
 
       <div class="space-x-2">
-        <%= f.submit t("admin.events.submit"), class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" %>
-        <%= link_to t("admin.events.cancel"), admin_events_path, class: "bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 inline-block" %>
+        <%= f.submit t("admin.events.submit"), class: "bg-indigo-700 text-white px-4 py-2 rounded hover:bg-indigo-800 font-medium" %>
+        <%= link_to t("admin.events.cancel"), admin_events_path, class: "bg-stone-300 text-stone-800 px-4 py-2 rounded hover:bg-stone-400 inline-block font-medium" %>
       </div>
     <% end %>
   </div>

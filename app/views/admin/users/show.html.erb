@@ -1,37 +1,37 @@
-<div class="py-8">
+<div class="bg-stone-50 py-8">
   <div class="mb-6">
-    <%= link_to t("admin.users.view_profile"), admin_users_path, class: "text-blue-600 hover:text-blue-800 text-sm" %>
+    <%= link_to t("admin.users.view_profile"), admin_users_path, class: "text-indigo-700 hover:text-indigo-800 text-sm font-medium" %>
   </div>
 
-  <h2 class="text-3xl font-bold mb-6"><%= @user.username %></h2>
+  <h2 class="text-3xl font-bold mb-6 text-stone-800"><%= @user.username %></h2>
 
   <!-- Section 1: Registered Information -->
-  <div class="bg-white shadow rounded-lg p-6 mb-8">
-    <h3 class="text-xl font-semibold mb-4 border-b pb-2"><%= t("admin.users.registered_info") %></h3>
+  <div class="bg-white border border-stone-200 rounded-lg p-6 mb-8">
+    <h3 class="text-xl font-semibold mb-4 border-b border-stone-200 pb-2 text-stone-800"><%= t("admin.users.registered_info") %></h3>
 
     <div class="space-y-4">
-      <div class="flex justify-between items-center py-2 border-b">
-        <span class="font-semibold text-gray-700"><%= t("admin.users.username") %>:</span>
-        <span class="text-gray-600"><%= @user.username %></span>
+      <div class="flex justify-between items-center py-2 border-b border-stone-200">
+        <span class="font-semibold text-stone-800"><%= t("admin.users.username") %>:</span>
+        <span class="text-stone-600"><%= @user.username %></span>
       </div>
 
-      <div class="flex justify-between items-center py-2 border-b">
-        <span class="font-semibold text-gray-700"><%= t("admin.users.email") %>:</span>
-        <span class="text-gray-600"><%= @user.email || "－" %></span>
+      <div class="flex justify-between items-center py-2 border-b border-stone-200">
+        <span class="font-semibold text-stone-800"><%= t("admin.users.email") %>:</span>
+        <span class="text-stone-600"><%= @user.email || "－" %></span>
       </div>
 
-      <div class="flex justify-between items-center py-2 border-b">
-        <span class="font-semibold text-gray-700"><%= t("admin.users.registered_at") %>:</span>
-        <span class="text-gray-600"><%= @user.created_at.strftime("%Y年%m月%d日 %H:%M") %></span>
+      <div class="flex justify-between items-center py-2 border-b border-stone-200">
+        <span class="font-semibold text-stone-800"><%= t("admin.users.registered_at") %>:</span>
+        <span class="text-stone-600"><%= @user.created_at.strftime("%Y年%m月%d日 %H:%M") %></span>
       </div>
 
       <div class="flex justify-between items-center py-2">
-        <span class="font-semibold text-gray-700"><%= t("admin.users.role") %>:</span>
-        <span class="text-gray-600">
+        <span class="font-semibold text-stone-800"><%= t("admin.users.role") %>:</span>
+        <span class="text-stone-600">
           <% if @user.role_admin? %>
-            <span class="bg-red-100 text-red-800 px-3 py-1 rounded text-xs font-semibold"><%= t("admin.users.admin_label") %></span>
+            <span class="bg-red-50 text-red-700 px-3 py-1 rounded text-xs font-semibold"><%= t("admin.users.admin_label") %></span>
           <% else %>
-            <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded text-xs font-semibold"><%= t("admin.users.general") %></span>
+            <span class="bg-stone-100 text-stone-500 px-3 py-1 rounded text-xs font-semibold"><%= t("admin.users.general") %></span>
           <% end %>
         </span>
       </div>
@@ -39,21 +39,21 @@
   </div>
 
   <!-- Section 2: External Accounts -->
-  <div class="bg-white shadow rounded-lg p-6 mb-8">
-    <h3 class="text-xl font-semibold mb-4 border-b pb-2"><%= t("admin.users.external_accounts") %></h3>
+  <div class="bg-white border border-stone-200 rounded-lg p-6 mb-8">
+    <h3 class="text-xl font-semibold mb-4 border-b border-stone-200 pb-2 text-stone-800"><%= t("admin.users.external_accounts") %></h3>
 
     <% if @user.identities.empty? %>
-      <p class="text-gray-600"><%= t("admin.users.no_external_accounts") %></p>
+      <p class="text-stone-500"><%= t("admin.users.no_external_accounts") %></p>
     <% else %>
       <div class="space-y-4">
         <% @user.identities.each do |identity| %>
-          <div class="flex justify-between items-center py-2 border-b">
-            <span class="font-semibold text-gray-700"><%= identity.provider_display_name %>:</span>
+          <div class="flex justify-between items-center py-2 border-b border-stone-200">
+            <span class="font-semibold text-stone-800"><%= identity.provider_display_name %>:</span>
             <% if identity.provider_twitter? && identity.uid.match?(/\A\d+\z/) %>
               <% url = "https://twitter.com/intent/user?user_id=#{ERB::Util.url_encode(identity.uid)}" %>
-              <%= link_to h(identity.uid), url, target: "_blank", class: "text-blue-600 hover:text-blue-800" %>
+              <%= link_to h(identity.uid), url, target: "_blank", class: "text-indigo-700 hover:text-indigo-800" %>
             <% else %>
-              <span class="text-gray-600"><%= h(identity.uid) %></span>
+              <span class="text-stone-600"><%= h(identity.uid) %></span>
             <% end %>
           </div>
         <% end %>
@@ -62,47 +62,47 @@
   </div>
 
   <!-- Section 3: Trades -->
-  <div class="bg-white shadow rounded-lg p-6">
-    <h3 class="text-xl font-semibold mb-4 border-b pb-2"><%= t("admin.users.trades") %></h3>
+  <div class="bg-white border border-stone-200 rounded-lg p-6">
+    <h3 class="text-xl font-semibold mb-4 border-b border-stone-200 pb-2 text-stone-800"><%= t("admin.users.trades") %></h3>
 
     <% if @trades.empty? %>
-      <p class="text-gray-600"><%= t("admin.users.no_trades") %></p>
+      <p class="text-stone-500"><%= t("admin.users.no_trades") %></p>
     <% else %>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead class="bg-gray-100 border-b">
+          <thead class="bg-stone-100 border-b border-stone-200">
             <tr>
-              <th class="px-4 py-3 text-left font-semibold"><%= t("admin.users.event_title") %></th>
-              <th class="px-4 py-3 text-left font-semibold"><%= t("admin.users.event_date") %></th>
-              <th class="px-4 py-3 text-left font-semibold"><%= t("activerecord.attributes.trade.status") %></th>
-              <th class="px-4 py-3 text-left font-semibold"><%= t("admin.users.view_details") %></th>
+              <th class="px-4 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.users.event_title") %></th>
+              <th class="px-4 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.users.event_date") %></th>
+              <th class="px-4 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.trade.status") %></th>
+              <th class="px-4 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.users.view_details") %></th>
             </tr>
           </thead>
           <tbody>
             <% @trades.each do |trade| %>
-              <tr class="border-b hover:bg-gray-50">
+              <tr class="border-b border-stone-200 hover:bg-stone-50">
                 <td class="px-4 py-3"><%= trade.event.title %></td>
                 <td class="px-4 py-3"><%= trade.event.event_date.strftime("%Y年%m月%d日") %></td>
                 <td class="px-4 py-3">
                   <span class="
                     <%= case trade.status
                         when "pending"
-                          "bg-yellow-100 text-yellow-800"
+                          "bg-stone-100 text-stone-500"
                         when "in_progress"
-                          "bg-blue-100 text-blue-800"
+                          "bg-amber-50 text-amber-700"
                         when "completed"
-                          "bg-green-100 text-green-800"
+                          "bg-emerald-50 text-emerald-700"
                         when "cancelled"
-                          "bg-gray-100 text-gray-800"
+                          "bg-red-50 text-red-700"
                         else
-                          "bg-gray-100 text-gray-800"
+                          "bg-stone-100 text-stone-500"
                         end %>
                     px-3 py-1 rounded text-xs font-semibold">
                     <%= t("activerecord.enums.trade.status.#{trade.status}") %>
                   </span>
                 </td>
                 <td class="px-4 py-3">
-                  <%= link_to t("admin.users.view_details"), admin_event_trade_path(trade.event, trade), class: "text-blue-600 hover:text-blue-800" %>
+                  <%= link_to t("admin.users.view_details"), admin_event_trade_path(trade.event, trade), class: "text-indigo-700 hover:text-indigo-800 font-medium" %>
                 </td>
               </tr>
             <% end %>
