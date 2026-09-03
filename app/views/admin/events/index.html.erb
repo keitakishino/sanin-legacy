@@ -1,36 +1,36 @@
-<div class="py-8">
-  <h2 class="text-3xl font-bold mb-6"><%= t("admin.events.title") %></h2>
+<div class="bg-stone-50 py-8">
+  <h2 class="text-3xl font-bold mb-6 text-stone-800"><%= t("admin.events.title") %></h2>
 
-  <%= link_to t("admin.events.new_button"), new_admin_event_path, class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-6 inline-block" %>
+  <%= link_to t("admin.events.new_button"), new_admin_event_path, class: "bg-indigo-700 text-white px-4 py-2 rounded hover:bg-indigo-800 mb-6 inline-block font-medium" %>
 
   <% if @events.empty? %>
-    <div class="bg-white shadow rounded-lg p-6">
-      <p class="text-gray-600"><%= t("admin.events.no_events") %></p>
+    <div class="bg-white border border-stone-200 rounded-lg p-6">
+      <p class="text-stone-500"><%= t("admin.events.no_events") %></p>
     </div>
   <% else %>
-    <div class="bg-white shadow rounded-lg overflow-hidden">
+    <div class="bg-white border border-stone-200 rounded-lg overflow-hidden">
       <table class="w-full">
-        <thead class="bg-gray-100 border-b">
+        <thead class="bg-stone-100 border-b border-stone-200">
           <tr>
-            <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.event.title") %></th>
-            <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.event.description") %></th>
-            <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.event.event_date") %></th>
-            <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.event.created_by_id") %></th>
-            <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("activerecord.attributes.event.created_at") %></th>
-            <th class="px-6 py-3 text-left text-sm font-semibold"><%= t("admin.events.actions") %></th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.title") %></th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.description") %></th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.event_date") %></th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.created_by_id") %></th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.created_at") %></th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.events.actions") %></th>
           </tr>
         </thead>
         <tbody id="events">
           <% @events.each do |event| %>
-            <tr class="border-b hover:bg-gray-50">
+            <tr class="border-b border-stone-200 hover:bg-stone-50">
               <td class="px-6 py-4 text-sm"><%= event.title %></td>
               <td class="px-6 py-4 text-sm"><%= truncate(event.description, length: 50) %></td>
               <td class="px-6 py-4 text-sm"><%= event.event_date.strftime("%Y年%m月%d日") %></td>
               <td class="px-6 py-4 text-sm"><%= event.created_by&.email %></td>
               <td class="px-6 py-4 text-sm"><%= event.created_at.strftime("%Y年%m月%d日 %H:%M") %></td>
               <td class="px-6 py-4 text-sm space-x-2">
-                <%= link_to t("admin.events.edit"), edit_admin_event_path(event), class: "text-blue-600 hover:text-blue-800" %>
-                <%= button_to t("admin.events.delete"), admin_event_path(event), method: :delete, data: { turbo_confirm: t("admin.events.confirm_delete") }, class: "text-red-600 hover:text-red-800" %>
+                <%= link_to t("admin.events.edit"), edit_admin_event_path(event), class: "text-indigo-700 hover:text-indigo-800 font-medium" %>
+                <%= button_to t("admin.events.delete"), admin_event_path(event), method: :delete, data: { turbo_confirm: t("admin.events.confirm_delete") }, class: "text-red-700 hover:text-red-800 font-medium" %>
               </td>
             </tr>
           <% end %>
