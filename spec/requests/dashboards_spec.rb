@@ -138,6 +138,96 @@ RSpec.describe "Dashboards", type: :request do
           count = response.body.scan('class="bg-white border border-stone-200 rounded-[10px]').count
           expect(count).to eq(2) # Only pending and in_progress trades
         end
+
+        it "displays maximum 5 offer chips and '+N件' for overflow" do
+          # Create a new event and trade with 10 offer cards
+          offer_event = create(:event)
+          offer_trade = create(:trade, user:, event: offer_event, status: :pending)
+          10.times { |i| create(:trade_card_offer, trade: offer_trade, card_name: "Card #{i + 1}") }
+
+          get "/dashboards/incomplete_trades"
+
+          # Count offer chips by looking for the bg-offer-soft class (excluding the overflow chip)
+          offer_chips_count = response.body.scan(/class="inline-flex items-center gap-2 bg-offer-soft/).count
+          expect(offer_chips_count).to eq(5)
+
+          # Verify the overflow text is displayed
+          expect(response.body).to include("+5件")
+        end
+
+        it "displays maximum 5 want chips and '+N件' for overflow" do
+          # Create a new event and trade with 6 want cards
+          want_event = create(:event)
+          want_trade = create(:trade, user:, event: want_event, status: :pending)
+          6.times { |i| create(:trade_card_want, trade: want_trade, card_name: "Want #{i + 1}") }
+
+          get "/dashboards/incomplete_trades"
+
+          # Count want chips by looking for the bg-want-soft class (excluding the overflow chip)
+          want_chips_count = response.body.scan(/class="inline-flex items-center gap-2 bg-want-soft/).count
+          expect(want_chips_count).to eq(5)
+
+          # Verify the overflow text is displayed
+          expect(response.body).to include("+1件")
+        end
+
+        it "does not display overflow chip when exactly 5 cards exist" do
+          # Create a new event and trade with exactly 5 offer and 5 want cards
+          exact_event = create(:event)
+          exact_trade = create(:trade, user:, event: exact_event, status: :pending)
+          5.times { |i| create(:trade_card_offer, trade: exact_trade, card_name: "Offer #{i + 1}") }
+          5.times { |i| create(:trade_card_want, trade: exact_trade, card_name: "Want #{i + 1}") }
+
+          get "/dashboards/incomplete_trades"
+
+          # Count all chips (should be 10 total)
+          offer_chips_count = response.body.scan(/class="inline-flex items-center gap-2 bg-offer-soft/).count
+          want_chips_count = response.body.scan(/class="inline-flex items-center gap-2 bg-want-soft/).count
+          expect(offer_chips_count).to eq(5)
+          expect(want_chips_count).to eq(5)
+
+          # Verify no overflow chips are displayed (no "+N件" for this trade)
+          # Count the occurrence of the overflow pattern for this trade
+          response_text = response.body
+          expect(response_text).not_to match(/\+\d+件/)
+        end
+
+        it "handles edge case with more than 5 cards (e.g., 12 cards)" do
+          # Create a new event and trade with 12 offer cards
+          edge_event = create(:event)
+          edge_trade = create(:trade, user:, event: edge_event, status: :pending)
+          12.times { |i| create(:trade_card_offer, trade: edge_trade, card_name: "Card #{i + 1}") }
+
+          get "/dashboards/incomplete_trades"
+
+          # Count offer chips by looking for the bg-offer-soft class (excluding the overflow chip)
+          offer_chips_count = response.body.scan(/class="inline-flex items-center gap-2 bg-offer-soft/).count
+          expect(offer_chips_count).to eq(5)
+
+          # Verify the overflow text is correctly displayed as "+7件" (12 - 5 = 7)
+          expect(response.body).to include("+7件")
+        end
+
+        it "displays different overflow counts for offer and want cards" do
+          # Create a new event and trade with 8 offer cards and 3 want cards
+          asymmetric_event = create(:event)
+          asymmetric_trade = create(:trade, user:, event: asymmetric_event, status: :pending)
+          8.times { |i| create(:trade_card_offer, trade: asymmetric_trade, card_name: "Offer #{i + 1}") }
+          3.times { |i| create(:trade_card_want, trade: asymmetric_trade, card_name: "Want #{i + 1}") }
+
+          get "/dashboards/incomplete_trades"
+
+          # Count offer chips
+          offer_chips_count = response.body.scan(/class="inline-flex items-center gap-2 bg-offer-soft/).count
+          expect(offer_chips_count).to eq(5)
+
+          # Count want chips (should display all 3)
+          want_chips_count = response.body.scan(/class="inline-flex items-center gap-2 bg-want-soft/).count
+          expect(want_chips_count).to eq(3)
+
+          # Verify overflow text for offers (8 - 5 = 3)
+          expect(response.body).to include("+3件")
+        end
       end
 
       context "when other user has incomplete trades" do
