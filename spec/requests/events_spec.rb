@@ -190,6 +190,15 @@ RSpec.describe "Events", type: :request do
           get "/events/#{event1.id}"
           expect(response.body).to include("閉じる")
         end
+
+        it "includes turbo_frame=\"_top\" attribute on edit trade link" do
+          get "/events/#{event1.id}"
+          doc = Nokogiri::HTML.parse(response.body)
+          # Find the link with href matching trade_path pattern
+          trade_link = doc.css("a[href='#{trade_path(event1.id)}']").first
+          expect(trade_link).not_to be_nil, "Trade link with href '#{trade_path(event1.id)}' not found"
+          expect(trade_link["data-turbo-frame"]).to eq("_top")
+        end
       end
 
       context "with discarded event" do

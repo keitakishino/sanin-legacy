@@ -1,4 +1,5 @@
 require "rails_helper"
+require "nokogiri"
 
 RSpec.describe "Dashboards", type: :request do
   let(:user) { create(:user, email: "test@example.com", password: "password123") }
@@ -255,6 +256,15 @@ RSpec.describe "Dashboards", type: :request do
           expect(response.body).to include(trade_path(event.id))
         end
 
+        it "includes turbo_frame=\"_top\" attribute on view_details link" do
+          get "/dashboards/incomplete_trades"
+          doc = Nokogiri::HTML.parse(response.body)
+          # Find the link with href matching trade_path pattern
+          trade_link = doc.css("a[href='#{trade_path(event.id)}']").first
+          expect(trade_link).not_to be_nil, "Trade link with href '#{trade_path(event.id)}' not found"
+          expect(trade_link["data-turbo-frame"]).to eq("_top")
+        end
+
         it "displays status enum translation via incomplete_trades endpoint" do
           get "/dashboards/incomplete_trades"
           expect(response.body).to include(I18n.t("activerecord.enums.trade.status.pending"))
@@ -296,6 +306,15 @@ RSpec.describe "Dashboards", type: :request do
         it "displays empty message" do
           get "/dashboards/incomplete_trades"
           expect(response.body).to include("トレードはまだありません")
+        end
+
+        it "includes turbo_frame=\"_top\" attribute on view_events link" do
+          get "/dashboards/incomplete_trades"
+          doc = Nokogiri::HTML.parse(response.body)
+          # Find the link with href matching events_path
+          events_link = doc.css("a[href='#{events_path}']").first
+          expect(events_link).not_to be_nil, "Events link with href '#{events_path}' not found"
+          expect(events_link["data-turbo-frame"]).to eq("_top")
         end
       end
 

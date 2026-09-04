@@ -1,4 +1,5 @@
 require "rails_helper"
+require "nokogiri"
 
 RSpec.describe "Admin::Users", type: :request do
   let(:admin_user) { create(:admin_user, email: "admin@example.com", password: "password123") }
@@ -50,6 +51,16 @@ RSpec.describe "Admin::Users", type: :request do
         pos2 = body.index(user2.username)
 
         expect(pos2).to be < pos1
+      end
+
+      it "includes turbo_frame=\"_top\" attribute on view_details link" do
+        test_user = create(:user, username: "test_user")
+        get admin_users_path
+        doc = Nokogiri::HTML.parse(response.body)
+        # Find the link with href matching admin_user_path pattern
+        user_link = doc.css("a[href='#{admin_user_path(test_user)}']").first
+        expect(user_link).not_to be_nil, "User link with href '#{admin_user_path(test_user)}' not found"
+        expect(user_link["data-turbo-frame"]).to eq("_top")
       end
 
       context "with search parameter" do
