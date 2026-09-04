@@ -61,6 +61,10 @@ Rails.application.configure do
   # Suppress logger output for asset requests.
   config.assets.quiet = true
 
+  # Explicitly disable public file serving in development to ensure asset compilation is prioritized
+  # over statically served files, enabling live asset updates when source files change.
+  config.public_file_server.enabled = false
+
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
 
