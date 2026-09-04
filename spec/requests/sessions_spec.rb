@@ -18,7 +18,7 @@ RSpec.describe "Sessions Controller", type: :request do
     it "displays the sign in form" do
       get signin_path
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include("Sign In")
+      expect(response.body).to include("サインイン")
       expect(response.body).to include('type="email"')
       expect(response.body).to include('type="password"')
     end
@@ -81,7 +81,7 @@ RSpec.describe "Sessions Controller", type: :request do
     it "shows sign in link after logout" do
       delete signout_path
       follow_redirect!
-      expect(response.body).to include("Sign In")
+      expect(response.body).to include("サインイン")
       expect(response.body).not_to include("Sign Out")
     end
   end

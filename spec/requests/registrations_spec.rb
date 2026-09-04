@@ -10,10 +10,10 @@ RSpec.describe "Registrations", type: :request do
         get "/signup", params: { token: token }
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include("Sign Up")
-        expect(response.body).to include("Email & Password")
+        expect(response.body).to include("サインアップ")
+        expect(response.body).to include("メール＆パスワード")
         expect(response.body).to include("Google")
-        expect(response.body).to include("X (Twitter)")
+        expect(response.body).to include("X")
       end
 
       it "saves token to session" do
