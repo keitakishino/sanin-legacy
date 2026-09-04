@@ -1,0 +1,15 @@
+<!-- Aggregated Amounts Section (inline within status card) -->
+<div id="trade_aggregates" class="grid grid-cols-3 gap-4">
+  <div class="bg-stone-50 p-4 rounded border border-stone-200">
+    <p class="text-[11px] font-bold text-stone-400 uppercase mb-1">出すカード合計</p>
+    <p class="text-xl font-extrabold text-sky-700">¥<%= number_with_delimiter(trade.offers_total_amount) %></p>
+  </div>
+  <div class="bg-stone-50 p-4 rounded border border-stone-200">
+    <p class="text-[11px] font-bold text-stone-400 uppercase mb-1">欲しいカード合計</p>
+    <p class="text-xl font-extrabold text-emerald-700">¥<%= number_with_delimiter(trade.wants_total_amount) %></p>
+  </div>
+  <div class="bg-stone-50 p-4 rounded border border-stone-200">
+    <p class="text-[11px] font-bold text-stone-400 uppercase mb-1">差額（出す - 欲しい）</p>
+    <p class="text-xl font-extrabold <%= trade.net_amount >= 0 ? "text-emerald-700" : "text-red-700" %>">¥<%= number_with_delimiter(trade.net_amount) %></p>
+  </div>
+</div>
