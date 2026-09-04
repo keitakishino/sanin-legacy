@@ -283,6 +283,23 @@ RSpec.describe "TradeCardOffers", type: :request do
         expect(response.body).to include("¥5,000")
       end
 
+      it "turbo_stream response uses inline aggregates design (no heading)" do
+        admin_offer
+        patch "/trades/#{event.id}/card_offers/#{admin_offer.id}",
+          params: params_with_amount.merge(trade_id: admin_trade.id),
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response).to have_http_status(:ok)
+        # Verify the heading "集計値（表示のみ）" is NOT included in turbo_stream response
+        expect(response.body).not_to include("集計値（表示のみ）")
+        # Verify the grid structure is present
+        expect(response.body).to include('class="grid grid-cols-3 gap-4"')
+        # Verify individual tiles are rendered
+        expect(response.body).to include("出すカード合計")
+        expect(response.body).to include("欲しいカード合計")
+        expect(response.body).to include("差額（出す - 欲しい）")
+      end
+
       it "recalculates trade totals when amount is updated" do
         # Create an offer with an initial amount
         admin_offer_with_amount = create(:trade_card_offer, trade: admin_trade, amount: 1000)

@@ -3,5 +3,5 @@
 </turbo-stream>
 
 <turbo-stream action="replace" target="trade_aggregates">
-  <template><%= render "admin/trades/aggregates_section", trade: @trade_card_want.trade %></template>
+  <template><%= render(partial: 'trades/aggregates_inline', locals: { trade: @trade_card_want.trade }, formats: [:html]) %></template>
 </turbo-stream>
