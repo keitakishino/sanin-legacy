@@ -116,9 +116,9 @@ RSpec.describe "TradeCardWants", type: :request do
         # Check that the expansion combobox controller is present
         expect(response.body).to include('data-controller="expansion-select"')
         # Check that the text input field is present
-        expect(response.body).to include('data-target="expansion-select.input"')
+        expect(response.body).to include('data-expansion-select-target="input"')
         # Check that the hidden field is present
-        expect(response.body).to include('data-target="expansion-select.select"')
+        expect(response.body).to include('data-expansion-select-target="select"')
         # Check that the turbo-frame for suggestions is present
         expect(response.body).to include('id="expansion_suggestions"')
       end
