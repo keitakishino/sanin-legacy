@@ -62,6 +62,14 @@ RUN bundle exec bootsnap precompile -j 1 app/ lib/
 RUN DATABASE_HOST=localhost DATABASE_PORT=5432 DATABASE_USER=sanin_legacy DATABASE_PASSWORD=dummy SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 
+# Development stage with all dependencies including development and test gems
+FROM build AS development
+
+# Override BUNDLE_WITHOUT to include development and test groups
+ENV BUNDLE_WITHOUT=""
+
+# Ensure application code is available
+COPY . .
 
 
 # Final stage for app image
