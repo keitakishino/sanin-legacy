@@ -66,7 +66,10 @@ RUN DATABASE_HOST=localhost DATABASE_PORT=5432 DATABASE_USER=sanin_legacy DATABA
 FROM build AS development
 
 # Override BUNDLE_WITHOUT to include development and test groups
-ENV BUNDLE_WITHOUT=""
+ENV BUNDLE_WITHOUT="" \
+    BUNDLE_DEPLOYMENT="0"
+
+RUN bundle install
 
 # Ensure application code is available
 COPY . .
