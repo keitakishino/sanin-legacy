@@ -53,6 +53,78 @@ RSpec.describe "Trades", type: :request do
           get "/trades/#{event.id}"
           expect(response.body).to include("トレード状態")
         end
+
+        it "displays aggregate values in the trade status card" do
+          trade
+          get "/trades/#{event.id}"
+          expect(response.body).to include("出すカード合計")
+          expect(response.body).to include("欲しいカード合計")
+          expect(response.body).to include("差額（出す - 欲しい）")
+        end
+
+        it "does not display separate aggregates card heading" do
+          trade
+          get "/trades/#{event.id}"
+          # The old separate card with this heading should not be displayed
+          expect(response.body).not_to include("集計値（表示のみ）")
+        end
+
+        it "displays aggregates section with correct ID for turbo_stream targeting" do
+          trade
+          get "/trades/#{event.id}"
+          # Verify the aggregates section has the correct ID for turbo_stream updates
+          expect(response.body).to include('id="trade_aggregates"')
+        end
+
+        it "displays formatted aggregate amounts" do
+          admin_user = create(:admin_user)
+          admin_trade = create(:trade, event: event, user: admin_user)
+          create(:trade_card_offer, trade: admin_trade, amount: 5000)
+          create(:trade_card_want, trade: admin_trade, amount: 2000)
+          admin_trade.recalculate_totals!
+
+          post signin_path, params: { email: admin_user.email, password: "password123" }
+          get "/trades/#{event.id}"
+
+          # Verify amounts are formatted with ¥ and comma separators
+          expect(response.body).to include("¥5,000")  # offers total
+          expect(response.body).to include("¥2,000")  # wants total
+          expect(response.body).to include("¥3,000")  # net amount
+        end
+
+        context "when net amount is negative" do
+          it "displays net amount with red styling" do
+            admin_user = create(:admin_user)
+            admin_trade = create(:trade, event: event, user: admin_user)
+            create(:trade_card_offer, trade: admin_trade, amount: 2000)
+            create(:trade_card_want, trade: admin_trade, amount: 5000)
+            admin_trade.recalculate_totals!
+
+            post signin_path, params: { email: admin_user.email, password: "password123" }
+            get "/trades/#{event.id}"
+
+            # Should include red-700 class for negative net amount
+            expect(response.body).to include("text-red-700")
+            expect(response.body).to include("¥-3,000")
+          end
+        end
+
+        context "when net amount is positive" do
+          it "displays net amount with green styling" do
+            admin_user = create(:admin_user)
+            admin_trade = create(:trade, event: event, user: admin_user)
+            create(:trade_card_offer, trade: admin_trade, amount: 5000)
+            create(:trade_card_want, trade: admin_trade, amount: 2000)
+            admin_trade.recalculate_totals!
+
+            post signin_path, params: { email: admin_user.email, password: "password123" }
+            get "/trades/#{event.id}"
+
+            # Should include emerald-700 class for positive net amount
+            expect(response.body).to include("text-emerald-700")
+            expect(response.body).to include("¥3,000")
+          end
+        end
       end
 
       context "with non-existent event id" do
