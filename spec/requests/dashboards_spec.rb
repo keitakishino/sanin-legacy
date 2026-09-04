@@ -255,6 +255,11 @@ RSpec.describe "Dashboards", type: :request do
           expect(response.body).to include(trade_path(event.id))
         end
 
+        it "includes turbo_frame=\"_top\" attribute on view_details link" do
+          get "/dashboards/incomplete_trades"
+          expect(response.body).to include('data-turbo-frame="_top"')
+        end
+
         it "displays status enum translation via incomplete_trades endpoint" do
           get "/dashboards/incomplete_trades"
           expect(response.body).to include(I18n.t("activerecord.enums.trade.status.pending"))
@@ -296,6 +301,11 @@ RSpec.describe "Dashboards", type: :request do
         it "displays empty message" do
           get "/dashboards/incomplete_trades"
           expect(response.body).to include("トレードはまだありません")
+        end
+
+        it "includes turbo_frame=\"_top\" attribute on view_events link" do
+          get "/dashboards/incomplete_trades"
+          expect(response.body).to include('data-turbo-frame="_top"')
         end
       end
 

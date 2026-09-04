@@ -52,6 +52,12 @@ RSpec.describe "Admin::Users", type: :request do
         expect(pos2).to be < pos1
       end
 
+      it "includes turbo_frame=\"_top\" attribute on view_details link" do
+        create(:user, username: "test_user")
+        get admin_users_path
+        expect(response.body).to include('data-turbo-frame="_top"')
+      end
+
       context "with search parameter" do
         it "filters users by username" do
           user1 = create(:user, username: "john_doe")

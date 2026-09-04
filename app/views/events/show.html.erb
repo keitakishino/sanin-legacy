@@ -53,7 +53,8 @@
       <!-- Footer with action and close buttons -->
       <div class="bg-neutral-soft border-t border-stone-200 px-6 py-4 flex justify-between gap-2">
         <%= link_to "自分のトレードを編集する", trade_path(@event.id),
-            class: "px-4 py-2 bg-accent text-white rounded-md hover:bg-accent-hover font-bold text-xs" %>
+            class: "px-4 py-2 bg-accent text-white rounded-md hover:bg-accent-hover font-bold text-xs",
+            data: { turbo_frame: "_top" } %>
         <button type="button" data-turbo-frame="event_modal"
                 onclick="document.getElementById('event_modal').innerHTML = ''"
                 class="px-4 py-2 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs">

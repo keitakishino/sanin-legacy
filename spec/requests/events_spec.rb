@@ -190,6 +190,11 @@ RSpec.describe "Events", type: :request do
           get "/events/#{event1.id}"
           expect(response.body).to include("閉じる")
         end
+
+        it "includes turbo_frame=\"_top\" attribute on edit trade link" do
+          get "/events/#{event1.id}"
+          expect(response.body).to include('data-turbo-frame="_top"')
+        end
       end
 
       context "with discarded event" do

@@ -83,7 +83,8 @@
               <!-- Action Link -->
               <div class="ml-4">
                 <%= link_to t("dashboards.show.view_details"), trade_path(trade.event_id),
-                    class: "px-4 py-2 bg-accent text-white rounded-md hover:bg-accent-hover font-bold text-xs whitespace-nowrap" %>
+                    class: "px-4 py-2 bg-accent text-white rounded-md hover:bg-accent-hover font-bold text-xs whitespace-nowrap",
+                    data: { turbo_frame: "_top" } %>
               </div>
             </div>
           </div>
@@ -96,7 +97,8 @@
           <%= t("dashboards.show.no_trades_guidance") %>
         </p>
         <%= link_to t("dashboards.show.view_events"), events_path,
-            class: "text-accent hover:text-accent-hover font-bold text-sm" %>
+            class: "text-accent hover:text-accent-hover font-bold text-sm",
+            data: { turbo_frame: "_top" } %>
       </div>
     <% end %>
   </div>
