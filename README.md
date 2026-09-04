@@ -11,10 +11,75 @@ Rails 8 application for Magic: The Gathering card trade management (MVP).
 
 ### Development Setup
 
+#### Initial Setup
+
+On the first setup, build the Docker image with the development stage and start all services:
+
 ```bash
-docker compose up -d
-docker compose exec app bundle exec rails db:prepare
+docker compose up --build
 ```
+
+This command will:
+- Build the Docker image including the development stage (with all gems including development and test dependencies)
+- Start the PostgreSQL database service
+- Run database preparation (`db:prepare`)
+- Start the Rails application server on http://localhost:3000
+
+#### Subsequent Startups
+
+For subsequent startups (when the Docker image is already built), simply use:
+
+```bash
+docker compose up
+```
+
+#### Stopping Services
+
+To stop all services:
+
+```bash
+docker compose down
+```
+
+#### Common Development Tasks
+
+View application logs:
+
+```bash
+docker compose logs -f app
+```
+
+Access the Rails console:
+
+```bash
+docker compose exec app bundle exec rails console
+```
+
+Run database migrations:
+
+```bash
+docker compose exec app bundle exec rails db:migrate
+```
+
+Seed the database:
+
+```bash
+docker compose exec app bundle exec rails db:seed
+```
+
+Run tests:
+
+```bash
+docker compose exec app bundle exec rspec
+```
+
+Run code quality checks:
+
+```bash
+docker compose exec app bundle exec rubocop
+```
+
+The application will be available at `http://localhost:3000`
 
 ### Environment Configuration
 
