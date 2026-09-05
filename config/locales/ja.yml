@@ -72,6 +72,7 @@ ja:
           extended: "拡張アート"
           borderless: "ボーダーレス"
           showcase: "ショーケース"
+          retro: "旧枠"
       trade_card_want:
         card_name: "カード名"
         quantity: "数量"
@@ -124,6 +125,7 @@ ja:
           extended: "拡張アート"
           borderless: "ボーダーレス"
           showcase: "ショーケース"
+          retro: "旧枠"
       trade_card_want:
         language:
           ja: "日本語"
