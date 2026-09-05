@@ -7,7 +7,7 @@
 
 <turbo-stream action="replace" target="<%= frame_id %>">
   <template>
-    <turbo-frame id="<%= frame_id %>" style="display: none;" class="mt-4 bg-gray-50 p-4 rounded-lg">
+    <turbo-frame id="<%= frame_id %>" style="display: none;" class="mt-4 bg-stone-50 p-4 rounded-lg">
       <%= render 'form', trade_card_offer: @trade.trade_card_offers.build, frame_id: frame_id %>
     </turbo-frame>
   </template>
