@@ -79,6 +79,16 @@ RSpec.describe "TradeCardWants", type: :request do
       expect(flash[:notice]).to include("カード明細を追加しました")
     end
 
+    it "includes toast notification in turbo_stream response" do
+      trade
+      post "/trades/#{event.id}/card_wants", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('target="toast-container"')
+      expect(response.body).to include('data-controller="toast"')
+      # Verify card_name is embedded in the message
+      expect(response.body).to include(valid_params[:trade_card_want][:card_name])
+    end
+
     context "with invalid params" do
       let(:invalid_params) do
         {

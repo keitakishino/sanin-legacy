@@ -12,3 +12,7 @@
     </turbo-frame>
   </template>
 </turbo-stream>
+
+<turbo-stream action="append" target="toast-container">
+  <template><%= render(partial: "shared/toast", locals: { message: t("toasts.trade_card_offer.create", card_name: @trade_card_offer.card_name) }, formats: [:html]) %></template>
+</turbo-stream>
