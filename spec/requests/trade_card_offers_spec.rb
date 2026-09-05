@@ -445,5 +445,59 @@ RSpec.describe "TradeCardOffers", type: :request do
         expect(admin_trade.net_amount).to eq(-2000)
       end
     end
+
+    context "when offer with amount is deleted via turbo_stream" do
+      let(:admin_user) { create(:admin_user) }
+
+      before do
+        delete "/signout"
+        post signin_path, params: { email: admin_user.email, password: "password123" }
+      end
+
+      let(:admin_trade) { create(:trade, event: event, user: admin_user) }
+      let(:admin_offer) { create(:trade_card_offer, trade: admin_trade, amount: 3000) }
+
+      it "returns turbo_stream response with aggregates section update" do
+        admin_offer
+        delete "/trades/#{event.id}/card_offers/#{admin_offer.id}",
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to include("text/vnd.turbo-stream.html")
+        # Verify aggregates section is included in the response
+        expect(response.body).to include('target="trade_aggregates"')
+      end
+
+      it "turbo_stream response includes inline aggregates design" do
+        admin_offer
+        delete "/trades/#{event.id}/card_offers/#{admin_offer.id}",
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        expect(response).to have_http_status(:ok)
+        # Verify the heading "集計値（表示のみ）" is NOT included in turbo_stream response
+        expect(response.body).not_to include("集計値（表示のみ）")
+        # Verify the grid structure is present
+        expect(response.body).to include('class="grid grid-cols-3 gap-4"')
+        # Verify individual tiles are rendered
+        expect(response.body).to include("出すカード合計")
+        expect(response.body).to include("欲しいカード合計")
+        expect(response.body).to include("差額（出す - 欲しい）")
+      end
+
+      it "aggregates show correctly updated values after deletion" do
+        admin_offer
+        admin_trade.reload
+        expect(admin_trade.offers_total_amount).to eq(3000)
+
+        delete "/trades/#{event.id}/card_offers/#{admin_offer.id}",
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        # Verify the aggregates template renders with updated (zero) amount
+        expect(response.body).to include("¥0")
+        # Verify the offer was deleted
+        admin_trade.reload
+        expect(admin_trade.offers_total_amount).to eq(0)
+      end
+    end
   end
 end
