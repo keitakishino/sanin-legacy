@@ -83,8 +83,8 @@ class TradeCardWantsController < ApplicationController
     params[:quantity] = 1 if params[:quantity].blank?
     # language: keep nil for "不問" (no preference), no normalization needed
     # conditions: keep empty array or nil for "不問" (no preference), no normalization needed
-    params[:foil] = 'non_foil' if params[:foil].blank?
-    params[:frame] = 'normal' if params[:frame].blank?
+    params[:foil] = "non_foil" if params[:foil].blank?
+    params[:frame] = "normal" if params[:frame].blank?
     params
   end
 end

@@ -81,10 +81,10 @@ class TradeCardOffersController < ApplicationController
   def normalize_trade_card_offer_params(params)
     # Apply default values for null/empty parameters
     params[:quantity] = 1 if params[:quantity].blank?
-    params[:language] = 'ja' if params[:language].blank?
-    params[:condition] = 'none' if params[:condition].blank?
-    params[:foil] = 'non_foil' if params[:foil].blank?
-    params[:frame] = 'normal' if params[:frame].blank?
+    params[:language] = "ja" if params[:language].blank?
+    params[:condition] = "none" if params[:condition].blank?
+    params[:foil] = "non_foil" if params[:foil].blank?
+    params[:frame] = "normal" if params[:frame].blank?
     params
   end
 end

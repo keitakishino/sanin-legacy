@@ -52,8 +52,8 @@ RSpec.describe "TradeCardWants", type: :request do
       want = TradeCardWant.last
       expect(want).not_to be_nil
       expect(want.language).to be_nil
-      expect(want.foil).to be_nil
-      expect(want.frame).to be_nil
+      expect(want.foil).to eq("non_foil")
+      expect(want.frame).to eq("normal")
     end
 
     it "returns turbo_stream response" do
@@ -619,7 +619,7 @@ RSpec.describe "TradeCardWants", type: :request do
               card_name: "Test Card",
               quantity: "",
               language: nil,
-              conditions: [],
+              conditions: nil,
               foil: "",
               frame: ""
             }
@@ -632,11 +632,12 @@ RSpec.describe "TradeCardWants", type: :request do
           expect(response).to redirect_to(trade_path(event))
 
           want = TradeCardWant.last
+          expect(want).not_to be_nil
           expect(want.quantity).to eq(1)
           expect(want.language).to be_nil
           expect(want.foil).to eq("non_foil")
           expect(want.frame).to eq("normal")
-          expect(want.conditions).to eq([] || nil)
+          expect(want.conditions).to be_nil
         end
       end
 
