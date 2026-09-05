@@ -11,7 +11,7 @@ class TradeCardOffer < ApplicationRecord
   validates :quantity, presence: true, numericality: { only_integer: true, greater_than: 0 }
   validates :language, :condition, :foil, :frame, presence: true
   validates :pw_mark, inclusion: { in: [ true, false ] }
-  validates :amount, numericality: { only_integer: true }, allow_nil: true
+  validates :amount, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
   validate :no_duplicate_card_entry
 

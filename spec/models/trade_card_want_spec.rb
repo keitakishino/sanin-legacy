@@ -17,7 +17,7 @@ describe TradeCardWant, type: :model do
 
     it { is_expected.to validate_presence_of(:card_name) }
     it { is_expected.to validate_presence_of(:quantity) }
-    it { is_expected.to validate_numericality_of(:amount).only_integer.allow_nil }
+    it { is_expected.to validate_numericality_of(:amount).only_integer.is_greater_than_or_equal_to(0).allow_nil }
 
     context 'quantity validation' do
       it 'validates quantity > 0' do
@@ -32,6 +32,33 @@ describe TradeCardWant, type: :model do
 
       it 'validates quantity is a positive integer' do
         subject.quantity = 1
+        expect(subject).to be_valid
+      end
+    end
+
+    context 'amount validation' do
+      it 'validates amount >= 0' do
+        subject.amount = -1
+        expect(subject).to be_invalid
+      end
+
+      it 'validates amount with negative value' do
+        subject.amount = -100
+        expect(subject).to be_invalid
+      end
+
+      it 'allows amount = 0' do
+        subject.amount = 0
+        expect(subject).to be_valid
+      end
+
+      it 'allows amount = positive integer' do
+        subject.amount = 1000
+        expect(subject).to be_valid
+      end
+
+      it 'allows amount = nil' do
+        subject.amount = nil
         expect(subject).to be_valid
       end
     end
