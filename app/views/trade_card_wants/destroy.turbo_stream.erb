@@ -1,2 +1,6 @@
 <turbo-stream action="remove" target="<%= dom_id(@trade_card_want) %>">
 </turbo-stream>
+
+<turbo-stream action="replace" target="trade_aggregates">
+  <template><%= render(partial: 'trades/aggregates_inline', locals: { trade: @trade_card_want.trade }, formats: [:html]) %></template>
+</turbo-stream>
