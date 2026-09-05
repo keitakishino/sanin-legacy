@@ -4,3 +4,7 @@
 <turbo-stream action="replace" target="trade_aggregates">
   <template><%= render(partial: 'trades/aggregates_inline', locals: { trade: @trade_card_offer.trade }, formats: [:html]) %></template>
 </turbo-stream>
+
+<turbo-stream action="append" target="toast-container">
+  <template><%= render(partial: 'shared/toast', locals: { message: t('toasts.trade_card_offer.destroy', card_name: @trade_card_offer.card_name) }, formats: [:html]) %></template>
+</turbo-stream>
