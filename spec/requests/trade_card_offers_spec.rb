@@ -209,6 +209,15 @@ RSpec.describe "TradeCardOffers", type: :request do
       expect(response.content_type).to include("text/vnd.turbo-stream.html")
     end
 
+    it "includes toast notification in turbo_stream response" do
+      offer
+      patch "/trades/#{event.id}/card_offers/#{offer.id}", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('action="append" target="toast-container"')
+      expect(response.body).to include("Updated Card")
+      expect(response.body).to include("の出すカード明細を更新しました")
+    end
+
     context "when general user tries to set amount" do
       let(:params_with_amount) do
         {
