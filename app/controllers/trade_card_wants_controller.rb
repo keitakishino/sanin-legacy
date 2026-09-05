@@ -81,10 +81,8 @@ class TradeCardWantsController < ApplicationController
   def normalize_trade_card_want_params(params)
     # Apply default values for null/empty parameters
     params[:quantity] = 1 if params[:quantity].blank?
-    # language: keep nil for "不問" (no preference), no normalization needed
-    # conditions: keep empty array or nil for "不問" (no preference), no normalization needed
-    params[:foil] = "non_foil" if params[:foil].blank?
-    params[:frame] = "normal" if params[:frame].blank?
+    # language, foil, frame, conditions: keep nil/empty for "不問" (no preference)
+    # ユーザーが「不問」を選んだ場合のnilを尊重し、上書きしない
     params
   end
 end
