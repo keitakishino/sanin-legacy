@@ -62,3 +62,20 @@
     color: rgb(120, 113, 108);
   }
 }
+
+@layer components {
+  /* Toast styles */
+  [data-controller="toast"] {
+    @apply relative overflow-hidden;
+    transition: opacity 0.3s ease-out;
+  }
+
+  @keyframes toast-countdown {
+    from {
+      width: 100%;
+    }
+    to {
+      width: 0%;
+    }
+  }
+}

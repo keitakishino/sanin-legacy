@@ -1,4 +1,13 @@
 ja:
+  toasts:
+    trade_card_offer:
+      create: "「%{card_name}」を出すカードに追加しました"
+      update: "「%{card_name}」の出すカード明細を更新しました"
+      destroy: "「%{card_name}」を出すカードから削除しました"
+    trade_card_want:
+      create: "「%{card_name}」を欲しいカードに追加しました"
+      update: "「%{card_name}」の欲しいカード明細を更新しました"
+      destroy: "「%{card_name}」を欲しいカードから削除しました"
   activerecord:
     attributes:
       user:
