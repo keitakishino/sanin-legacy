@@ -41,6 +41,28 @@ RSpec.describe Event, type: :model do
         expect(event.errors[:title]).to be_present
       end
     end
+
+    describe 'date validations' do
+      let(:user) { create(:user) }
+
+      it 'rejects past date for event_date' do
+        event = Event.new(title: 'Test Event', event_date: Date.today - 1.day, created_by: user)
+        expect(event.valid?).to be false
+        expect(event.errors[:event_date]).to be_present
+      end
+
+      it 'accepts today as event_date' do
+        event = Event.new(title: 'Test Event', event_date: Date.today, created_by: user)
+        expect(event.valid?).to be true
+        expect(event.errors[:event_date]).to be_empty
+      end
+
+      it 'accepts future date for event_date' do
+        event = Event.new(title: 'Test Event', event_date: Date.today + 1.day, created_by: user)
+        expect(event.valid?).to be true
+        expect(event.errors[:event_date]).to be_empty
+      end
+    end
   end
 
   describe 'logical deletion' do
