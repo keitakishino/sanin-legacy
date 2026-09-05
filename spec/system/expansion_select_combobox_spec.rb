@@ -1,3 +1,7 @@
+# NOTE: このテストはSelenium/ChromeDriver環境が整備されるまでCI実行対象から除外されています。
+# 開発環境で `rspec spec/system/expansion_select_combobox_spec.rb` で手動実行可能。
+# TODO: CI環境にChrome/Selenium サービスを追加したら、.rspec から除外パターンを削除
+
 require "rails_helper"
 
 RSpec.describe "Expansion Select Combobox", type: :system do
