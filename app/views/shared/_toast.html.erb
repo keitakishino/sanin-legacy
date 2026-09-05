@@ -1,6 +1,8 @@
 <%
+  id ||= "toast-#{SecureRandom.hex(4)}"
   duration ||= 4000
-  type ||= 'success'
+  # Clamp duration to valid range (100ms to 60 seconds)
+  duration = [[duration.to_i, 100].max, 60000].min
 %>
 <div data-controller="toast"
      id="<%= id %>"
@@ -34,7 +36,6 @@
   <!-- Progress bar (下部カウントダウン) -->
   <div class="mt-3 bg-stone-200 rounded-full h-1 overflow-hidden">
     <div class="bg-success h-full w-full"
-         data-toast-progress
          style="animation: toast-countdown <%= duration / 1000 %>s linear forwards;"></div>
   </div>
 </div>

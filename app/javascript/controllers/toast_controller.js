@@ -2,7 +2,9 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   connect() {
-    const duration = parseInt(this.element.dataset.toastDuration || 4000)
+    let duration = parseInt(this.element.dataset.toastDuration || 4000)
+    // Clamp duration to valid range (100ms to 60 seconds)
+    duration = Math.max(100, Math.min(duration, 60000))
     this.timeoutId = setTimeout(() => this.remove(), duration)
   }
 
@@ -13,7 +15,11 @@ export default class extends Controller {
 
   remove() {
     if (this.timeoutId) clearTimeout(this.timeoutId)
-    this.element.remove()
+    // Fade out with opacity transition, then remove DOM element
+    this.element.style.opacity = "0"
+    setTimeout(() => {
+      this.element.remove()
+    }, 300)
   }
 
   disconnect() {
