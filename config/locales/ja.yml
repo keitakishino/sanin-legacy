@@ -64,11 +64,11 @@ ja:
           poor: "POOR（悪い）"
           none: "未定義"
         foils:
-          foil: "フォイル"
-          non_foil: "ノンフォイル"
-          special: "スペシャル"
+          foil: "foil"
+          non_foil: "non-foil"
+          special: "その他"
         frames:
-          normal: "ノーマル"
+          normal: "通常"
           extended: "拡張アート"
           borderless: "ボーダーレス"
           showcase: "ショーケース"
@@ -87,15 +87,15 @@ ja:
           en: "英語"
           other: "その他"
         foils:
-          foil: "フォイル"
-          non_foil: "ノンフォイル"
-          special: "スペシャル"
+          foil: "foil"
+          non_foil: "non-foil"
+          special: "その他"
         frames:
-          normal: "ノーマル"
+          normal: "通常"
           extended: "拡張アート"
           borderless: "ボーダーレス"
           showcase: "ショーケース"
-          retro: "レトロ"
+          retro: "旧枠"
     enums:
       trade:
         status:
@@ -116,11 +116,11 @@ ja:
           poor: "POOR（悪い）"
           none: "未定義"
         foil:
-          foil: "フォイル"
-          non_foil: "ノンフォイル"
-          special: "スペシャル"
+          foil: "foil"
+          non_foil: "non-foil"
+          special: "その他"
         frame:
-          normal: "ノーマル"
+          normal: "通常"
           extended: "拡張アート"
           borderless: "ボーダーレス"
           showcase: "ショーケース"
@@ -130,15 +130,15 @@ ja:
           en: "英語"
           other: "その他"
         foil:
-          foil: "フォイル"
-          non_foil: "ノンフォイル"
-          special: "スペシャル"
+          foil: "foil"
+          non_foil: "non-foil"
+          special: "その他"
         frame:
-          normal: "ノーマル"
+          normal: "通常"
           extended: "拡張アート"
           borderless: "ボーダーレス"
           showcase: "ショーケース"
-          retro: "レトロ"
+          retro: "旧枠"
       trade_card_want_condition:
         0: "NM（ニアミント）"
         1: "SP（スライトプレイ）"
