@@ -8,6 +8,10 @@ class EventsController < ApplicationController
 
   def show
     @event = Event.find(params[:id])
+
+    # Turbo Frame経由でない場合（直リンク）は404を返す
+    return head :not_found unless turbo_frame_request?
+
     # Rails のTurboサポートにより、turbo_frameタグを含むレスポンスは自動的にレイアウトがスキップされます
     render :show, layout: false
   end

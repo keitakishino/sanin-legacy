@@ -139,60 +139,67 @@ RSpec.describe "Events", type: :request do
         post signin_path, params: { email: user.email, password: "password123" }
       end
 
-      context "with valid event id" do
-        it "returns 200 OK" do
+      context "with valid event id (direct link)" do
+        it "returns 404 Not Found when accessed without Turbo-Frame header" do
           get "/events/#{event1.id}"
+          expect(response).to have_http_status(:not_found)
+        end
+      end
+
+      context "with valid event id via turbo_frame" do
+        it "returns 200 OK when accessed with Turbo-Frame header" do
+          get "/events/#{event1.id}", headers: { "Turbo-Frame" => "event_modal" }
           expect(response).to have_http_status(:ok)
         end
 
         it "displays event title" do
-          get "/events/#{event1.id}"
+          get "/events/#{event1.id}", headers: { "Turbo-Frame" => "event_modal" }
           expect(response.body).to include(event1.title)
         end
 
         it "displays event date in Japanese format" do
-          get "/events/#{event1.id}"
+          get "/events/#{event1.id}", headers: { "Turbo-Frame" => "event_modal" }
           expected_date = event1.event_date.strftime("%Y年%m月%d日")
           expect(response.body).to include(expected_date)
         end
 
         it "displays event description" do
           event_with_desc = create(:event, title: "Event with description", description: "This is a test description")
-          get "/events/#{event_with_desc.id}"
+          get "/events/#{event_with_desc.id}", headers: { "Turbo-Frame" => "event_modal" }
           expect(response.body).to include("This is a test description")
         end
 
         it "displays '説明はありません' when description is nil" do
           event_no_desc = create(:event, title: "Event without description", description: nil)
-          get "/events/#{event_no_desc.id}"
+          get "/events/#{event_no_desc.id}", headers: { "Turbo-Frame" => "event_modal" }
           expect(response.body).to include("説明はありません")
         end
 
         it "displays created_by username" do
           admin_user = create(:user, username: "adminuser")
           event_by_admin = create(:event, title: "Admin Event", created_by: admin_user)
-          get "/events/#{event_by_admin.id}"
+          get "/events/#{event_by_admin.id}", headers: { "Turbo-Frame" => "event_modal" }
           expect(response.body).to include("adminuser")
         end
 
         it "displays created_at in Japanese format" do
-          get "/events/#{event1.id}"
+          get "/events/#{event1.id}", headers: { "Turbo-Frame" => "event_modal" }
           expected_datetime = event1.created_at.strftime("%Y年%m月%d日 %H:%M")
           expect(response.body).to include(expected_datetime)
         end
 
         it "wraps content in turbo_frame with id='event_modal'" do
-          get "/events/#{event1.id}"
+          get "/events/#{event1.id}", headers: { "Turbo-Frame" => "event_modal" }
           expect(response.body).to include('id="event_modal"')
         end
 
         it "includes close button in header" do
-          get "/events/#{event1.id}"
+          get "/events/#{event1.id}", headers: { "Turbo-Frame" => "event_modal" }
           expect(response.body).to include("閉じる")
         end
 
         it "includes turbo_frame=\"_top\" attribute on edit trade link" do
-          get "/events/#{event1.id}"
+          get "/events/#{event1.id}", headers: { "Turbo-Frame" => "event_modal" }
           doc = Nokogiri::HTML.parse(response.body)
           # Find the link with href matching trade_path pattern
           trade_link = doc.css("a[href='#{trade_path(event1.id)}']").first
@@ -202,11 +209,19 @@ RSpec.describe "Events", type: :request do
       end
 
       context "with discarded event" do
-        it "returns 404 Not Found" do
+        it "returns 404 Not Found when accessed without Turbo-Frame header" do
           discarded_event = create(:event, title: "Discarded Event")
           discarded_event.discard!
 
           get "/events/#{discarded_event.id}"
+          expect(response).to have_http_status(:not_found)
+        end
+
+        it "returns 404 Not Found when accessed via turbo_frame" do
+          discarded_event = create(:event, title: "Discarded Event")
+          discarded_event.discard!
+
+          get "/events/#{discarded_event.id}", headers: { "Turbo-Frame" => "event_modal" }
           expect(response).to have_http_status(:not_found)
         end
       end
@@ -228,14 +243,14 @@ RSpec.describe "Events", type: :request do
         it "displays event_date in Japanese format with configured timezone" do
           # Verify that strftime uses the configured timezone
           # Rails default is UTC; verify the format is correctly rendered
-          get "/events/#{event1.id}"
+          get "/events/#{event1.id}", headers: { "Turbo-Frame" => "event_modal" }
           expected_date = event1.event_date.strftime("%Y年%m月%d日")
           expect(response.body).to include(expected_date)
         end
 
         it "displays created_at in Japanese format with correct time" do
           # Verify datetime is formatted correctly with timezone handling
-          get "/events/#{event1.id}"
+          get "/events/#{event1.id}", headers: { "Turbo-Frame" => "event_modal" }
           expected_datetime = event1.created_at.strftime("%Y年%m月%d日 %H:%M")
           expect(response.body).to include(expected_datetime)
         end
