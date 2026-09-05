@@ -5,7 +5,7 @@ export default class extends Controller {
 
   connect() {
     this.debounceTimer = null
-    this.frameTarget.addEventListener("turbo:load", () => this.attachDropdownHandlers())
+    this.frameTarget.addEventListener("turbo:before-frame-render", () => this.attachDropdownHandlers())
   }
 
   disconnect() {
