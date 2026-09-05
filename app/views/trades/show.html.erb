@@ -1,4 +1,7 @@
 <div class="container mx-auto px-4 py-8 max-w-4xl">
+  <!-- Admin context detection -->
+  <% admin_context = current_user.role_admin? && params[:trade_id].present? %>
+
   <!-- Header -->
   <div class="mb-8">
     <%= link_to "← イベント一覧に戻る", events_path, class: "text-accent hover:text-accent-hover mb-4 inline-block font-bold text-sm" %>
@@ -48,8 +51,9 @@
       </button>
     </div>
 
-    <turbo-frame id="new_trade_card_offer" style="display: none;" class="mt-4 bg-stone-50 p-4 rounded-lg">
-      <%= render 'trade_card_offers/form', trade_card_offer: @trade.trade_card_offers.build %>
+    <% offer_frame_id = admin_context ? 'new_trade_card_offer_admin' : 'new_trade_card_offer' %>
+    <turbo-frame id="<%= offer_frame_id %>" style="display: none;" class="mt-4 bg-stone-50 p-4 rounded-lg">
+      <%= render 'trade_card_offers/form', trade_card_offer: @trade.trade_card_offers.build, frame_id: offer_frame_id %>
     </turbo-frame>
   </div>
 
@@ -78,19 +82,20 @@
       </button>
     </div>
 
-    <turbo-frame id="new_trade_card_want" style="display: none;" class="mt-4 bg-stone-50 p-4 rounded-lg">
-      <%= render 'trade_card_wants/form', trade_card_want: @trade.trade_card_wants.build %>
+    <% want_frame_id = admin_context ? 'new_trade_card_want_admin' : 'new_trade_card_want' %>
+    <turbo-frame id="<%= want_frame_id %>" style="display: none;" class="mt-4 bg-stone-50 p-4 rounded-lg">
+      <%= render 'trade_card_wants/form', trade_card_want: @trade.trade_card_wants.build, frame_id: want_frame_id %>
     </turbo-frame>
   </div>
 
   <script>
     document.getElementById('add_offer_btn').addEventListener('click', function() {
-      const frame = document.getElementById('new_trade_card_offer');
+      const frame = document.getElementById('<%= offer_frame_id %>');
       frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
     });
 
     document.getElementById('add_want_btn').addEventListener('click', function() {
-      const frame = document.getElementById('new_trade_card_want');
+      const frame = document.getElementById('<%= want_frame_id %>');
       frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
     });
   </script>
