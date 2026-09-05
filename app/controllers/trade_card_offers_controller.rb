@@ -75,6 +75,16 @@ class TradeCardOffersController < ApplicationController
   def trade_card_offer_params
     permitted = [ :card_name, :quantity, :language, :condition, :foil, :frame, :pw_mark, :expansion_id, :note ]
     permitted << :amount if current_user.role_admin?
-    params.require(:trade_card_offer).permit(permitted)
+    normalize_trade_card_offer_params(params.require(:trade_card_offer).permit(permitted))
+  end
+
+  def normalize_trade_card_offer_params(params)
+    # Apply default values for null/empty parameters
+    params[:quantity] = 1 if params[:quantity].blank?
+    params[:language] = 'ja' if params[:language].blank?
+    params[:condition] = 'none' if params[:condition].blank?
+    params[:foil] = 'non_foil' if params[:foil].blank?
+    params[:frame] = 'normal' if params[:frame].blank?
+    params
   end
 end

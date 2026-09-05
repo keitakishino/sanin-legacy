@@ -37,13 +37,13 @@
     <!-- Quantity -->
     <div>
       <%= f.label :quantity, "数量", class: "block text-xs font-bold text-stone-500 mb-1" %>
-      <%= f.number_field :quantity, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+      <%= f.number_field :quantity, value: trade_card_want.quantity.presence || 1, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
     </div>
 
     <!-- Language (nullable) -->
     <div>
       <%= f.label :language, "言語 (不問なら未選択)", class: "block text-xs font-bold text-stone-500 mb-1" %>
-      <%= f.select :language, [["不問", nil]] + TradeCardWant.languages.keys.map { |k| [I18n.t("activerecord.enums.trade_card_want.language.#{k}"), k] }, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+      <%= f.select :language, [["不問", nil]] + TradeCardWant.languages.keys.map { |k| [I18n.t("activerecord.enums.trade_card_want.language.#{k}"), k] }, { prompt: "選択してください", selected: trade_card_want.language }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
     </div>
 
     <!-- Conditions (array field) -->
@@ -62,13 +62,13 @@
     <!-- Foil (nullable) -->
     <div>
       <%= f.label :foil, "フォイル (不問なら未選択)", class: "block text-xs font-bold text-stone-500 mb-1" %>
-      <%= f.select :foil, [["不問", nil]] + TradeCardWant.foils.keys.map { |k| [I18n.t("activerecord.enums.trade_card_want.foil.#{k}"), k] }, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+      <%= f.select :foil, [["不問", nil]] + TradeCardWant.foils.keys.map { |k| [I18n.t("activerecord.enums.trade_card_want.foil.#{k}"), k] }, { prompt: "選択してください", selected: trade_card_want.foil.presence || 'non_foil' }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
     </div>
 
     <!-- Frame (nullable) -->
     <div>
       <%= f.label :frame, "フレーム (不問なら未選択)", class: "block text-xs font-bold text-stone-500 mb-1" %>
-      <%= f.select :frame, [["不問", nil]] + TradeCardWant.frames.keys.map { |k| [I18n.t("activerecord.enums.trade_card_want.frame.#{k}"), k] }, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+      <%= f.select :frame, [["不問", nil]] + TradeCardWant.frames.keys.map { |k| [I18n.t("activerecord.enums.trade_card_want.frame.#{k}"), k] }, { prompt: "選択してください", selected: trade_card_want.frame.presence || 'normal' }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
     </div>
 
     <!-- Expansion (Combobox) -->

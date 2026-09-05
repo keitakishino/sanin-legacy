@@ -609,4 +609,93 @@ RSpec.describe "TradeCardWants", type: :request do
       end
     end
   end
+
+  describe "default values for null inputs" do
+    describe "POST /trades/:event_id/card_wants (create)" do
+      context "with all null/empty parameters" do
+        let(:null_params) do
+          {
+            trade_card_want: {
+              card_name: "Test Card",
+              quantity: "",
+              language: nil,
+              conditions: [],
+              foil: "",
+              frame: ""
+            }
+          }
+        end
+
+        it "applies default values: quantity=1, language=nil, foil=non_foil, frame=normal" do
+          trade
+          post "/trades/#{event.id}/card_wants", params: null_params
+          expect(response).to redirect_to(trade_path(event))
+
+          want = TradeCardWant.last
+          expect(want.quantity).to eq(1)
+          expect(want.language).to be_nil
+          expect(want.foil).to eq("non_foil")
+          expect(want.frame).to eq("normal")
+          expect(want.conditions).to eq([] || nil)
+        end
+      end
+
+      context "with partial null parameters" do
+        let(:partial_null_params) do
+          {
+            trade_card_want: {
+              card_name: "Test Card",
+              quantity: 3,
+              language: "en",
+              conditions: [ 0, 2 ],
+              foil: "foil",
+              frame: ""
+            }
+          }
+        end
+
+        it "preserves provided values and applies defaults only to null parameters" do
+          trade
+          post "/trades/#{event.id}/card_wants", params: partial_null_params
+          expect(response).to redirect_to(trade_path(event))
+
+          want = TradeCardWant.last
+          expect(want.quantity).to eq(3)
+          expect(want.language).to eq("en")
+          expect(want.conditions).to eq([ 0, 2 ])
+          expect(want.foil).to eq("foil")
+          expect(want.frame).to eq("normal")
+        end
+      end
+    end
+
+    describe "PATCH /trades/:event_id/card_wants/:id (update)" do
+      context "when updating without changing values" do
+        let(:existing_want) { create(:trade_card_want, trade: trade, quantity: 2, language: nil, foil: "special") }
+        let(:resubmit_params) do
+          {
+            trade_card_want: {
+              card_name: existing_want.card_name,
+              quantity: 2,
+              language: nil,
+              conditions: existing_want.conditions || [],
+              foil: "special",
+              frame: existing_want.frame
+            }
+          }
+        end
+
+        it "preserves existing values" do
+          existing_want
+          patch "/trades/#{event.id}/card_wants/#{existing_want.id}", params: resubmit_params
+          expect(response).to redirect_to(trade_path(event))
+
+          existing_want.reload
+          expect(existing_want.quantity).to eq(2)
+          expect(existing_want.language).to be_nil
+          expect(existing_want.foil).to eq("special")
+        end
+      end
+    end
+  end
 end
