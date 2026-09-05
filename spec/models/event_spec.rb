@@ -63,6 +63,50 @@ RSpec.describe Event, type: :model do
         expect(event.errors[:event_date]).to be_empty
       end
     end
+
+    describe 'error messages' do
+      let(:user) { create(:user) }
+
+      context 'when title is blank' do
+        it 'displays Japanese error message' do
+          with_locale(:ja) do
+            event = Event.new(title: '', event_date: Date.today, created_by: user)
+            event.valid?
+            expect(event.errors.full_messages).to include("イベント名 を入力してください")
+          end
+        end
+      end
+
+      context 'when title exceeds max length' do
+        it 'displays Japanese error message for too_long' do
+          with_locale(:ja) do
+            event = Event.new(title: 'a' * 256, event_date: Date.today, created_by: user)
+            event.valid?
+            expect(event.errors.full_messages).to include("イベント名 は長すぎます（最大255文字）")
+          end
+        end
+      end
+
+      context 'when event_date is blank' do
+        it 'displays Japanese error message' do
+          with_locale(:ja) do
+            event = Event.new(title: 'Test Event', event_date: nil, created_by: user)
+            event.valid?
+            expect(event.errors.full_messages).to include("イベント日時 を入力してください")
+          end
+        end
+      end
+
+      context 'when event_date is in the past' do
+        it 'displays Japanese error message for past date' do
+          with_locale(:ja) do
+            event = Event.new(title: 'Test Event', event_date: Date.today - 1.day, created_by: user)
+            event.valid?
+            expect(event.errors.full_messages).to include("イベント日時 は過去の日付に設定することはできません")
+          end
+        end
+      end
+    end
   end
 
   describe 'logical deletion' do
