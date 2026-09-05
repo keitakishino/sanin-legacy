@@ -30,6 +30,9 @@
 en:
   hello: "Hello world"
   activerecord:
+    errors:
+      messages:
+        date_must_not_be_past: "must not be a past date"
     attributes:
       event:
         title: "Event Title"

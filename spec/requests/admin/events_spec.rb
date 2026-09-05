@@ -202,6 +202,34 @@ RSpec.describe "Admin::Events", type: :request do
           post admin_events_path, params: invalid_params
           expect(response.body).to include("error")
         end
+
+        context "with past event_date" do
+          let(:past_params) do
+            {
+              event: {
+                title: "Past Event",
+                description: "Event Description",
+                event_date: Date.today - 1.day
+              }
+            }
+          end
+
+          it "does not create an event" do
+            expect {
+              post admin_events_path, params: past_params
+            }.not_to change(Event, :count)
+          end
+
+          it "returns unprocessable_entity status" do
+            post admin_events_path, params: past_params
+            expect(response).to have_http_status(:unprocessable_entity)
+          end
+
+          it "displays error message for event_date" do
+            post admin_events_path, params: past_params
+            expect(response.body).to include("error")
+          end
+        end
       end
     end
   end
@@ -326,6 +354,27 @@ RSpec.describe "Admin::Events", type: :request do
         it "returns unprocessable_entity status" do
           patch admin_event_path(event), params: invalid_params
           expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        context "with past event_date" do
+          let(:past_params) do
+            {
+              event: {
+                title: "Updated Title",
+                event_date: Date.today - 1.day
+              }
+            }
+          end
+
+          it "does not update the event" do
+            patch admin_event_path(event), params: past_params
+            expect(event.reload.event_date).not_to eq(Date.today - 1.day)
+          end
+
+          it "returns unprocessable_entity status" do
+            patch admin_event_path(event), params: past_params
+            expect(response).to have_http_status(:unprocessable_entity)
+          end
         end
       end
     end

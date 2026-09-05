@@ -152,6 +152,7 @@ ja:
         too_short: "は短すぎます（最小%{count}文字）"
         too_long: "は長すぎます（最大%{count}文字）"
         blank: "を入力してください"
+        date_must_not_be_past: "は過去の日付に設定することはできません"
       models:
         user:
           attributes:

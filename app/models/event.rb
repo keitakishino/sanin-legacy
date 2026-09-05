@@ -10,6 +10,7 @@ class Event < ApplicationRecord
   validates :created_by, presence: true
   validates :title, presence: true, length: { maximum: 255 }
   validates :event_date, presence: true
+  validate :event_date_not_in_past
 
   # Scopes for logical deletion
   default_scope { where(discarded_at: nil) }
@@ -27,5 +28,11 @@ class Event < ApplicationRecord
 
   def discarded?
     discarded_at.present?
+  end
+
+  private
+
+  def event_date_not_in_past
+    errors.add(:event_date, :date_must_not_be_past) if event_date.present? && event_date < Date.today
   end
 end
