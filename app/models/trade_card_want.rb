@@ -9,7 +9,7 @@ class TradeCardWant < ApplicationRecord
 
   validates :card_name, presence: true
   validates :quantity, presence: true, numericality: { only_integer: true, greater_than: 0 }
-  validates :amount, numericality: { only_integer: true }, allow_nil: true
+  validates :amount, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
   # A13: language, foil, frame are nullable (representing "不問"/no preference)
   #      conditions is an integer array where nil or empty array means "不問"
