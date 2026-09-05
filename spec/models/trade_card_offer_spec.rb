@@ -10,7 +10,7 @@ describe TradeCardOffer, type: :model do
     it { is_expected.to define_enum_for(:language).with_values(ja: 0, en: 1, other: 2) }
     it { is_expected.to define_enum_for(:condition).with_values(nm: 0, sp: 1, mp: 2, hp: 3, poor: 4, none: 5).with_suffix }
     it { is_expected.to define_enum_for(:foil).with_values(foil: 0, non_foil: 1, special: 2) }
-    it { is_expected.to define_enum_for(:frame).with_values(normal: 0, extended: 1, borderless: 2, showcase: 3) }
+    it { is_expected.to define_enum_for(:frame).with_values(normal: 0, extended: 1, borderless: 2, showcase: 3, retro: 4) }
   end
 
   describe 'validations' do
