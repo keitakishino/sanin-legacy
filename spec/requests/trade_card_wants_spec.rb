@@ -471,6 +471,15 @@ RSpec.describe "TradeCardWants", type: :request do
       expect(response.content_type).to include("text/vnd.turbo-stream.html")
     end
 
+    it "includes toast notification in turbo_stream response" do
+      want
+      delete "/trades/#{event.id}/card_wants/#{want.id}", headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('action="append" target="toast-container"')
+      expect(response.body).to include(want.card_name)
+      expect(response.body).to include("を欲しいカードから削除しました")
+    end
+
     it "returns HTML redirect on success" do
       want
       delete "/trades/#{event.id}/card_wants/#{want.id}"
