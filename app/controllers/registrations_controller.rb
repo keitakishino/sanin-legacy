@@ -18,6 +18,7 @@ class RegistrationsController < ApplicationController
     @invitation = invitation
     @show_email_form = false
     @email = nil
+    @username = nil
   end
 
   def create
@@ -74,6 +75,7 @@ class RegistrationsController < ApplicationController
       flash.now[:alert] = build_error_message(e.record)
       @show_email_form = true
       @email = email
+      @username = username
       render :new, status: :unprocessable_entity
     end
   end
