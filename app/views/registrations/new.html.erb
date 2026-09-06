@@ -39,6 +39,11 @@
         </div>
 
         <div class="mb-4">
+          <%= f.label :username, "ユーザー名", class: "block text-xs font-bold text-stone-500 mb-2" %>
+          <%= f.text_field :username, class: "w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent", required: true, placeholder: "3～50文字の英数字またはアンダースコア" %>
+        </div>
+
+        <div class="mb-4">
           <%= f.label :password, "パスワード", class: "block text-xs font-bold text-stone-500 mb-2" %>
           <%= f.password_field :password, class: "w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent", required: true, placeholder: "8文字以上" %>
         </div>
