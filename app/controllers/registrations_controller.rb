@@ -71,6 +71,8 @@ class RegistrationsController < ApplicationController
       redirect_to root_path
     rescue ActiveRecord::RecordInvalid => e
       flash.now[:alert] = build_error_message(e.record)
+      @show_email_form = true
+      @email = email
       render :new, status: :unprocessable_entity
     end
   end

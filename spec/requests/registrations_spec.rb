@@ -186,6 +186,37 @@ RSpec.describe "Registrations", type: :request do
 
         expect(invitation.reload.status).to eq("active")
       end
+
+      it "displays email form without hidden class" do
+        post "/signup", params: params
+
+        parsed = Nokogiri::HTML(response.body)
+        email_form = parsed.css('#email-form')
+
+        expect(email_form).not_to be_empty
+        expect(email_form.first.classes).not_to include("hidden")
+      end
+
+      it "preserves email value in form" do
+        post "/signup", params: params
+
+        parsed = Nokogiri::HTML(response.body)
+        email_input = parsed.css('input[name="email"]')
+
+        expect(email_input).not_to be_empty
+        expect(email_input.first.attr('value')).to eq("newuser@example.com")
+      end
+
+      it "clears password fields" do
+        post "/signup", params: params
+
+        parsed = Nokogiri::HTML(response.body)
+        password_input = parsed.css('input[name="password"]')
+        password_confirmation_input = parsed.css('input[name="password_confirmation"]')
+
+        expect(password_input.first.attr('value')).to eq("")
+        expect(password_confirmation_input.first.attr('value')).to eq("")
+      end
     end
 
     context "with password too short" do
@@ -214,6 +245,37 @@ RSpec.describe "Registrations", type: :request do
         post "/signup", params: params
 
         expect(response.body).to include("パスワード")
+      end
+
+      it "displays email form without hidden class" do
+        post "/signup", params: params
+
+        parsed = Nokogiri::HTML(response.body)
+        email_form = parsed.css('#email-form')
+
+        expect(email_form).not_to be_empty
+        expect(email_form.first.classes).not_to include("hidden")
+      end
+
+      it "preserves email value in form" do
+        post "/signup", params: params
+
+        parsed = Nokogiri::HTML(response.body)
+        email_input = parsed.css('input[name="email"]')
+
+        expect(email_input).not_to be_empty
+        expect(email_input.first.attr('value')).to eq("newuser@example.com")
+      end
+
+      it "clears password fields" do
+        post "/signup", params: params
+
+        parsed = Nokogiri::HTML(response.body)
+        password_input = parsed.css('input[name="password"]')
+        password_confirmation_input = parsed.css('input[name="password_confirmation"]')
+
+        expect(password_input.first.attr('value')).to eq("")
+        expect(password_confirmation_input.first.attr('value')).to eq("")
       end
     end
 
@@ -247,6 +309,40 @@ RSpec.describe "Registrations", type: :request do
         post "/signup", params: params
 
         expect(response.body).to include("メール")
+      end
+
+      it "displays email form without hidden class" do
+        existing_user
+        post "/signup", params: params
+
+        parsed = Nokogiri::HTML(response.body)
+        email_form = parsed.css('#email-form')
+
+        expect(email_form).not_to be_empty
+        expect(email_form.first.classes).not_to include("hidden")
+      end
+
+      it "preserves email value in form" do
+        existing_user
+        post "/signup", params: params
+
+        parsed = Nokogiri::HTML(response.body)
+        email_input = parsed.css('input[name="email"]')
+
+        expect(email_input).not_to be_empty
+        expect(email_input.first.attr('value')).to eq("duplicate@example.com")
+      end
+
+      it "clears password fields" do
+        existing_user
+        post "/signup", params: params
+
+        parsed = Nokogiri::HTML(response.body)
+        password_input = parsed.css('input[name="password"]')
+        password_confirmation_input = parsed.css('input[name="password_confirmation"]')
+
+        expect(password_input.first.attr('value')).to eq("")
+        expect(password_confirmation_input.first.attr('value')).to eq("")
       end
     end
 
