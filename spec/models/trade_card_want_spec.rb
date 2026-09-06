@@ -34,6 +34,32 @@ describe TradeCardWant, type: :model do
         subject.quantity = 1
         expect(subject).to be_valid
       end
+
+      context 'error messages' do
+        it 'returns correct message when quantity is zero' do
+          with_locale(:ja) do
+            subject.quantity = 0
+            subject.valid?
+            expect(subject.errors[:quantity]).to include("は0より大きい値で入力してください")
+          end
+        end
+
+        it 'returns correct message when quantity is negative' do
+          with_locale(:ja) do
+            subject.quantity = -5
+            subject.valid?
+            expect(subject.errors[:quantity]).to include("は0より大きい値で入力してください")
+          end
+        end
+
+        it 'returns correct message when quantity is non-integer (decimal)' do
+          with_locale(:ja) do
+            subject.quantity = 1.5
+            subject.valid?
+            expect(subject.errors[:quantity]).to include("は整数で入力してください")
+          end
+        end
+      end
     end
 
     context 'amount validation' do
@@ -60,6 +86,32 @@ describe TradeCardWant, type: :model do
       it 'allows amount = nil' do
         subject.amount = nil
         expect(subject).to be_valid
+      end
+
+      context 'error messages' do
+        it 'returns correct message when amount is negative' do
+          with_locale(:ja) do
+            subject.amount = -1
+            subject.valid?
+            expect(subject.errors[:amount]).to include("は0以上の値で入力してください")
+          end
+        end
+
+        it 'returns correct message when amount is non-integer (decimal)' do
+          with_locale(:ja) do
+            subject.amount = 100.5
+            subject.valid?
+            expect(subject.errors[:amount]).to include("は整数で入力してください")
+          end
+        end
+
+        it 'returns correct message when amount is non-numeric string' do
+          with_locale(:ja) do
+            subject.amount = "invalid"
+            subject.valid?
+            expect(subject.errors[:amount]).to include("は数値で入力してください")
+          end
+        end
       end
     end
 
