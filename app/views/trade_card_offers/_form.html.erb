@@ -37,31 +37,31 @@
     <!-- Quantity -->
     <div>
       <%= f.label :quantity, "数量", class: "block text-xs font-bold text-stone-500 mb-1" %>
-      <%= f.number_field :quantity, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+      <%= f.number_field :quantity, value: trade_card_offer.quantity.presence || 1, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
     </div>
 
     <!-- Language -->
     <div>
       <%= f.label :language, "言語", class: "block text-xs font-bold text-stone-500 mb-1" %>
-      <%= f.select :language, TradeCardOffer.languages.keys.map { |k| [I18n.t("activerecord.enums.trade_card_offer.language.#{k}"), k] }, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+      <%= f.select :language, TradeCardOffer.languages.keys.map { |k| [I18n.t("activerecord.enums.trade_card_offer.language.#{k}"), k] }, { selected: trade_card_offer.language.presence || 'ja' }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
     </div>
 
     <!-- Condition -->
     <div>
       <%= f.label :condition, "状態", class: "block text-xs font-bold text-stone-500 mb-1" %>
-      <%= f.select :condition, TradeCardOffer.conditions.keys.map { |k| [I18n.t("activerecord.enums.trade_card_offer.condition.#{k}"), k] }, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+      <%= f.select :condition, TradeCardOffer.conditions.keys.map { |k| [I18n.t("activerecord.enums.trade_card_offer.condition.#{k}"), k] }, { selected: trade_card_offer.condition.presence || 'none' }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
     </div>
 
     <!-- Foil -->
     <div>
       <%= f.label :foil, "フォイル", class: "block text-xs font-bold text-stone-500 mb-1" %>
-      <%= f.select :foil, TradeCardOffer.foils.keys.map { |k| [I18n.t("activerecord.enums.trade_card_offer.foil.#{k}"), k] }, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+      <%= f.select :foil, TradeCardOffer.foils.keys.map { |k| [I18n.t("activerecord.enums.trade_card_offer.foil.#{k}"), k] }, { selected: trade_card_offer.foil.presence || 'non_foil' }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
     </div>
 
     <!-- Frame -->
     <div>
       <%= f.label :frame, "フレーム", class: "block text-xs font-bold text-stone-500 mb-1" %>
-      <%= f.select :frame, TradeCardOffer.frames.keys.map { |k| [I18n.t("activerecord.enums.trade_card_offer.frame.#{k}"), k] }, { prompt: "選択してください" }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+      <%= f.select :frame, TradeCardOffer.frames.keys.map { |k| [I18n.t("activerecord.enums.trade_card_offer.frame.#{k}"), k] }, { selected: trade_card_offer.frame.presence || 'normal' }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
     </div>
 
     <!-- PW Mark -->

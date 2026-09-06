@@ -609,4 +609,39 @@ RSpec.describe "TradeCardWants", type: :request do
       end
     end
   end
+
+  describe "null input handling" do
+    describe "POST /trades/:event_id/card_wants (create)" do
+      context "with empty quantity" do
+        let(:null_quantity_params) do
+          {
+            trade_card_want: {
+              card_name: "Test Card",
+              quantity: ""
+            }
+          }
+        end
+
+        it "does not create a trade card want when quantity is empty" do
+          trade
+          expect {
+            post "/trades/#{event.id}/card_wants", params: null_quantity_params
+          }.not_to change { TradeCardWant.count }
+        end
+
+        it "returns unprocessable_entity status for turbo_stream" do
+          trade
+          post "/trades/#{event.id}/card_wants", params: null_quantity_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it "returns error response for HTML" do
+          trade
+          post "/trades/#{event.id}/card_wants", params: null_quantity_params
+          expect(response).to redirect_to(trade_path(event))
+          expect(flash[:alert]).to be_present
+        end
+      end
+    end
+  end
 end
