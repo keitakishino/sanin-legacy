@@ -1,21 +1,36 @@
 <%
   id ||= "toast-#{SecureRandom.hex(4)}"
   duration ||= 4000
+  variant ||= :success
   # Clamp duration to valid range (100ms to 60 seconds)
   duration = [[duration.to_i, 100].max, 60000].min
+
+  # Variant-specific styling
+  border_color = variant == :danger ? "border-danger" : "border-success"
+  icon_color = variant == :danger ? "text-danger" : "text-success"
+  progress_color = variant == :danger ? "bg-danger" : "bg-success"
+  bg_color = variant == :danger ? "bg-danger-soft" : "bg-white"
 %>
 <div data-controller="toast"
      id="<%= id %>"
-     class="relative bg-white border-l-4 border-success rounded-md shadow-lg p-4 max-w-sm w-full pointer-events-auto"
-     data-toast-duration="<%= duration %>">
+     class="relative <%= bg_color %> border-l-4 <%= border_color %> rounded-md shadow-lg p-4 max-w-sm w-full pointer-events-auto"
+     data-toast-duration="<%= duration %>"
+     aria-live="polite"
+     aria-atomic="true">
 
   <!-- Main content -->
   <div class="flex gap-3">
-    <!-- Checkmark icon (SVG inline) -->
+    <!-- Icon (Checkmark for success, X for danger) -->
     <div class="flex-shrink-0 pt-0.5">
-      <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
-      </svg>
+      <% if variant == :danger %>
+        <svg class="w-5 h-5 <%= icon_color %>" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      <% else %>
+        <svg class="w-5 h-5 <%= icon_color %>" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+        </svg>
+      <% end %>
     </div>
 
     <!-- Message text -->
@@ -35,7 +50,7 @@
 
   <!-- Progress bar (下部カウントダウン) -->
   <div class="mt-3 bg-stone-200 rounded-full h-1 overflow-hidden">
-    <div class="bg-success h-full w-full"
+    <div class="<%= progress_color %> h-full w-full"
          style="animation: toast-countdown <%= duration / 1000 %>s linear forwards;"></div>
   </div>
 </div>

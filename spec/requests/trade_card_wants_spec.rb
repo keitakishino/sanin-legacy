@@ -132,6 +132,18 @@ RSpec.describe "TradeCardWants", type: :request do
         # Check that the turbo-frame for suggestions is present
         expect(response.body).to include('id="expansion_suggestions"')
       end
+
+      it "includes error toast notification in turbo_stream response" do
+        trade
+        post "/trades/#{event.id}/card_wants", params: invalid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.body).to include('action="append" target="toast-container"')
+        expect(response.body).to include('data-controller="toast"')
+        expect(response.body).to include('border-danger')
+        # Verify error messages are in the toast (check for X icon for danger variant)
+        expect(response.body).to include('text-danger')
+        expect(response.body).to include('bg-danger-soft')
+      end
     end
 
     context "with invalid conditions values" do
@@ -163,6 +175,16 @@ RSpec.describe "TradeCardWants", type: :request do
         post "/trades/#{event.id}/card_wants", params: invalid_conditions_params
         expect(response).to redirect_to(trade_path(event))
         expect(flash[:alert]).to be_present
+      end
+
+      it "includes error toast in turbo_stream response for invalid conditions" do
+        trade
+        post "/trades/#{event.id}/card_wants", params: invalid_conditions_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.body).to include('action="append" target="toast-container"')
+        expect(response.body).to include('data-controller="toast"')
+        expect(response.body).to include('border-danger')
+        expect(response.body).to include('text-danger')
       end
     end
 
@@ -212,6 +234,16 @@ RSpec.describe "TradeCardWants", type: :request do
         expect(response).to redirect_to(trade_path(event))
         expect(flash[:alert]).to include("このカード明細は既に登録されています")
       end
+
+      it "includes error toast in turbo_stream response for duplicate" do
+        trade
+        post "/trades/#{event.id}/card_wants", params: duplicate_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.body).to include('action="append" target="toast-container"')
+        expect(response.body).to include('data-controller="toast"')
+        expect(response.body).to include('border-danger')
+        expect(response.body).to include("このカード明細は既に登録されています")
+      end
     end
 
     context "with duplicate card entry but different condition order" do
@@ -259,6 +291,16 @@ RSpec.describe "TradeCardWants", type: :request do
         post "/trades/#{event.id}/card_wants", params: duplicate_params_different_order
         expect(response).to redirect_to(trade_path(event))
         expect(flash[:alert]).to include("このカード明細は既に登録されています")
+      end
+
+      it "includes error toast in turbo_stream response for order-insensitive duplicate" do
+        trade
+        post "/trades/#{event.id}/card_wants", params: duplicate_params_different_order, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.body).to include('action="append" target="toast-container"')
+        expect(response.body).to include('data-controller="toast"')
+        expect(response.body).to include('border-danger')
+        expect(response.body).to include("このカード明細は既に登録されています")
       end
     end
 
