@@ -80,6 +80,18 @@ RSpec.describe "Users::Profiles", type: :request do
           expect(response.body).to include(mypage_path)
           expect(response.body).to include("マイページ")
         end
+
+        it "displays mypage link in header when accessing dashboard" do
+          get "/"
+          expect(response.body).to include(mypage_path)
+          expect(response.body).to include("マイページ")
+        end
+
+        it "displays mypage link in header when accessing admin events page" do
+          get admin_events_path
+          expect(response.body).to include(mypage_path)
+          expect(response.body).to include("マイページ")
+        end
       end
 
       context "when user has Twitter identity" do
