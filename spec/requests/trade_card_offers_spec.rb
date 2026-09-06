@@ -529,9 +529,9 @@ RSpec.describe "TradeCardOffers", type: :request do
     end
   end
 
-  describe "default values for null inputs" do
+  describe "null input handling" do
     describe "POST /trades/:event_id/card_offers (create)" do
-      context "with all null/empty parameters" do
+      context "with null/empty required parameters" do
         let(:null_params) do
           {
             trade_card_offer: {
@@ -546,75 +546,24 @@ RSpec.describe "TradeCardOffers", type: :request do
           }
         end
 
-        it "applies default values: quantity=1, language=ja, condition=none, foil=non_foil, frame=normal" do
+        it "does not create a trade card offer when required fields are empty" do
+          trade
+          expect {
+            post "/trades/#{event.id}/card_offers", params: null_params
+          }.not_to change { TradeCardOffer.count }
+        end
+
+        it "returns unprocessable_entity status for turbo_stream" do
+          trade
+          post "/trades/#{event.id}/card_offers", params: null_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it "returns error response for HTML" do
           trade
           post "/trades/#{event.id}/card_offers", params: null_params
           expect(response).to redirect_to(trade_path(event))
-
-          offer = TradeCardOffer.last
-          expect(offer.quantity).to eq(1)
-          expect(offer.language).to eq("ja")
-          expect(offer.condition).to eq("none")
-          expect(offer.foil).to eq("non_foil")
-          expect(offer.frame).to eq("normal")
-        end
-      end
-
-      context "with partial null parameters" do
-        let(:partial_null_params) do
-          {
-            trade_card_offer: {
-              card_name: "Test Card",
-              quantity: 2,
-              language: "en",
-              condition: "",
-              foil: "foil",
-              frame: "",
-              pw_mark: false
-            }
-          }
-        end
-
-        it "preserves provided values and applies defaults only to null parameters" do
-          trade
-          post "/trades/#{event.id}/card_offers", params: partial_null_params
-          expect(response).to redirect_to(trade_path(event))
-
-          offer = TradeCardOffer.last
-          expect(offer.quantity).to eq(2)
-          expect(offer.language).to eq("en")
-          expect(offer.condition).to eq("none")
-          expect(offer.foil).to eq("foil")
-          expect(offer.frame).to eq("normal")
-        end
-      end
-    end
-
-    describe "PATCH /trades/:event_id/card_offers/:id (update)" do
-      context "when updating without changing values" do
-        let(:existing_offer) { create(:trade_card_offer, trade: trade, quantity: 3, language: "other") }
-        let(:resubmit_params) do
-          {
-            trade_card_offer: {
-              card_name: existing_offer.card_name,
-              quantity: 3,
-              language: "other",
-              condition: existing_offer.condition,
-              foil: existing_offer.foil,
-              frame: existing_offer.frame,
-              pw_mark: existing_offer.pw_mark
-            }
-          }
-        end
-
-        it "preserves existing values" do
-          existing_offer
-          patch "/trades/#{event.id}/card_offers/#{existing_offer.id}", params: resubmit_params
-          expect(response).to redirect_to(trade_path(event))
-
-          existing_offer.reload
-          expect(existing_offer.quantity).to eq(3)
-          expect(existing_offer.language).to eq("other")
+          expect(flash[:alert]).to be_present
         end
       end
     end

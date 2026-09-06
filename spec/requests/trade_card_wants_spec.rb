@@ -610,91 +610,36 @@ RSpec.describe "TradeCardWants", type: :request do
     end
   end
 
-  describe "default values for null inputs" do
+  describe "null input handling" do
     describe "POST /trades/:event_id/card_wants (create)" do
-      context "with all null/empty parameters" do
-        let(:null_params) do
+      context "with empty quantity" do
+        let(:null_quantity_params) do
           {
             trade_card_want: {
               card_name: "Test Card",
-              quantity: "",
-              language: nil,
-              conditions: nil,
-              foil: "",
-              frame: ""
+              quantity: ""
             }
           }
         end
 
-        it "applies default values: quantity=1, language=nil, foil=nil, frame=nil" do
+        it "does not create a trade card want when quantity is empty" do
           trade
-          post "/trades/#{event.id}/card_wants", params: null_params
-          expect(response).to redirect_to(trade_path(event))
-
-          want = TradeCardWant.last
-          expect(want).not_to be_nil
-          expect(want.quantity).to eq(1)
-          expect(want.language).to be_nil
-          expect(want.foil).to be_nil
-          expect(want.frame).to be_nil
-          expect(want.conditions).to be_nil
-        end
-      end
-
-      context "with partial null parameters" do
-        let(:partial_null_params) do
-          {
-            trade_card_want: {
-              card_name: "Test Card",
-              quantity: 3,
-              language: "en",
-              conditions: [ 0, 2 ],
-              foil: "foil",
-              frame: ""
-            }
-          }
+          expect {
+            post "/trades/#{event.id}/card_wants", params: null_quantity_params
+          }.not_to change { TradeCardWant.count }
         end
 
-        it "preserves provided values and applies defaults only to null parameters" do
+        it "returns unprocessable_entity status for turbo_stream" do
           trade
-          post "/trades/#{event.id}/card_wants", params: partial_null_params
-          expect(response).to redirect_to(trade_path(event))
-
-          want = TradeCardWant.last
-          expect(want.quantity).to eq(3)
-          expect(want.language).to eq("en")
-          expect(want.conditions).to eq([ 0, 2 ])
-          expect(want.foil).to eq("foil")
-          expect(want.frame).to be_nil
-        end
-      end
-    end
-
-    describe "PATCH /trades/:event_id/card_wants/:id (update)" do
-      context "when updating without changing values" do
-        let(:existing_want) { create(:trade_card_want, trade: trade, quantity: 2, language: nil, foil: "special") }
-        let(:resubmit_params) do
-          {
-            trade_card_want: {
-              card_name: existing_want.card_name,
-              quantity: 2,
-              language: nil,
-              conditions: existing_want.conditions || [],
-              foil: "special",
-              frame: existing_want.frame
-            }
-          }
+          post "/trades/#{event.id}/card_wants", params: null_quantity_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+          expect(response).to have_http_status(:unprocessable_entity)
         end
 
-        it "preserves existing values" do
-          existing_want
-          patch "/trades/#{event.id}/card_wants/#{existing_want.id}", params: resubmit_params
+        it "returns error response for HTML" do
+          trade
+          post "/trades/#{event.id}/card_wants", params: null_quantity_params
           expect(response).to redirect_to(trade_path(event))
-
-          existing_want.reload
-          expect(existing_want.quantity).to eq(2)
-          expect(existing_want.language).to be_nil
-          expect(existing_want.foil).to eq("special")
+          expect(flash[:alert]).to be_present
         end
       end
     end

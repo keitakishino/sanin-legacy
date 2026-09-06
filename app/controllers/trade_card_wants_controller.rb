@@ -75,14 +75,6 @@ class TradeCardWantsController < ApplicationController
   def trade_card_want_params
     permitted = [ :card_name, :quantity, :language, :foil, :frame, :expansion_id, :note, conditions: [] ]
     permitted << :amount if current_user.role_admin?
-    normalize_trade_card_want_params(params.require(:trade_card_want).permit(permitted))
-  end
-
-  def normalize_trade_card_want_params(params)
-    # Apply default values for null/empty parameters
-    params[:quantity] = 1 if params[:quantity].blank?
-    # language, foil, frame, conditions: keep nil/empty for "不問" (no preference)
-    # ユーザーが「不問」を選んだ場合のnilを尊重し、上書きしない
-    params
+    params.require(:trade_card_want).permit(permitted)
   end
 end
