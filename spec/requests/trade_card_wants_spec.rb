@@ -142,6 +142,7 @@ RSpec.describe "TradeCardWants", type: :request do
         expect(response.body).to include('border-danger')
         # Verify error messages are in the toast (check for X icon for danger variant)
         expect(response.body).to include('text-danger')
+        expect(response.body).to include('bg-danger-soft')
       end
     end
 
