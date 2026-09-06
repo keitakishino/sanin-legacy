@@ -5,6 +5,6 @@ class Admin::BaseController < ApplicationController
   private
 
   def require_admin!
-    head :forbidden unless current_user&.role_admin?
+    raise ForbiddenError unless current_user&.role_admin?
   end
 end
