@@ -30,4 +30,28 @@ class ApplicationController < ActionController::Base
     session.delete(:user_id)
     @current_user = nil
   end
+
+  private
+
+  def generate_unique_username(email)
+    base_username = email.split("@").first if email.present?
+    base_username = "user" if base_username.blank?
+
+    base_username = base_username.gsub(/[^a-zA-Z0-9_]/, "_")[0..49]
+    base_username = "user" if base_username.blank?
+
+    max_attempts = 100
+
+    candidates = [ base_username ] + (1..max_attempts).map { |i| "#{base_username}#{i}" }
+
+    existing_usernames = User.where(username: candidates).pluck(:username).to_set
+
+    selected_username = candidates.find { |u| !existing_usernames.include?(u) }
+
+    if selected_username.nil?
+      "#{base_username[0..37]}_#{Time.current.to_i}"
+    else
+      selected_username
+    end
+  end
 end
