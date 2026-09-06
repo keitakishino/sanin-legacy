@@ -115,6 +115,6 @@ class RegistrationsController < ApplicationController
   end
 
   def render_forbidden
-    head :forbidden
+    raise ForbiddenError
   end
 end

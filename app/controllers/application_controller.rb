@@ -8,7 +8,17 @@ class ApplicationController < ActionController::Base
 
   helper_method :current_user, :user_signed_in?
 
+  rescue_from ForbiddenError, with: :handle_forbidden
+
   private
+
+  def handle_forbidden
+    @status_code = 403
+    @title = t("errors.forbidden.title", default: "アクセスが拒否されました")
+    @message = t("errors.forbidden.message", default: "このページにアクセスする権限がありません")
+    @button_path = user_signed_in? ? root_path : signin_path
+    render "errors/show", status: :forbidden, layout: "error"
+  end
 
   def current_user
     @current_user ||= session[:user_id] ? User.find_by(id: session[:user_id]) : nil

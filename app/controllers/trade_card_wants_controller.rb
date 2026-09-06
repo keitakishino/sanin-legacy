@@ -64,7 +64,7 @@ class TradeCardWantsController < ApplicationController
 
   def authorize_user_or_admin!
     unless @trade.user == current_user || current_user.role_admin?
-      head :forbidden
+      raise ForbiddenError
     end
   end
 
