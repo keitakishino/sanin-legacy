@@ -262,6 +262,32 @@ RSpec.describe "Expansions", type: :request do
           expect(response.body).to include('<span class="text-accent font-bold">M</span><span class="font-bold text-stone-800">00</span>')
         end
       end
+
+      context "with expansion_select stimulus handler integration" do
+        before do
+          create(:expansion, scryfall_set_code: "VOW", name: "Innistrad: Midnight Hunt", name_ja: "イニストラード：真夜中の狩り")
+          create(:expansion, scryfall_set_code: "VOC", name: "Innistrad: Crimson Vow", name_ja: "イニストラード：真紅の契約")
+        end
+
+        it "returns turbo-frame content with clickable data-expansion-id attributes for Stimulus handler" do
+          get "/expansions", params: { q: "VO" }
+          # Verify that returned items have data-expansion-id and data-expansion-code attributes
+          # These are required for the expansion_select Stimulus controller to work
+          expect(response.body).to include('data-expansion-code="VOW"')
+          expect(response.body).to include('data-expansion-code="VOC"')
+          expect(response.body).to include("data-expansion-id=")
+          # Verify that the action handler is present for Stimulus to attach click handlers
+          expect(response.body).to include('data-action="click->expansion-select#selectExpansion"')
+        end
+
+        it "includes all necessary turbo-frame structure for Stimulus controller" do
+          get "/expansions", params: { q: "VO" }
+          # The response must be wrapped in a turbo-frame with id="expansion_suggestions"
+          # so that Stimulus can target and update the frame
+          expect(response.body).to include('<turbo-frame id="expansion_suggestions">')
+          expect(response.body).to include('</turbo-frame>')
+        end
+      end
     end
   end
 end

@@ -5,7 +5,7 @@ class TradeCardOffer < ApplicationRecord
   enum :language, { ja: 0, en: 1, other: 2 }
   enum :condition, { nm: 0, sp: 1, mp: 2, hp: 3, poor: 4, none: 5 }, suffix: true
   enum :foil, { foil: 0, non_foil: 1, special: 2 }
-  enum :frame, { normal: 0, extended: 1, borderless: 2, showcase: 3 }
+  enum :frame, { normal: 0, extended: 1, borderless: 2, showcase: 3, retro: 4 }
 
   validates :card_name, presence: true
   validates :quantity, presence: true, numericality: { only_integer: true, greater_than: 0 }
