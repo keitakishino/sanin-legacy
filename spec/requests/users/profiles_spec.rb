@@ -92,6 +92,23 @@ RSpec.describe "Users::Profiles", type: :request do
           expect(response.body).to include(mypage_path)
           expect(response.body).to include("マイページ")
         end
+
+        it "displays admin role badge in header on dashboard" do
+          get "/"
+          expect(response.body).to include("管理者")
+          # Verify the badge styling is present
+          expect(response.body).to match(%r{<span[^>]*class="[^"]*bg-danger-soft[^"]*text-danger[^"]*"[^>]*>管理者</span>|<span[^>]*class="[^"]*text-danger[^"]*bg-danger-soft[^"]*"[^>]*>管理者</span>})
+        end
+
+        it "displays admin role badge in header on admin events page" do
+          get admin_events_path
+          expect(response.body).to include("管理者")
+        end
+
+        it "displays admin role badge in header on admin users page" do
+          get admin_users_path
+          expect(response.body).to include("管理者")
+        end
       end
 
       context "when user has Twitter identity" do
