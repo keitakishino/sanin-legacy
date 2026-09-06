@@ -16,6 +16,8 @@ class RegistrationsController < ApplicationController
 
     session[:signup_token] = token
     @invitation = invitation
+    @show_email_form = false
+    @email = nil
   end
 
   def create

@@ -214,8 +214,8 @@ RSpec.describe "Registrations", type: :request do
         password_input = parsed.css('input[name="password"]')
         password_confirmation_input = parsed.css('input[name="password_confirmation"]')
 
-        expect(password_input.first.attr('value')).to eq("")
-        expect(password_confirmation_input.first.attr('value')).to eq("")
+        expect(password_input.first.attr('value').to_s).to be_empty
+        expect(password_confirmation_input.first.attr('value').to_s).to be_empty
       end
     end
 
@@ -274,8 +274,8 @@ RSpec.describe "Registrations", type: :request do
         password_input = parsed.css('input[name="password"]')
         password_confirmation_input = parsed.css('input[name="password_confirmation"]')
 
-        expect(password_input.first.attr('value')).to eq("")
-        expect(password_confirmation_input.first.attr('value')).to eq("")
+        expect(password_input.first.attr('value').to_s).to be_empty
+        expect(password_confirmation_input.first.attr('value').to_s).to be_empty
       end
     end
 
@@ -341,8 +341,8 @@ RSpec.describe "Registrations", type: :request do
         password_input = parsed.css('input[name="password"]')
         password_confirmation_input = parsed.css('input[name="password_confirmation"]')
 
-        expect(password_input.first.attr('value')).to eq("")
-        expect(password_confirmation_input.first.attr('value')).to eq("")
+        expect(password_input.first.attr('value').to_s).to be_empty
+        expect(password_confirmation_input.first.attr('value').to_s).to be_empty
       end
     end
 
