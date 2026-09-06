@@ -5,3 +5,9 @@
     </turbo-frame>
   </template>
 </turbo-stream>
+
+<% if @trade_card_want.errors.any? %>
+  <turbo-stream action="append" target="toast-container">
+    <template><%= render(partial: "shared/toast", locals: { message: @trade_card_want.errors.full_messages.join(", "), variant: :danger }, formats: [:html]) %></template>
+  </turbo-stream>
+<% end %>
