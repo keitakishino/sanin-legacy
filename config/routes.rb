@@ -58,4 +58,12 @@ Rails.application.routes.draw do
     post "/events/:event_id/trades/:user_id/spreadsheet_export", to: "trade_spreadsheet_exports#create",
          as: :event_trade_spreadsheet_export
   end
+
+  # Error pages
+  get "/errors/unauthorized", to: "errors#unauthorized", as: :errors_unauthorized
+  get "/errors/forbidden", to: "errors#forbidden", as: :errors_forbidden
+  get "/errors/not_found", to: "errors#not_found", as: :errors_not_found
+
+  # Catch-all for undefined routes (404)
+  match "*path", to: "errors#not_found", via: :all
 end

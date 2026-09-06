@@ -224,3 +224,14 @@ ja:
       created: "招待コードを発行しました"
       creation_failed: "招待コード発行に失敗しました"
       expired_label: "（期限切れ）"
+  errors:
+    unauthorized:
+      title: "認証が必要です"
+      message: "このページを表示するにはサインインが必要です"
+    forbidden:
+      title: "アクセスが拒否されました"
+      message: "このページにアクセスする権限がありません"
+    not_found:
+      title: "ページが見つかりません"
+      message: "お探しのページは見つかりませんでした"
+    button: "ホームに戻る"
