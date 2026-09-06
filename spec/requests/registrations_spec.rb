@@ -96,6 +96,7 @@ RSpec.describe "Registrations", type: :request do
           email: "newuser@example.com",
           password: "SecurePassword123",
           password_confirmation: "SecurePassword123",
+          username: "validusername",
           auth_method: "email"
         }
       end
@@ -113,11 +114,11 @@ RSpec.describe "Registrations", type: :request do
         expect(user.role).to eq("general")
       end
 
-      it "creates user with generated username" do
+      it "creates user with provided username" do
         post "/signup", params: params
 
         user = User.last
-        expect(user.username).to eq("newuser")
+        expect(user.username).to eq("validusername")
       end
 
       it "creates Identity (none for email signup)" do
@@ -153,12 +154,136 @@ RSpec.describe "Registrations", type: :request do
       end
     end
 
+    context "with missing username" do
+      let(:params) do
+        {
+          email: "newuser@example.com",
+          password: "SecurePassword123",
+          password_confirmation: "SecurePassword123",
+          auth_method: "email"
+        }
+      end
+
+      it "does not create a user" do
+        expect do
+          post "/signup", params: params
+        end.not_to change { User.count }
+      end
+
+      it "returns 422" do
+        post "/signup", params: params
+
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "shows error message" do
+        post "/signup", params: params
+
+        expect(response.body).to include("ユーザー作成に失敗しました")
+      end
+    end
+
+    context "with username too short" do
+      let(:params) do
+        {
+          email: "newuser@example.com",
+          password: "SecurePassword123",
+          password_confirmation: "SecurePassword123",
+          username: "ab",
+          auth_method: "email"
+        }
+      end
+
+      it "does not create a user" do
+        expect do
+          post "/signup", params: params
+        end.not_to change { User.count }
+      end
+
+      it "returns 422" do
+        post "/signup", params: params
+
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "shows username error message" do
+        post "/signup", params: params
+
+        expect(response.body).to include("ユーザー名")
+      end
+    end
+
+    context "with username too long" do
+      let(:params) do
+        {
+          email: "newuser@example.com",
+          password: "SecurePassword123",
+          password_confirmation: "SecurePassword123",
+          username: "a" * 51,
+          auth_method: "email"
+        }
+      end
+
+      it "does not create a user" do
+        expect do
+          post "/signup", params: params
+        end.not_to change { User.count }
+      end
+
+      it "returns 422" do
+        post "/signup", params: params
+
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "shows username error message" do
+        post "/signup", params: params
+
+        expect(response.body).to include("ユーザー名")
+      end
+    end
+
+    context "with duplicate username" do
+      let(:existing_user) { create(:user, username: "duplicateuser") }
+      let(:params) do
+        {
+          email: "newuser@example.com",
+          password: "SecurePassword123",
+          password_confirmation: "SecurePassword123",
+          username: "duplicateuser",
+          auth_method: "email"
+        }
+      end
+
+      it "does not create a user" do
+        existing_user
+        expect do
+          post "/signup", params: params
+        end.not_to change { User.count }
+      end
+
+      it "returns 422" do
+        existing_user
+        post "/signup", params: params
+
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "shows username error message" do
+        existing_user
+        post "/signup", params: params
+
+        expect(response.body).to include("ユーザー名")
+      end
+    end
+
     context "with mismatched passwords" do
       let(:params) do
         {
           email: "newuser@example.com",
           password: "SecurePassword123",
           password_confirmation: "DifferentPassword456",
+          username: "validusername",
           auth_method: "email"
         }
       end
@@ -225,6 +350,7 @@ RSpec.describe "Registrations", type: :request do
           email: "newuser@example.com",
           password: "short",
           password_confirmation: "short",
+          username: "validusername",
           auth_method: "email"
         }
       end
@@ -286,6 +412,7 @@ RSpec.describe "Registrations", type: :request do
           email: existing_user.email,
           password: "SecurePassword123",
           password_confirmation: "SecurePassword123",
+          username: "validusername",
           auth_method: "email"
         }
       end
@@ -358,6 +485,7 @@ RSpec.describe "Registrations", type: :request do
           email: "newuser@example.com",
           password: "SecurePassword123",
           password_confirmation: "SecurePassword123",
+          username: "validusername",
           auth_method: "email"
         }
       end
@@ -392,6 +520,7 @@ RSpec.describe "Registrations", type: :request do
         email: "newuser@example.com",
         password: "SecurePassword123",
         password_confirmation: "SecurePassword123",
+        username: "validusername",
         auth_method: "email"
       }
     end
