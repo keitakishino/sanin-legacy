@@ -1,0 +1,1 @@
+class ForbiddenError < StandardError; end
