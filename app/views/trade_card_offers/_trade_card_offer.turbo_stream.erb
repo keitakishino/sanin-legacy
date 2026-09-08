@@ -31,6 +31,6 @@
     </div>
   </div>
   <turbo-frame id="<%= dom_id(trade_card_offer, :edit_form) %>" class="mt-4 border-t border-stone-200 pt-4" style="display: none;">
-    <%= render(partial: 'form', locals: { trade_card_offer: trade_card_offer }, formats: [:html]) %>
+    <%= render(partial: 'form', locals: { trade_card_offer: trade_card_offer, frame_id: dom_id(trade_card_offer, :edit_form) }, formats: [:html]) %>
   </turbo-frame>
 </div>

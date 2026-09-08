@@ -144,6 +144,33 @@ RSpec.describe "TradeCardWants", type: :request do
         expect(response.body).to include('text-danger')
         expect(response.body).to include('bg-danger-soft')
       end
+
+      it "uses correct frame_id for non-admin user validation error" do
+        trade
+        post "/trades/#{event.id}/card_wants", params: invalid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+        # General user validation error should target 'new_trade_card_want' frame
+        expect(response.body).to include('target="new_trade_card_want"')
+        expect(response.body).to include('id="new_trade_card_want"')
+      end
+
+      context "when admin user creates with invalid params" do
+        before do
+          delete "/signout"
+          post signin_path, params: { email: admin_user.email, password: "password123" }
+        end
+
+        let(:admin_trade) { create(:trade, event: event, user: admin_user) }
+
+        it "uses admin frame_id for validation error" do
+          admin_trade
+          post "/trades/#{event.id}/card_wants", params: invalid_params.merge(trade_id: admin_trade.id), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+          expect(response).to have_http_status(:unprocessable_entity)
+          # Admin context validation error should target 'new_trade_card_want_admin' frame
+          expect(response.body).to include('target="new_trade_card_want_admin"')
+          expect(response.body).to include('id="new_trade_card_want_admin"')
+        end
+      end
     end
 
     context "with invalid conditions values" do
@@ -361,6 +388,49 @@ RSpec.describe "TradeCardWants", type: :request do
       expect(response.body).to include('action="append" target="toast-container"')
       expect(response.body).to include("Updated Card")
       expect(response.body).to include("の欲しいカード明細を更新しました")
+    end
+
+    context "with invalid params on update" do
+      let(:invalid_update_params) do
+        {
+          trade_card_want: {
+            card_name: "",
+            quantity: -1
+          }
+        }
+      end
+
+      it "does not update the trade card want" do
+        want
+        patch "/trades/#{event.id}/card_wants/#{want.id}", params: invalid_update_params
+        want.reload
+        expect(want.card_name).not_to eq("")
+      end
+
+      it "returns unprocessable_entity status" do
+        want
+        patch "/trades/#{event.id}/card_wants/#{want.id}", params: invalid_update_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "uses correct frame_id for validation error on update" do
+        want
+        patch "/trades/#{event.id}/card_wants/#{want.id}", params: invalid_update_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+        # Edit validation error should use persisted dom_id frame
+        expected_frame_id = "edit_form_trade_card_want_#{want.id}"
+        expect(response.body).to include("target=\"#{expected_frame_id}\"")
+        expect(response.body).to include("id=\"#{expected_frame_id}\"")
+      end
+
+      it "includes error toast notification in turbo_stream response" do
+        want
+        patch "/trades/#{event.id}/card_wants/#{want.id}", params: invalid_update_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.body).to include('action="append" target="toast-container"')
+        expect(response.body).to include('data-controller="toast"')
+        expect(response.body).to include('border-danger')
+      end
     end
 
     context "when general user tries to set amount" do
