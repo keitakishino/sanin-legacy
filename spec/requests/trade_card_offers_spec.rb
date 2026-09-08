@@ -467,6 +467,61 @@ RSpec.describe "TradeCardOffers", type: :request do
           expect(another_offer.reload.amount).to eq(1000)
         end
       end
+
+      context "trade_id validation on update/destroy" do
+        it "returns 404 when trade_id param does not match the offer's actual trade (update)" do
+          main_offer
+          original_card_name = main_offer.card_name
+
+          patch "/trades/#{event.id}/card_offers/#{main_offer.id}",
+            params: valid_params.merge(trade_id: another_trade.id)
+
+          expect(response).to have_http_status(:not_found)
+          expect(main_offer.reload.card_name).to eq(original_card_name)
+        end
+
+        it "returns 404 when trade_id param does not match the offer's actual trade (destroy)" do
+          main_offer
+
+          expect {
+            delete "/trades/#{event.id}/card_offers/#{main_offer.id}",
+              params: { trade_id: another_trade.id }
+          }.not_to change { TradeCardOffer.count }
+
+          expect(response).to have_http_status(:not_found)
+        end
+
+        it "updates successfully when trade_id param matches the offer's actual trade" do
+          main_offer
+
+          patch "/trades/#{event.id}/card_offers/#{main_offer.id}",
+            params: valid_params.merge(trade_id: trade.id),
+            headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+          expect(response).to have_http_status(:ok)
+          expect(main_offer.reload.card_name).to eq("Updated Card")
+        end
+
+        it "deletes successfully when trade_id param matches the offer's actual trade" do
+          main_offer
+
+          expect {
+            delete "/trades/#{event.id}/card_offers/#{main_offer.id}",
+              params: { trade_id: trade.id },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+          }.to change { TradeCardOffer.count }.by(-1)
+
+          expect(response).to have_http_status(:ok)
+        end
+
+        it "updates successfully when trade_id param is not provided (existing behavior)" do
+          main_offer
+
+          patch "/trades/#{event.id}/card_offers/#{main_offer.id}", params: valid_params
+
+          expect(main_offer.reload.card_name).to eq("Updated Card")
+        end
+      end
     end
   end
 
