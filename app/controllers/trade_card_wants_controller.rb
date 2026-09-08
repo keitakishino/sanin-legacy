@@ -1,6 +1,5 @@
 class TradeCardWantsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_event
   before_action :set_trade
   before_action :authorize_user_or_admin!
   before_action :set_trade_card_want, only: [ :update, :destroy ]
@@ -48,29 +47,18 @@ class TradeCardWantsController < ApplicationController
 
   private
 
-  def set_event
-    @event = Event.find(params[:event_id])
-  end
-
   def set_trade
-    # For update/destroy, derive trade from card want to ensure correct trade is used
-    if %w[update destroy].include?(action_name) && params[:id].present?
-      trade_card_want_temp = TradeCardWant.find(params[:id])
-      @trade = trade_card_want_temp.trade
-      raise ActiveRecord::RecordNotFound unless @trade.event_id == @event.id
-      # If trade_id is provided, verify it matches the want's trade
-      if params[:trade_id].present? && params[:trade_id].to_i != @trade.id
-        raise ActiveRecord::RecordNotFound
+    if current_user.role_admin?
+      # For admin: if trade_id is provided, validate it matches the event_id in the URL
+      if params[:trade_id].present?
+        @trade = Trade.find_by!(id: params[:trade_id], event_id: params[:event_id])
+      else
+        # Fallback for routes that don't provide trade_id
+        raise ActiveRecord::RecordNotFound if Trade.where(event_id: params[:event_id]).count > 1
+        @trade = Trade.find_by!(event_id: params[:event_id])
       end
     else
-      # For create, find trade by event
-      if params[:trade_id].present?
-        @trade = Trade.find_by(id: params[:trade_id], event_id: @event.id)
-      else
-        @trade = Trade.find_by(event_id: @event.id, user_id: current_user.id) if !current_user.role_admin?
-        @trade ||= Trade.find_by(event_id: @event.id) if current_user.role_admin?
-      end
-      raise ActiveRecord::RecordNotFound unless @trade
+      @trade = Trade.find_by!(event_id: params[:event_id], user_id: current_user.id)
     end
   end
 

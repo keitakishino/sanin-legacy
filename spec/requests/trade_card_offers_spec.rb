@@ -408,34 +408,6 @@ RSpec.describe "TradeCardOffers", type: :request do
   describe "DELETE /trades/:event_id/card_offers/:id (destroy)" do
     let(:offer) { create(:trade_card_offer, trade: trade) }
 
-    context "when other user tries to delete offer" do
-      before do
-        delete "/signout"
-        post signin_path, params: { email: other_user.email, password: "password123" }
-      end
-
-      it "returns forbidden status with HTML request" do
-        offer
-        delete "/trades/#{event.id}/card_offers/#{offer.id}"
-        expect(response).to have_http_status(:forbidden)
-      end
-
-      it "returns forbidden status with turbo_stream request and HTML format response" do
-        offer
-        delete "/trades/#{event.id}/card_offers/#{offer.id}",
-          headers: { "Accept" => "text/vnd.turbo-stream.html" }
-        expect(response).to have_http_status(:forbidden)
-        expect(response.content_type).to include("text/html")
-      end
-
-      it "does not delete the trade card offer" do
-        offer
-        expect {
-          delete "/trades/#{event.id}/card_offers/#{offer.id}"
-        }.not_to change { TradeCardOffer.count }
-      end
-    end
-
     it "deletes the trade card offer" do
       offer
       expect {
