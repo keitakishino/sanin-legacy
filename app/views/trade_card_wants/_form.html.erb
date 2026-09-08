@@ -108,7 +108,7 @@
     <div class="flex gap-2 pt-4">
       <%= f.submit trade_card_want.persisted? ? "更新" : "追加", class: "px-4 py-2 bg-want text-white rounded-md hover:opacity-90 font-bold text-xs" %>
       <button type="button" class="px-4 py-2 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs"
-              onclick="document.getElementById('<%= dom_id(trade_card_want, :edit_form) %>').style.display = 'none'">
+              onclick="document.getElementById('<%= frame_id %>').style.display = 'none'">
         キャンセル
       </button>
     </div>
