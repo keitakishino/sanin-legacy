@@ -5,12 +5,16 @@ export default class extends Controller {
 
   connect() {
     this.debounceTimer = null
+    this.hideDropdownTimer = null
     this.frameTarget.addEventListener("turbo:before-frame-render", () => this.attachDropdownHandlers())
   }
 
   disconnect() {
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer)
+    }
+    if (this.hideDropdownTimer) {
+      clearTimeout(this.hideDropdownTimer)
     }
   }
 
@@ -54,7 +58,15 @@ export default class extends Controller {
   }
 
   hideDropdown() {
-    this.frameTarget.src = ""
-    this.frameTarget.style.display = "none"
+    // 遅延実行により、click イベント（selectExpansion）の完了を保証
+    // blur イベント発火前に selectExpansion が実行されるようにする
+    if (this.hideDropdownTimer) {
+      clearTimeout(this.hideDropdownTimer)
+    }
+
+    this.hideDropdownTimer = setTimeout(() => {
+      this.frameTarget.src = ""
+      this.frameTarget.style.display = "none"
+    }, 100)
   }
 }
