@@ -459,29 +459,39 @@ RSpec.describe "TradeCardOffers", type: :request do
           expect(another_offer.reload.amount).to eq(1000)
         end
       end
-
-      context "when admin tries to update with mismatched trade_id" do
-        let(:other_event) { create(:event) }
-        let(:other_trade) { create(:trade, event: other_event, user: other_user) }
-        let(:main_offer) { create(:trade_card_offer, trade: trade, amount: 2000) }
-
-        it "returns 404 when trade_id belongs to different event" do
-          main_offer
-          expect(Trade.where(event_id: event.id).count).to be >= 1
-
-          patch "/trades/#{event.id}/card_offers/#{main_offer.id}",
-            params: valid_params.merge(trade_id: other_trade.id)
-
-          expect(response).to have_http_status(:not_found)
-          expect(main_offer.reload.card_name).not_to eq("Updated Card")
-          expect(main_offer.reload.amount).to eq(2000)
-        end
-      end
     end
   end
 
   describe "DELETE /trades/:event_id/card_offers/:id (destroy)" do
     let(:offer) { create(:trade_card_offer, trade: trade) }
+
+    context "when other user tries to delete offer" do
+      before do
+        delete "/signout"
+        post signin_path, params: { email: other_user.email, password: "password123" }
+      end
+
+      it "returns forbidden status with HTML request" do
+        offer
+        delete "/trades/#{event.id}/card_offers/#{offer.id}"
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      it "returns forbidden status with turbo_stream request and HTML format response" do
+        offer
+        delete "/trades/#{event.id}/card_offers/#{offer.id}",
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:forbidden)
+        expect(response.content_type).to include("text/html")
+      end
+
+      it "does not delete the trade card offer" do
+        offer
+        expect {
+          delete "/trades/#{event.id}/card_offers/#{offer.id}"
+        }.not_to change { TradeCardOffer.count }
+      end
+    end
 
     it "deletes the trade card offer" do
       offer

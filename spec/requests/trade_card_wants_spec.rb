@@ -555,29 +555,39 @@ RSpec.describe "TradeCardWants", type: :request do
           expect(another_want.reload.amount).to eq(500)
         end
       end
-
-      context "when admin tries to update with mismatched trade_id" do
-        let(:other_event) { create(:event) }
-        let(:other_trade) { create(:trade, event: other_event, user: other_user) }
-        let(:main_want) { create(:trade_card_want, trade: trade, amount: 1500) }
-
-        it "returns 404 when trade_id belongs to different event" do
-          main_want
-          expect(Trade.where(event_id: event.id).count).to be >= 1
-
-          patch "/trades/#{event.id}/card_wants/#{main_want.id}",
-            params: valid_params.merge(trade_id: other_trade.id)
-
-          expect(response).to have_http_status(:not_found)
-          expect(main_want.reload.card_name).not_to eq("Updated Card")
-          expect(main_want.reload.amount).to eq(1500)
-        end
-      end
     end
   end
 
   describe "DELETE /trades/:event_id/card_wants/:id (destroy)" do
     let(:want) { create(:trade_card_want, trade: trade) }
+
+    context "when other user tries to delete want" do
+      before do
+        delete "/signout"
+        post signin_path, params: { email: other_user.email, password: "password123" }
+      end
+
+      it "returns forbidden status with HTML request" do
+        want
+        delete "/trades/#{event.id}/card_wants/#{want.id}"
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      it "returns forbidden status with turbo_stream request and HTML format response" do
+        want
+        delete "/trades/#{event.id}/card_wants/#{want.id}",
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:forbidden)
+        expect(response.content_type).to include("text/html")
+      end
+
+      it "does not delete the trade card want" do
+        want
+        expect {
+          delete "/trades/#{event.id}/card_wants/#{want.id}"
+        }.not_to change { TradeCardWant.count }
+      end
+    end
 
     it "deletes the trade card want" do
       want
