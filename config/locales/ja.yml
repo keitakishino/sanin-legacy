@@ -157,6 +157,7 @@ ja:
         date_must_not_be_past: "は過去の日付に設定することはできません"
         greater_than: "は%{count}より大きい値で入力してください"
         greater_than_or_equal_to: "は%{count}以上の値で入力してください"
+        less_than_or_equal_to: "は%{count}以下の値で入力してください"
         not_an_integer: "は整数で入力してください"
         not_a_number: "は数値で入力してください"
       models:
