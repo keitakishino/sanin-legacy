@@ -109,6 +109,14 @@ RSpec.describe "Admin::Trades", type: :request do
           patch admin_event_trade_path(event, trade), params: { trade: { status: :in_progress } }
         }.not_to change { trade.reload.status }
       end
+
+      it "returns forbidden status with turbo_stream request and HTML format response" do
+        patch admin_event_trade_path(event, trade),
+          params: { trade: { status: :in_progress } },
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:forbidden)
+        expect(response.content_type).to include("text/html")
+      end
     end
 
     context "when user is an admin" do
