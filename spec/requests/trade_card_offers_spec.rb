@@ -69,6 +69,14 @@ RSpec.describe "TradeCardOffers", type: :request do
       expect(response.body).to include(valid_params[:trade_card_offer][:card_name])
     end
 
+    it "removes empty state element when adding first offer to empty trade" do
+      trade
+      expect(trade.trade_card_offers.count).to eq(0)
+      post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('action="remove" target="trade_card_offers_empty"')
+    end
+
     context "with invalid params" do
       let(:invalid_params) do
         {
@@ -521,6 +529,61 @@ RSpec.describe "TradeCardOffers", type: :request do
       delete "/trades/#{event.id}/card_offers/#{offer.id}"
       expect(response).to redirect_to(trade_path(event))
       expect(flash[:notice]).to include("カード明細を削除しました")
+    end
+
+    it "shows empty state when deleting last offer" do
+      offer
+      expect(trade.trade_card_offers.count).to eq(1)
+      delete "/trades/#{event.id}/card_offers/#{offer.id}", headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('action="append" target="trade_card_offers"')
+      expect(response.body).to include('id="trade_card_offers_empty"')
+      expect(response.body).to include('カード明細はまだありません')
+    end
+
+    it "does not show empty state when deleting non-last offer" do
+      offer1 = create(:trade_card_offer, trade: trade)
+      offer2 = create(:trade_card_offer, trade: trade)
+      expect(trade.trade_card_offers.count).to eq(2)
+      delete "/trades/#{event.id}/card_offers/#{offer1.id}", headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:ok)
+      # Should not have append action for empty state if not empty after deletion
+      expect(response.body).not_to include('id="trade_card_offers_empty"')
+    end
+
+    context "when admin deletes last offer (admin context)" do
+      before do
+        delete "/signout"
+        post signin_path, params: { email: admin_user.email, password: "password123" }
+      end
+
+      let(:admin_trade) { create(:trade, event: event, user: admin_user) }
+      let(:admin_offer) { create(:trade_card_offer, trade: admin_trade) }
+
+      it "shows empty state with admin styling when deleting last offer" do
+        admin_offer
+        expect(admin_trade.trade_card_offers.count).to eq(1)
+        # Admin context deletion with trade_id param
+        delete "/trades/#{event.id}/card_offers/#{admin_offer.id}", params: { trade_id: admin_trade.id }, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('action="append" target="trade_card_offers"')
+        expect(response.body).to include('id="trade_card_offers_empty"')
+        # Verify admin styling is used (text-stone-500 instead of text-stone-400, no text-xs)
+        expect(response.body).to include('class="text-stone-500 text-center py-8"')
+        expect(response.body).not_to include('class="text-stone-400 text-center py-8 text-xs"')
+        expect(response.body).to include('カード明細はまだありません')
+      end
+
+      it "does not show empty state when admin deletes non-last offer" do
+        offer1 = create(:trade_card_offer, trade: admin_trade)
+        offer2 = create(:trade_card_offer, trade: admin_trade)
+        expect(admin_trade.trade_card_offers.count).to eq(2)
+        # Admin context deletion with trade_id param
+        delete "/trades/#{event.id}/card_offers/#{offer1.id}", params: { trade_id: admin_trade.id }, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        # Should not have append action for empty state if not empty after deletion
+        expect(response.body).not_to include('id="trade_card_offers_empty"')
+      end
     end
 
     context "when offer with amount is deleted" do

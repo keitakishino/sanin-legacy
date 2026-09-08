@@ -40,6 +40,9 @@ class TradeCardWantsController < ApplicationController
 
   def destroy
     @trade_card_want.destroy
+    # Store trade_id for turbo_stream template context awareness
+    # Only set @trade_id if current user is admin AND trade_id param is present
+    @trade_id = current_user.role_admin? && params[:trade_id].present? ? params[:trade_id].to_i : nil
     respond_to do |format|
       format.turbo_stream { render :destroy }
       format.html { redirect_to trade_path(@trade.event), notice: "カード明細を削除しました" }

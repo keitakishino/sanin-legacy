@@ -100,7 +100,7 @@
           <%= render "trade_card_offers/trade_card_offer", trade_card_offer: offer %>
         <% end %>
       <% else %>
-        <p class="text-stone-500 text-center py-8">カード明細はまだありません</p>
+        <p id="trade_card_offers_empty" class="text-stone-500 text-center py-8">カード明細はまだありません</p>
       <% end %>
     </div>
 
@@ -130,7 +130,7 @@
           <%= render "trade_card_wants/trade_card_want", trade_card_want: want %>
         <% end %>
       <% else %>
-        <p class="text-stone-500 text-center py-8">カード明細はまだありません</p>
+        <p id="trade_card_wants_empty" class="text-stone-500 text-center py-8">カード明細はまだありません</p>
       <% end %>
     </div>
 
