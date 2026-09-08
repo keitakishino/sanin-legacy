@@ -2,9 +2,11 @@
 </turbo-stream>
 
 <% if @trade_card_want.trade.trade_card_wants.count == 0 %>
+  <% admin_context = @trade_id.present? %>
+  <% empty_classes = admin_context ? 'text-stone-500 text-center py-8' : 'text-stone-400 text-center py-8 text-xs' %>
   <turbo-stream action="append" target="trade_card_wants">
     <template>
-      <p id="trade_card_wants_empty" class="text-stone-400 text-center py-8 text-xs">カード明細はまだありません</p>
+      <p id="trade_card_wants_empty" class="<%= empty_classes %>">カード明細はまだありません</p>
     </template>
   </turbo-stream>
 <% end %>
