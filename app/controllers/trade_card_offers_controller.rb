@@ -4,6 +4,7 @@ class TradeCardOffersController < ApplicationController
   before_action :set_trade
   before_action :authorize_user_or_admin!
   before_action :set_trade_card_offer, only: [ :update, :destroy ]
+  before_action :validate_trade_id_param, only: [ :update, :destroy ]
 
   def create
     @trade_card_offer = @trade.trade_card_offers.build(trade_card_offer_params)
@@ -87,6 +88,15 @@ class TradeCardOffersController < ApplicationController
 
   def set_trade_card_offer
     @trade_card_offer = @trade.trade_card_offers.find(params[:id])
+  end
+
+  def validate_trade_id_param
+    # Defense in Depth: Validate that the trade_id param (if provided) matches the actual trade
+    # This prevents IDOR attacks where a user might try to manipulate a card detail record
+    # by specifying a different trade_id
+    if params[:trade_id].present? && params[:trade_id].to_i != @trade.id
+      raise ActiveRecord::RecordNotFound
+    end
   end
 
   def trade_card_offer_params
