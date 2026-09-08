@@ -58,6 +58,10 @@ class TradeCardOffersController < ApplicationController
       trade_card_offer_temp = TradeCardOffer.find(params[:id])
       @trade = trade_card_offer_temp.trade
       raise ActiveRecord::RecordNotFound unless @trade.event_id == @event.id
+      # If trade_id is provided, verify it matches the offer's trade
+      if params[:trade_id].present? && params[:trade_id].to_i != @trade.id
+        raise ActiveRecord::RecordNotFound
+      end
     else
       # For create, find trade by event
       if params[:trade_id].present?
