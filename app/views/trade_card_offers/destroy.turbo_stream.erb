@@ -1,6 +1,14 @@
 <turbo-stream action="remove" target="<%= dom_id(@trade_card_offer) %>">
 </turbo-stream>
 
+<% if @trade_card_offer.trade.trade_card_offers.count == 0 %>
+  <turbo-stream action="append" target="trade_card_offers">
+    <template>
+      <p id="trade_card_offers_empty" class="text-stone-400 text-center py-8 text-xs">カード明細はまだありません</p>
+    </template>
+  </turbo-stream>
+<% end %>
+
 <turbo-stream action="replace" target="trade_aggregates">
   <template><%= render(partial: 'trades/aggregates_inline', locals: { trade: @trade_card_offer.trade }, formats: [:html]) %></template>
 </turbo-stream>
