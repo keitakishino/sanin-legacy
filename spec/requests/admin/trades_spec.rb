@@ -541,6 +541,5 @@ RSpec.describe "Admin::Trades", type: :request do
       patch trade_card_want_path(trade.event, want), params: { trade_card_want: { amount: 3000 }, trade_id: trade.id }
       expect(want.reload.amount).to eq(3000)
     end
-
   end
 end
