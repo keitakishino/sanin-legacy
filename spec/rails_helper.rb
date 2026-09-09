@@ -98,4 +98,11 @@ RSpec.configure do |config|
   config.after(:each, type: :request) do
     OmniAuth.config.mock_auth.clear
   end
+
+  # Clean up seed data that may have been created during db:prepare
+  # This ensures test isolation when seed data is created in test environment
+  config.before(:suite) do
+    User.where(email: 'admin@example.com').delete_all
+    User.where(email: 'general01@example.com').delete_all
+  end
 end
