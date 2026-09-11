@@ -5,16 +5,14 @@
   <% frame_id = admin_context ? 'new_trade_card_offer_admin' : 'new_trade_card_offer' %>
 <% end %>
 
-<turbo-stream action="replace" target="<%= frame_id %>">
-  <template>
-    <turbo-frame id="<%= frame_id %>" class="mt-4 border-t pt-4">
-      <%= render(partial: 'form', locals: { trade_card_offer: @trade_card_offer, frame_id: frame_id }, formats: [:html]) %>
-    </turbo-frame>
-  </template>
-</turbo-stream>
+<%= turbo_stream.replace frame_id do %>
+  <turbo-frame id="<%= frame_id %>" class="mt-4 border-t pt-4">
+    <%= render(partial: 'form', locals: { trade_card_offer: @trade_card_offer, frame_id: frame_id }, formats: [:html]) %>
+  </turbo-frame>
+<% end %>
 
 <% if @trade_card_offer.errors.any? %>
-  <turbo-stream action="append" target="toast-container">
-    <template><%= render(partial: "shared/toast", locals: { message: @trade_card_offer.errors.full_messages.join(", "), variant: :danger }, formats: [:html]) %></template>
-  </turbo-stream>
+  <%= turbo_stream.append "toast-container" do %>
+    <%= render(partial: "shared/toast", locals: { message: @trade_card_offer.errors.full_messages.join(", "), variant: :danger }, formats: [:html]) %>
+  <% end %>
 <% end %>
