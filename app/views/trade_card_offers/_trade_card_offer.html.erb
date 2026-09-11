@@ -1,38 +1,67 @@
-<div id="<%= dom_id(trade_card_offer) %>" class="bg-white border border-stone-200 rounded-[10px] p-6 border-l-4" style="border-left-color: oklch(52% 0.12 231)">
-  <div class="flex items-start justify-between">
-    <div class="flex-1">
-      <h3 class="text-base font-bold text-stone-800"><%= trade_card_offer.card_name %></h3>
-      <div class="mt-4 space-y-2 text-stone-700 text-xs">
-        <p><strong>数量:</strong> <%= trade_card_offer.quantity %></p>
-        <p><strong>言語:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.language.#{trade_card_offer.language}") %></p>
-        <p><strong>状態:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.condition.#{trade_card_offer.condition}") %></p>
-        <p><strong>フォイル:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.foil.#{trade_card_offer.foil}") %></p>
-        <p><strong>フレーム:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.frame.#{trade_card_offer.frame}") %></p>
-        <p><strong>PWマーク:</strong> <%= trade_card_offer.pw_mark ? "あり" : "なし" %></p>
-        <% if trade_card_offer.expansion %>
-          <p><strong>セット:</strong> <%= trade_card_offer.expansion.name %></p>
-        <% end %>
-        <% if trade_card_offer.note.present? %>
-          <p><strong>備考:</strong> <%= trade_card_offer.note %></p>
-        <% end %>
-        <% if trade_card_offer.amount.present? %>
-          <p><strong>金額:</strong> ¥<%= number_with_delimiter(trade_card_offer.amount) %></p>
-        <% end %>
-      </div>
-    </div>
-    <div class="flex gap-2 ml-4">
+<tr id="<%= dom_id(trade_card_offer) %>" class="border-b border-stone-200 hover:bg-stone-50" style="border-left: 3px solid oklch(52% 0.12 231)">
+  <!-- Desktop: Full columns -->
+  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800 truncate" title="<%= trade_card_offer.card_name %>"><%= trade_card_offer.card_name %></td>
+  <td class="px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.quantity %></td>
+  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.language.#{trade_card_offer.language}") %></td>
+  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.condition.#{trade_card_offer.condition}") %></td>
+  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.foil.#{trade_card_offer.foil}") %></td>
+  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.frame.#{trade_card_offer.frame}") %></td>
+  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.pw_mark ? "あり" : "なし" %></td>
+  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.expansion&.name.present? ? trade_card_offer.expansion.name : "—" %></td>
+  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800 truncate" title="<%= trade_card_offer.note %>"><%= trade_card_offer.note.present? ? trade_card_offer.note : "—" %></td>
+  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.amount.present? ? "¥#{number_with_delimiter(trade_card_offer.amount)}" : "—" %></td>
+
+  <!-- Mobile: Card name only -->
+  <td class="md:hidden px-4 py-3 text-sm text-stone-800 flex-1 truncate" title="<%= trade_card_offer.card_name %>"><%= trade_card_offer.card_name %></td>
+
+  <!-- Actions -->
+  <td class="px-4 py-3 text-right">
+    <div class="flex items-center justify-end gap-2">
       <button
         type="button"
-        class="px-3 py-2 bg-offer text-white text-xs rounded-md hover:opacity-90 font-bold"
-        onclick="document.getElementById('<%= dom_id(trade_card_offer, :edit_form) %>').style.display = 'block'">
+        class="px-2 py-1 text-sky-700 hover:bg-sky-50 text-xs rounded hover:opacity-90 font-bold"
+        onclick="document.getElementById('<%= dom_id(trade_card_offer, :edit_form) %>').style.display = 'block'; document.querySelector('[data-row-id=<%= dom_id(trade_card_offer) %>]')?.classList.add('hidden');">
         編集
       </button>
-      <%= button_to "削除", trade_card_offer_path(@trade.event, trade_card_offer), method: :delete, form: { local: true, data: { turbo: true } }, class: "px-3 py-2 bg-danger text-white text-xs rounded-md hover:opacity-90 font-bold" %>
+      <%= button_to "削除", trade_card_offer_path(@trade.event, trade_card_offer), method: :delete, form: { local: true, data: { turbo: true } }, class: "px-2 py-1 text-red-700 hover:bg-red-50 text-xs rounded hover:opacity-90 font-bold" %>
+      <button
+        type="button"
+        class="md:hidden px-2 py-1 text-stone-500 hover:bg-stone-100 text-xs"
+        data-toggle-expand="<%= dom_id(trade_card_offer) %>"
+        aria-expanded="false">
+        ▼
+      </button>
     </div>
-  </div>
+  </td>
+</tr>
 
-  <!-- Edit form (hidden by default) -->
-  <turbo-frame id="<%= dom_id(trade_card_offer, :edit_form) %>" style="display: none;" class="mt-4 border-t border-stone-200 pt-4">
-    <%= render 'trade_card_offers/form', trade_card_offer: trade_card_offer, frame_id: dom_id(trade_card_offer, :edit_form) %>
-  </turbo-frame>
-</div>
+<!-- Mobile expansion row -->
+<tr id="<%= dom_id(trade_card_offer, :expand) %>" class="hidden md:hidden border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.12 231)">
+  <td colspan="4" class="px-4 py-3 bg-stone-50">
+    <div class="space-y-2 text-sm">
+      <p><strong>言語:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.language.#{trade_card_offer.language}") %></p>
+      <p><strong>状態:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.condition.#{trade_card_offer.condition}") %></p>
+      <p><strong>フォイル:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.foil.#{trade_card_offer.foil}") %></p>
+      <p><strong>フレーム:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.frame.#{trade_card_offer.frame}") %></p>
+      <p><strong>PWマーク:</strong> <%= trade_card_offer.pw_mark ? "あり" : "なし" %></p>
+      <% if trade_card_offer.expansion %>
+        <p><strong>セット:</strong> <%= trade_card_offer.expansion.name %></p>
+      <% end %>
+      <% if trade_card_offer.note.present? %>
+        <p><strong>備考:</strong> <%= trade_card_offer.note %></p>
+      <% end %>
+      <% if trade_card_offer.amount.present? %>
+        <p><strong>金額:</strong> ¥<%= number_with_delimiter(trade_card_offer.amount) %></p>
+      <% end %>
+    </div>
+  </td>
+</tr>
+
+<!-- Edit form row (hidden by default) -->
+<tr id="<%= dom_id(trade_card_offer, :edit_form) %>" class="hidden border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.12 231)">
+  <td colspan="11" class="px-4 py-4 bg-stone-50">
+    <turbo-frame id="<%= dom_id(trade_card_offer, :edit_form) %>" class="">
+      <%= render 'trade_card_offers/form', trade_card_offer: trade_card_offer, frame_id: dom_id(trade_card_offer, :edit_form) %>
+    </turbo-frame>
+  </td>
+</tr>

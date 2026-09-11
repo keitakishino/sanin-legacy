@@ -1,10 +1,12 @@
 <%= turbo_stream.remove dom_id(@trade_card_want) %>
+<%= turbo_stream.remove dom_id(@trade_card_want, :expand) %>
+<%= turbo_stream.remove dom_id(@trade_card_want, :edit_form) %>
 
 <% if @trade_card_want.trade.trade_card_wants.count == 0 %>
-  <% admin_context = @trade_id.present? %>
-  <% empty_classes = admin_context ? 'text-stone-500 text-center py-8' : 'text-stone-400 text-center py-8 text-xs' %>
   <%= turbo_stream.append "trade_card_wants" do %>
-    <p id="trade_card_wants_empty" class="<%= empty_classes %>">カード明細はまだありません</p>
+    <tr id="trade_card_wants_empty">
+      <td colspan="10" class="px-4 py-8 text-center text-stone-400 text-xs">カード明細はまだありません</td>
+    </tr>
   <% end %>
 <% end %>
 

@@ -615,7 +615,7 @@ RSpec.describe "TradeCardOffers", type: :request do
       let(:admin_trade) { create(:trade, event: event, user: admin_user) }
       let(:admin_offer) { create(:trade_card_offer, trade: admin_trade) }
 
-      it "shows empty state with admin styling when deleting last offer" do
+      it "shows empty state when deleting last offer" do
         admin_offer
         expect(admin_trade.trade_card_offers.count).to eq(1)
         # Admin context deletion with trade_id param
@@ -623,9 +623,9 @@ RSpec.describe "TradeCardOffers", type: :request do
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('action="append" target="trade_card_offers"')
         expect(response.body).to include('id="trade_card_offers_empty"')
-        # Verify admin styling is used (text-stone-500 instead of text-stone-400, no text-xs)
-        expect(response.body).to include('class="text-stone-500 text-center py-8"')
-        expect(response.body).not_to include('class="text-stone-400 text-center py-8 text-xs"')
+        # Verify empty state is rendered as table row (tr > td)
+        expect(response.body).to include('<tr id="trade_card_offers_empty">')
+        expect(response.body).to include('colspan="11"')
         expect(response.body).to include('カード明細はまだありません')
       end
 
