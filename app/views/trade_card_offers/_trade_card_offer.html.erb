@@ -36,7 +36,7 @@
 </tr>
 
 <!-- Mobile expansion row -->
-<tr id="<%= dom_id(trade_card_offer, :expand) %>" class="hidden md:table-row border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.12 231); display: table-row;">
+<tr id="<%= dom_id(trade_card_offer, :expand) %>" class="border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.12 231); display: none;">
   <td colspan="3" class="px-4 py-3 bg-stone-50">
     <div class="space-y-2 text-sm">
       <p><strong>言語:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.language.#{trade_card_offer.language}") %></p>
