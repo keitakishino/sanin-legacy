@@ -102,7 +102,9 @@ RSpec.configure do |config|
   # Clean up seed data that may have been created during db:prepare
   # This ensures test isolation when seed data is created in test environment
   config.before(:suite) do
-    User.where(email: 'admin@example.com').delete_all
-    User.where(email: 'general01@example.com').delete_all
+    # Delete seed data by truncating tables with dependencies in correct order
+    %w[TradeCardWant TradeCardOffer Trade Event User].each do |model_name|
+      model_name.constantize.delete_all rescue nil
+    end
   end
 end

@@ -78,4 +78,15 @@
       width: 0%;
     }
   }
+
+  /* Mobile expand button - hide on desktop */
+  .expand-btn {
+    @apply block;
+  }
+
+  @media (min-width: 48rem) {
+    .expand-btn {
+      display: none !important;
+    }
+  }
 }

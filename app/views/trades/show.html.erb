@@ -32,14 +32,36 @@
       <h2 class="text-2xl font-bold text-stone-800">出すカード一覧</h2>
     </div>
 
-    <div id="trade_card_offers" class="space-y-4">
-      <% if @trade.trade_card_offers.any? %>
-        <% @trade.trade_card_offers.each do |offer| %>
-          <%= render offer %>
-        <% end %>
-      <% else %>
-        <p id="trade_card_offers_empty" class="text-stone-400 text-center py-8 text-xs">カード明細はまだありません</p>
-      <% end %>
+    <div class="overflow-x-auto border border-stone-200 rounded-lg">
+      <table class="w-full">
+        <thead class="bg-stone-100">
+          <tr>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-stone-500">数量</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">言語</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">状態</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">フォイル</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">フレーム</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">PWマーク</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">セット</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">備考</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">金額</th>
+            <th class="md:hidden px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
+            <th class="px-4 py-3 text-right text-xs font-bold text-stone-500">操作</th>
+          </tr>
+        </thead>
+        <tbody id="trade_card_offers">
+          <% if @trade.trade_card_offers.any? %>
+            <% @trade.trade_card_offers.each do |offer| %>
+              <%= render offer %>
+            <% end %>
+          <% else %>
+            <tr id="trade_card_offers_empty">
+              <td colspan="12" class="px-4 py-8 text-center text-stone-400 text-xs">カード明細はまだありません</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
     </div>
 
     <div class="mt-4">
@@ -63,14 +85,35 @@
       <h2 class="text-2xl font-bold text-stone-800">欲しいカード一覧</h2>
     </div>
 
-    <div id="trade_card_wants" class="space-y-4">
-      <% if @trade.trade_card_wants.any? %>
-        <% @trade.trade_card_wants.each do |want| %>
-          <%= render want %>
-        <% end %>
-      <% else %>
-        <p id="trade_card_wants_empty" class="text-stone-400 text-center py-8 text-xs">カード明細はまだありません</p>
-      <% end %>
+    <div class="overflow-x-auto border border-stone-200 rounded-lg">
+      <table class="w-full">
+        <thead class="bg-stone-100">
+          <tr>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-stone-500">数量</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">言語</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">状態</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">フォイル</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">フレーム</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">セット</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">備考</th>
+            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">金額</th>
+            <th class="md:hidden px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
+            <th class="px-4 py-3 text-right text-xs font-bold text-stone-500">操作</th>
+          </tr>
+        </thead>
+        <tbody id="trade_card_wants">
+          <% if @trade.trade_card_wants.any? %>
+            <% @trade.trade_card_wants.each do |want| %>
+              <%= render want %>
+            <% end %>
+          <% else %>
+            <tr id="trade_card_wants_empty">
+              <td colspan="11" class="px-4 py-8 text-center text-stone-400 text-xs">カード明細はまだありません</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
     </div>
 
     <div class="mt-4">
@@ -89,6 +132,7 @@
   </div>
 
   <script>
+    // Toggle add form buttons
     document.getElementById('add_offer_btn').addEventListener('click', function() {
       const frame = document.getElementById('<%= offer_frame_id %>');
       frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
@@ -98,5 +142,81 @@
       const frame = document.getElementById('<%= want_frame_id %>');
       frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
     });
+
+    // Mobile accordion expansion
+    document.querySelectorAll('[data-toggle-expand]').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const rowId = this.getAttribute('data-toggle-expand');
+        const expandRow = document.getElementById('expand_' + rowId);
+        const editFormRow = document.getElementById('edit_form_' + rowId);
+
+        if (expandRow) {
+          const isHidden = expandRow.style.display === 'none';
+          // Close all other expand rows and edit forms in the same table
+          const table = this.closest('table');
+          table.querySelectorAll('[id^="expand_"]').forEach(row => {
+            row.style.display = 'none';
+          });
+          table.querySelectorAll('[id^="edit_form_"]').forEach(row => {
+            row.style.display = 'none';
+          });
+          table.querySelectorAll('[data-toggle-expand]').forEach(btn => {
+            btn.setAttribute('aria-expanded', 'false');
+          });
+
+          // Toggle this row
+          if (isHidden) {
+            expandRow.style.display = 'table-row';
+            this.setAttribute('aria-expanded', 'true');
+          }
+        }
+      });
+    });
+
+    // Listen for Turbo updates to re-bind accordion buttons
+    document.addEventListener('turbo:load', function() {
+      document.querySelectorAll('[data-toggle-expand]').forEach(button => {
+        // Remove old listeners by cloning
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+
+        newButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          const rowId = this.getAttribute('data-toggle-expand');
+          const expandRow = document.getElementById('expand_' + rowId);
+
+          if (expandRow) {
+            const isHidden = expandRow.style.display === 'none';
+            const table = this.closest('table');
+            table.querySelectorAll('[id^="expand_"]').forEach(row => {
+              row.style.display = 'none';
+            });
+            table.querySelectorAll('[id^="edit_form_"]').forEach(row => {
+              row.style.display = 'none';
+            });
+            table.querySelectorAll('[data-toggle-expand]').forEach(btn => {
+              btn.setAttribute('aria-expanded', 'false');
+            });
+
+            if (isHidden) {
+              expandRow.style.display = 'table-row';
+              this.setAttribute('aria-expanded', 'true');
+            }
+          }
+        });
+      });
+    });
+
+    // Hide expand buttons on desktop
+    function updateExpandButtonVisibility() {
+      const buttons = document.querySelectorAll('[data-toggle-expand]');
+      const isDesktop = window.innerWidth >= 768;
+      buttons.forEach(btn => {
+        btn.style.display = isDesktop ? 'none' : 'inline-block';
+      });
+    }
+    updateExpandButtonVisibility();
+    window.addEventListener('resize', updateExpandButtonVisibility);
   </script>
 </div>
