@@ -25,7 +25,7 @@
       <%= button_to "削除", trade_card_want_path(@trade.event, trade_card_want), method: :delete, form: { local: true, data: { turbo: true } }, class: "px-2 py-1 text-red-700 hover:bg-red-50 text-xs rounded hover:opacity-90 font-bold" %>
       <button
         type="button"
-        class="md:hidden px-2 py-1 text-stone-500 hover:bg-stone-100 text-xs"
+        class="px-2 py-1 text-stone-500 hover:bg-stone-100 text-xs expand-btn"
         data-toggle-expand="<%= dom_id(trade_card_want) %>"
         aria-expanded="false">
         ▼
