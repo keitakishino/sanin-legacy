@@ -33,7 +33,7 @@ gem "omniauth-rails_csrf_protection", "~> 1.0"
 
 # Google Sheets API integration
 gem "google-apis-sheets_v4", "~> 0.15.0"
-gem "google-apis-drive_v3", "~> 0.32.0"
+gem "google-apis-drive_v3", "~> 0.86.0"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]

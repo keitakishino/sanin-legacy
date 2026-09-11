@@ -154,8 +154,8 @@ GEM
       multi_json (~> 1.11)
       representable (~> 3.0)
       retriable (>= 3.1, < 5.0)
-    google-apis-drive_v3 (0.32.0)
-      google-apis-core (>= 0.9.1, < 2.a)
+    google-apis-drive_v3 (0.86.0)
+      google-apis-core (>= 0.15.0, < 2.a)
     google-apis-sheets_v4 (0.15.0)
       google-apis-core (>= 0.6, < 2.a)
     google-cloud-env (2.4.0)
@@ -190,7 +190,7 @@ GEM
     jbuilder (2.15.1)
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
-    json (2.21.2)
+    json (3.0.0)
     jwt (3.2.0)
       base64
     kamal (2.12.0)
@@ -527,7 +527,7 @@ DEPENDENCIES
   factory_bot_rails (~> 6.2)
   faker (~> 3.0)
   foreman
-  google-apis-drive_v3 (~> 0.32.0)
+  google-apis-drive_v3 (~> 0.86.0)
   google-apis-sheets_v4 (~> 0.15.0)
   image_processing (~> 1.2)
   importmap-rails
