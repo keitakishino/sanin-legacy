@@ -129,6 +129,27 @@ RSpec.describe "Errors", type: :request do
     end
   end
 
+  describe "Accessing static files that don't exist (favicon, icons, etc.)" do
+    it "returns 404 for favicon.svg" do
+      get "/favicon.svg"
+      expect(response).to have_http_status(:not_found)
+      expect(response.content_type).to include("text/html")
+      expect(response.body).to include("ページが見つかりません")
+    end
+
+    it "returns 404 for icon.png" do
+      get "/icon.png"
+      expect(response).to have_http_status(:not_found)
+      expect(response.content_type).to include("text/html")
+    end
+
+    it "returns 404 for robots.txt" do
+      get "/robots.txt"
+      expect(response).to have_http_status(:not_found)
+      expect(response.content_type).to include("text/html")
+    end
+  end
+
   describe "public/500.html" do
     it "file exists and contains error message" do
       file_path = Rails.root.join("public", "500.html")
