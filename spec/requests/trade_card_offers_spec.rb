@@ -625,7 +625,7 @@ RSpec.describe "TradeCardOffers", type: :request do
         expect(response.body).to include('id="trade_card_offers_empty"')
         # Verify empty state is rendered as table row (tr > td)
         expect(response.body).to include('<tr id="trade_card_offers_empty">')
-        expect(response.body).to include('colspan="11"')
+        expect(response.body).to include('colspan="12"')
         expect(response.body).to include('カード明細はまだありません')
       end
 

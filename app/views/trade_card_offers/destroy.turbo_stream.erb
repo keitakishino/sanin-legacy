@@ -5,7 +5,7 @@
 <% if @trade_card_offer.trade.trade_card_offers.count == 0 %>
   <%= turbo_stream.append "trade_card_offers" do %>
     <tr id="trade_card_offers_empty">
-      <td colspan="11" class="px-4 py-8 text-center text-stone-400 text-xs">カード明細はまだありません</td>
+      <td colspan="12" class="px-4 py-8 text-center text-stone-400 text-xs">カード明細はまだありません</td>
     </tr>
   <% end %>
 <% end %>

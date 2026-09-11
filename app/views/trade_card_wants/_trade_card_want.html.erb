@@ -19,7 +19,7 @@
       <button
         type="button"
         class="px-2 py-1 text-emerald-700 hover:bg-emerald-50 text-xs rounded hover:opacity-90 font-bold"
-        onclick="document.getElementById('<%= dom_id(trade_card_want, :edit_form) %>').style.display = 'table-row'; document.getElementById('<%= dom_id(trade_card_want, :expand) %>').classList.add('hidden');">
+        onclick="document.getElementById('<%= dom_id(trade_card_want, :edit_form) %>').style.display = 'table-row'; document.getElementById('<%= dom_id(trade_card_want, :expand) %>').style.display = 'none';">
         編集
       </button>
       <%= button_to "削除", trade_card_want_path(@trade.event, trade_card_want), method: :delete, form: { local: true, data: { turbo: true } }, class: "px-2 py-1 text-red-700 hover:bg-red-50 text-xs rounded hover:opacity-90 font-bold" %>
@@ -56,7 +56,7 @@
 </tr>
 
 <!-- Edit form row (hidden by default) -->
-<tr id="<%= dom_id(trade_card_want, :edit_form) %>" class="hidden border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.1 150)">
+<tr id="<%= dom_id(trade_card_want, :edit_form) %>" class="border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.1 150); display: none;">
   <td colspan="11" class="px-4 py-4 bg-stone-50">
     <turbo-frame id="<%= dom_id(trade_card_want, :edit_form) %>" class="">
       <%= render 'trade_card_wants/form', trade_card_want: trade_card_want, frame_id: dom_id(trade_card_want, :edit_form) %>
