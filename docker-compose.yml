@@ -7,6 +7,9 @@ services:
       POSTGRES_PASSWORD: development_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    # Port configuration: Override DB_PORT environment variable for worktree isolation
+    # Default: 5432 (main branch), can be overridden in .env for worktree instances
+    # Set automatically by scripts/create_worktree.sh
     ports:
       - "${DB_PORT:-5432}:5432"
     healthcheck:
@@ -23,6 +26,9 @@ services:
     volumes:
       - .:/rails
       - bundle:/usr/local/bundle
+    # Port configuration: Override APP_PORT environment variable for worktree isolation
+    # Default: 3000 (main branch), can be overridden in .env for worktree instances
+    # Set automatically by scripts/create_worktree.sh
     ports:
       - "${APP_PORT:-3000}:3000"
     depends_on:
