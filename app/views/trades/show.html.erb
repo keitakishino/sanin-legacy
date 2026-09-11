@@ -148,17 +148,17 @@
       button.addEventListener('click', function(e) {
         e.preventDefault();
         const rowId = this.getAttribute('data-toggle-expand');
-        const expandRow = document.getElementById(rowId + '_expand');
-        const editFormRow = document.getElementById(rowId + '_edit_form');
+        const expandRow = document.getElementById('expand_' + rowId);
+        const editFormRow = document.getElementById('edit_form_' + rowId);
 
         if (expandRow) {
           const isHidden = expandRow.style.display === 'none';
           // Close all other expand rows and edit forms in the same table
           const table = this.closest('table');
-          table.querySelectorAll('[id$="_expand"]').forEach(row => {
+          table.querySelectorAll('[id^="expand_"]').forEach(row => {
             row.style.display = 'none';
           });
-          table.querySelectorAll('[id$="_edit_form"]').forEach(row => {
+          table.querySelectorAll('[id^="edit_form_"]').forEach(row => {
             row.style.display = 'none';
           });
           table.querySelectorAll('[data-toggle-expand]').forEach(btn => {
@@ -184,15 +184,15 @@
         newButton.addEventListener('click', function(e) {
           e.preventDefault();
           const rowId = this.getAttribute('data-toggle-expand');
-          const expandRow = document.getElementById(rowId + '_expand');
+          const expandRow = document.getElementById('expand_' + rowId);
 
           if (expandRow) {
             const isHidden = expandRow.style.display === 'none';
             const table = this.closest('table');
-            table.querySelectorAll('[id$="_expand"]').forEach(row => {
+            table.querySelectorAll('[id^="expand_"]').forEach(row => {
               row.style.display = 'none';
             });
-            table.querySelectorAll('[id$="_edit_form"]').forEach(row => {
+            table.querySelectorAll('[id^="edit_form_"]').forEach(row => {
               row.style.display = 'none';
             });
             table.querySelectorAll('[data-toggle-expand]').forEach(btn => {
