@@ -15,6 +15,15 @@
   </turbo-frame>
 <% end %>
 
+<%= turbo_stream.append frame_id do %>
+  <script>
+    const form = document.querySelector('#<%= frame_id %>_form');
+    if (form) {
+      form.reset();
+    }
+  </script>
+<% end %>
+
 <%= turbo_stream.append "toast-container" do %>
   <%= render(partial: "shared/toast", locals: { message: t("toasts.trade_card_offer.create", card_name: @trade_card_offer.card_name) }, formats: [:html]) %>
 <% end %>
