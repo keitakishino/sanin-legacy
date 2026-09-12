@@ -68,9 +68,9 @@
     <div>
       <%= f.label :pw_mark, "PWマーク", class: "block text-xs font-bold text-stone-500 mb-2" %>
       <div class="flex items-center gap-4">
-        <%= f.radio_button :pw_mark, true %>
+        <%= f.radio_button :pw_mark, true, checked: (trade_card_offer.pw_mark == true) %>
         <%= f.label :pw_mark_true, "あり", for: "trade_card_offer_pw_mark_true", class: "text-xs font-bold text-stone-700" %>
-        <%= f.radio_button :pw_mark, false %>
+        <%= f.radio_button :pw_mark, false, checked: (trade_card_offer.pw_mark == false) %>
         <%= f.label :pw_mark_false, "なし", for: "trade_card_offer_pw_mark_false", class: "text-xs font-bold text-stone-700" %>
       </div>
     </div>
