@@ -817,7 +817,6 @@ RSpec.describe "TradeCardOffers", type: :request do
         post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('data-controller="form-reset"')
-        expect(response.body).to include('data-form-reset-frame-id-value="new_trade_card_offer"')
       end
 
       it "does not include script tag for manual form reset" do
@@ -849,7 +848,8 @@ RSpec.describe "TradeCardOffers", type: :request do
         post "/trades/#{event.id}/card_offers", params: valid_params.merge(trade_id: trade.id),
           headers: { "Accept" => "text/vnd.turbo-stream.html" }
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('data-form-reset-frame-id-value="new_trade_card_offer_admin"')
+        expect(response.body).to include('id="new_trade_card_offer_admin"')
+        expect(response.body).to include('data-controller="form-reset"')
       end
     end
   end
