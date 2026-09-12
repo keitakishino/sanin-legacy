@@ -10,7 +10,7 @@
 <% end %>
 
 <%= turbo_stream.replace frame_id do %>
-  <turbo-frame id="<%= frame_id %>" style="display: none;" class="mt-4 bg-stone-50 p-4 rounded-lg">
+  <turbo-frame id="<%= frame_id %>" style="display: none;" class="mt-4 bg-stone-50 p-4 rounded-lg" data-controller="form-reset">
     <%= render(partial: 'form', locals: { trade_card_offer: @trade.trade_card_offers.build, frame_id: frame_id }, formats: [:html]) %>
   </turbo-frame>
 <% end %>

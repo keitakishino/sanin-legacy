@@ -8,7 +8,7 @@
 
 <% frame_id ||= "new_trade_card_offer" %>
 
-<%= form_with url: form_url, method: form_method, model: trade_card_offer, local: true, data: { turbo: true, "turbo-frame": "_top" } do |f| %>
+<%= form_with url: form_url, method: form_method, model: trade_card_offer, local: true, data: { turbo: true, "turbo-frame": "_top" }, id: "#{frame_id}_form" do |f| %>
   <!-- Hidden trade_id for admin operations only -->
   <% if current_user.role_admin? %>
     <%= hidden_field_tag :trade_id, @trade.id %>
@@ -31,7 +31,7 @@
     <!-- Card Name -->
     <div>
       <%= f.label :card_name, "カード名", class: "block text-xs font-bold text-stone-500 mb-1" %>
-      <%= f.text_field :card_name, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+      <%= f.text_field :card_name, value: trade_card_offer.card_name.presence || "", class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
     </div>
 
     <!-- Quantity -->
@@ -68,9 +68,9 @@
     <div>
       <%= f.label :pw_mark, "PWマーク", class: "block text-xs font-bold text-stone-500 mb-2" %>
       <div class="flex items-center gap-4">
-        <%= f.radio_button :pw_mark, true %>
+        <%= f.radio_button :pw_mark, true, checked: (trade_card_offer.pw_mark == true) %>
         <%= f.label :pw_mark_true, "あり", for: "trade_card_offer_pw_mark_true", class: "text-xs font-bold text-stone-700" %>
-        <%= f.radio_button :pw_mark, false %>
+        <%= f.radio_button :pw_mark, false, checked: (trade_card_offer.pw_mark == false) %>
         <%= f.label :pw_mark_false, "なし", for: "trade_card_offer_pw_mark_false", class: "text-xs font-bold text-stone-700" %>
       </div>
     </div>
@@ -82,9 +82,9 @@
              data-expansion-select-target="input"
              data-action="keyup->expansion-select#search blur->expansion-select#hideDropdown"
              placeholder="セットコードで検索（例: VOW）"
-             value="<%= trade_card_offer.expansion&.scryfall_set_code&.upcase %>"
+             value="<%= (trade_card_offer.persisted? && trade_card_offer.expansion&.scryfall_set_code&.upcase) || "" %>"
              class="w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" />
-      <%= f.hidden_field :expansion_id, data: { "expansion-select-target": "select" } %>
+      <%= f.hidden_field :expansion_id, value: (trade_card_offer.persisted? ? trade_card_offer.expansion_id : ""), data: { "expansion-select-target": "select" } %>
 
       <!-- Dropdown frame with suggestions -->
       <turbo-frame id="expansion_suggestions"
@@ -97,7 +97,7 @@
     <!-- Note -->
     <div>
       <%= f.label :note, "備考", class: "block text-xs font-bold text-stone-500 mb-1" %>
-      <%= f.text_area :note, rows: 3, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+      <%= f.text_area :note, rows: 3, value: trade_card_offer.note.presence || "", class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
     </div>
 
     <!-- Amount (admin only) -->

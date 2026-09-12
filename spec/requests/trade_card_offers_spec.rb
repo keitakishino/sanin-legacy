@@ -793,4 +793,64 @@ RSpec.describe "TradeCardOffers", type: :request do
       end
     end
   end
+
+  describe "form reset and lifecycle" do
+    let(:valid_params) do
+      {
+        trade_card_offer: {
+          card_name: "Black Lotus",
+          quantity: 1,
+          language: :ja,
+          condition: :nm,
+          foil: :foil,
+          frame: :normal,
+          pw_mark: true,
+          expansion_id: expansion.id,
+          note: "Test note"
+        }
+      }
+    end
+
+    describe "POST /trades/:event_id/card_offers (create) with turbo_stream" do
+      it "includes form-reset Stimulus controller in turbo_stream response" do
+        trade
+        post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('data-controller="form-reset"')
+      end
+
+      it "does not include script tag for manual form reset" do
+        trade
+        post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).not_to include("form.reset()")
+      end
+
+      it "uses turbo_stream.replace for form updates" do
+        trade
+        post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('action="replace" target="new_trade_card_offer"')
+      end
+
+      it "renders form with pw_mark radio buttons in replacement" do
+        trade
+        post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("PWマーク")
+      end
+    end
+
+    describe "admin context" do
+      it "uses correct frame id for admin users" do
+        post signin_path, params: { email: admin_user.email, password: "password123" }
+        trade
+        post "/trades/#{event.id}/card_offers", params: valid_params.merge(trade_id: trade.id),
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('id="new_trade_card_offer_admin"')
+        expect(response.body).to include('data-controller="form-reset"')
+      end
+    end
+  end
 end
