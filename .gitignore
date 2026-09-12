@@ -36,6 +36,12 @@
 # Ignore local docker compose overrides (e.g. worktree-specific port remapping).
 docker-compose.override.yml
 
+# Ignore Node.js dependencies (used only by local tooling, not the Rails app).
+/node_modules
+
+# Ignore local Playwright MCP artifacts (screenshots, snapshots, console logs).
+/.playwright-mcp
+
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
