@@ -884,4 +884,76 @@ RSpec.describe "TradeCardWants", type: :request do
       end
     end
   end
+
+  describe "form reset and lifecycle" do
+    let(:valid_params) do
+      {
+        trade_card_want: {
+          card_name: "Blue Eyes White Dragon",
+          quantity: 1,
+          language: :ja,
+          conditions: [ 0, 1 ],
+          foil: :foil,
+          frame: :normal,
+          expansion_id: expansion.id,
+          note: "Test note"
+        }
+      }
+    end
+
+    describe "POST /trades/:event_id/card_wants (create) with turbo_stream" do
+      it "includes form-reset Stimulus controller in turbo_stream response" do
+        trade
+        post "/trades/#{event.id}/card_wants", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('data-controller="form-reset"')
+        expect(response.body).to include('data-form-reset-frame-id-value="new_trade_card_want"')
+      end
+
+      it "does not include script tag for manual form reset" do
+        trade
+        post "/trades/#{event.id}/card_wants", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).not_to include("form.reset()")
+      end
+
+      it "uses turbo_stream.replace for form updates" do
+        trade
+        post "/trades/#{event.id}/card_wants", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('action="replace" target="new_trade_card_want"')
+      end
+
+      it "renders form with conditions checkboxes in replacement" do
+        trade
+        post "/trades/#{event.id}/card_wants", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("状態")
+        expect(response.body).to include("NM")
+      end
+    end
+
+    describe "conditions checkbox handling" do
+      it "creates want with checked conditions" do
+        trade
+        params_with_conditions = valid_params.dup
+        params_with_conditions[:trade_card_want][:conditions] = [ "0", "1" ]
+        post "/trades/#{event.id}/card_wants", params: params_with_conditions
+        expect(response).to redirect_to(trade_path(event))
+        want = TradeCardWant.last
+        expect(want.conditions).to match_array([ 0, 1 ])
+      end
+    end
+
+    describe "admin context" do
+      it "uses correct frame id for admin users" do
+        post signin_path, params: { email: admin_user.email, password: "password123" }
+        trade
+        post "/trades/#{event.id}/card_wants", params: valid_params.merge(trade_id: trade.id),
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('data-form-reset-frame-id-value="new_trade_card_want_admin"')
+      end
+    end
+  end
 end
