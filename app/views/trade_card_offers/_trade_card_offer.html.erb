@@ -7,7 +7,7 @@
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.foil.#{trade_card_offer.foil}") %></td>
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.frame.#{trade_card_offer.frame}") %></td>
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.pw_mark ? "あり" : "なし" %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.expansion&.name.present? ? trade_card_offer.expansion.name : "—" %></td>
+  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.expansion&.scryfall_set_code&.upcase || "—" %></td>
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800 truncate" title="<%= trade_card_offer.note %>"><%= trade_card_offer.note.present? ? trade_card_offer.note : "—" %></td>
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.amount.present? ? "¥#{number_with_delimiter(trade_card_offer.amount)}" : "—" %></td>
 
@@ -45,7 +45,7 @@
       <p><strong>フレーム:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.frame.#{trade_card_offer.frame}") %></p>
       <p><strong>PWマーク:</strong> <%= trade_card_offer.pw_mark ? "あり" : "なし" %></p>
       <% if trade_card_offer.expansion %>
-        <p><strong>セット:</strong> <%= trade_card_offer.expansion.name %></p>
+        <p><strong>セット:</strong> <%= trade_card_offer.expansion.scryfall_set_code.upcase %></p>
       <% end %>
       <% if trade_card_offer.note.present? %>
         <p><strong>備考:</strong> <%= trade_card_offer.note %></p>

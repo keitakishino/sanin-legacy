@@ -6,7 +6,7 @@
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_want.conditions.present? && trade_card_want.conditions.any? ? trade_card_want.conditions.map { |c| I18n.t("activerecord.enums.trade_card_want_condition.#{c}") }.join(", ") : "不問" %></td>
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_want.foil.present? ? I18n.t("activerecord.enums.trade_card_want.foil.#{trade_card_want.foil}") : "不問" %></td>
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_want.frame.present? ? I18n.t("activerecord.enums.trade_card_want.frame.#{trade_card_want.frame}") : "不問" %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_want.expansion&.name.present? ? trade_card_want.expansion.name : "—" %></td>
+  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_want.expansion&.scryfall_set_code&.upcase || "—" %></td>
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800 truncate" title="<%= trade_card_want.note %>"><%= trade_card_want.note.present? ? trade_card_want.note : "—" %></td>
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_want.amount.present? ? "¥#{number_with_delimiter(trade_card_want.amount)}" : "—" %></td>
 
@@ -43,7 +43,7 @@
       <p><strong>フォイル:</strong> <%= trade_card_want.foil.present? ? I18n.t("activerecord.enums.trade_card_want.foil.#{trade_card_want.foil}") : "不問" %></p>
       <p><strong>フレーム:</strong> <%= trade_card_want.frame.present? ? I18n.t("activerecord.enums.trade_card_want.frame.#{trade_card_want.frame}") : "不問" %></p>
       <% if trade_card_want.expansion %>
-        <p><strong>セット:</strong> <%= trade_card_want.expansion.name %></p>
+        <p><strong>セット:</strong> <%= trade_card_want.expansion.scryfall_set_code.upcase %></p>
       <% end %>
       <% if trade_card_want.note.present? %>
         <p><strong>備考:</strong> <%= trade_card_want.note %></p>
