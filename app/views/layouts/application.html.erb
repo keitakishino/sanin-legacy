@@ -28,7 +28,7 @@
   </head>
 
   <body class="bg-stone-50">
-    <header class="bg-white border-b border-stone-200">
+    <header class="bg-white border-b border-stone-200" data-controller="hamburger-menu">
       <div class="container mx-auto px-4 py-4 flex justify-between items-center">
         <!-- Logo and app name -->
         <div class="flex items-center gap-3">
@@ -41,8 +41,22 @@
           <h1 class="text-base font-bold text-stone-800" style="font-weight: 800; font-size: 17px;">Sanin Legacy</h1>
         </div>
 
-        <!-- Navigation and user menu -->
-        <nav class="flex items-center gap-6">
+        <!-- Hamburger menu button (mobile only) -->
+        <% if user_signed_in? %>
+          <button
+            class="md:hidden w-8 h-8 flex items-center justify-center hover:bg-stone-100 rounded-md transition-colors"
+            data-hamburger-menu-target="icon"
+            data-action="click->hamburger-menu#toggle"
+            aria-label="メニューを開く"
+            type="button">
+            <svg class="w-6 h-6 text-stone-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
+        <% end %>
+
+        <!-- Navigation and user menu (desktop) -->
+        <nav class="hidden md:flex items-center gap-6">
           <% if user_signed_in? && !current_user.role_admin? %>
             <!-- User screen navigation -->
             <div class="flex items-center gap-6">
@@ -87,6 +101,75 @@
                 class: "px-4 py-2 bg-accent text-white rounded-md hover:bg-accent-hover font-bold text-xs" %>
           <% end %>
         </nav>
+      </div>
+
+      <!-- Mobile drawer menu -->
+      <div
+        class="hidden fixed inset-0 top-16 md:hidden bg-white border-b border-stone-200 flex flex-col gap-4 p-4 z-40 w-screen transition-all duration-200"
+        data-hamburger-menu-target="drawer"
+        aria-hidden="true">
+        <% if user_signed_in? && !current_user.role_admin? %>
+          <!-- User navigation links -->
+          <nav class="flex flex-col gap-3">
+            <%= link_to t("dashboards.show.title", default: "ダッシュボード"), root_path,
+                class: "text-sm font-semibold text-stone-800 hover:text-accent py-2",
+                data: { action: "click->hamburger-menu#close" } %>
+            <%= link_to t("events.title", default: "イベント"), events_path,
+                class: "text-sm font-semibold text-stone-800 hover:text-accent py-2",
+                data: { action: "click->hamburger-menu#close" } %>
+            <%= link_to t("histories.title", default: "トレード履歴"), histories_path,
+                class: "text-sm font-semibold text-stone-800 hover:text-accent py-2",
+                data: { action: "click->hamburger-menu#close" } %>
+          </nav>
+
+          <div class="border-t border-stone-200 pt-3 flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold text-stone-800"><%= current_user.username %></span>
+            </div>
+            <%= link_to "マイページ", mypage_path,
+                class: "text-sm text-stone-800 hover:text-accent font-semibold py-2",
+                data: { action: "click->hamburger-menu#close" } %>
+            <%= button_to "Sign Out", signout_path, method: :delete,
+                class: "w-full px-4 py-2 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs text-left",
+                data: { action: "click->hamburger-menu#close" } %>
+          </div>
+        <% elsif user_signed_in? && current_user.role_admin? %>
+          <!-- Admin navigation links -->
+          <nav class="flex flex-col gap-3">
+            <%= link_to t("dashboards.show.title", default: "ダッシュボード"), root_path,
+                class: "text-sm font-semibold text-stone-800 hover:text-accent py-2",
+                data: { action: "click->hamburger-menu#close" } %>
+            <%= link_to "イベント管理", admin_events_path,
+                class: "text-sm font-semibold text-stone-800 hover:text-accent py-2",
+                data: { action: "click->hamburger-menu#close" } %>
+            <%= link_to t("admin.users.nav_label"), admin_users_path,
+                class: "text-sm font-semibold text-stone-800 hover:text-accent py-2",
+                data: { action: "click->hamburger-menu#close" } %>
+            <%= link_to "招待コード管理", admin_invitations_path,
+                class: "text-sm font-semibold text-stone-800 hover:text-accent py-2",
+                data: { action: "click->hamburger-menu#close" } %>
+          </nav>
+
+          <div class="border-t border-stone-200 pt-3 flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold text-stone-800"><%= current_user.username %></span>
+              <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-danger-soft text-danger">管理者</span>
+            </div>
+            <%= link_to "マイページ", mypage_path,
+                class: "text-sm text-stone-800 hover:text-accent font-semibold py-2",
+                data: { action: "click->hamburger-menu#close" } %>
+            <%= button_to "Sign Out", signout_path, method: :delete,
+                class: "w-full px-4 py-2 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs text-left",
+                data: { action: "click->hamburger-menu#close" } %>
+          </div>
+        <% else %>
+          <!-- Not signed in -->
+          <div>
+            <%= link_to "Sign In", signin_path,
+                class: "block px-4 py-2 bg-accent text-white rounded-md hover:bg-accent-hover font-bold text-xs text-center",
+                data: { action: "click->hamburger-menu#close" } %>
+          </div>
+        <% end %>
       </div>
     </header>
 
