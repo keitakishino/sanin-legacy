@@ -58,7 +58,7 @@
 </tr>
 
 <!-- Edit form row (hidden by default) -->
-<tr id="<%= dom_id(trade_card_offer, :edit_form) %>" class="border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.12 231); display: none;">
+<tr id="<%= dom_id(trade_card_offer, :edit_form) %>" class="border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.12 231); display: none;" data-controller="form-reset">
   <td colspan="12" class="px-4 py-4 bg-stone-50">
     <turbo-frame id="<%= dom_id(trade_card_offer, :edit_form) %>" class="">
       <%= render 'trade_card_offers/form', trade_card_offer: trade_card_offer, frame_id: dom_id(trade_card_offer, :edit_form) %>

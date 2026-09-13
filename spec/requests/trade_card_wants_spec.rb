@@ -418,6 +418,20 @@ RSpec.describe "TradeCardWants", type: :request do
       expect(response.body).to include("の欲しいカード明細を更新しました")
     end
 
+    it "includes hidden edit form row in turbo_stream response after successful update" do
+      want
+      patch "/trades/#{event.id}/card_wants/#{want.id}", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:ok)
+      # Verify the edit form row is replaced with display: none
+      # This ensures form_reset_controller's resetForm() will hide the form row
+      expected_frame_id = "edit_form_trade_card_want_#{want.id}"
+      expect(response.body).to include('action="replace"')
+      expect(response.body).to include("target=\"#{expected_frame_id}\"")
+      expect(response.body).to include("display: none;")
+      # Verify data-controller attribute is present for form_reset_controller to initialize
+      expect(response.body).to include("data-controller=\"form-reset\"")
+    end
+
     context "with invalid params on update" do
       let(:invalid_update_params) do
         {
