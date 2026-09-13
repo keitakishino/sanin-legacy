@@ -2,6 +2,17 @@
   <%= render 'trade_card_want', trade_card_want: @trade_card_want %>
 <% end %>
 
+<!-- Hide the edit form row and reset form after successful update -->
+<%= turbo_stream.replace dom_id(@trade_card_want, :edit_form) do %>
+  <tr id="<%= dom_id(@trade_card_want, :edit_form) %>" class="border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.1 150); display: none;" data-controller="form-reset">
+    <td colspan="11" class="px-4 py-4 bg-stone-50">
+      <turbo-frame id="<%= dom_id(@trade_card_want, :edit_form_frame) %>" class="">
+        <%= render 'trade_card_wants/form', trade_card_want: @trade_card_want, frame_id: dom_id(@trade_card_want, :edit_form_frame) %>
+      </turbo-frame>
+    </td>
+  </tr>
+<% end %>
+
 <%= turbo_stream.replace "trade_aggregates" do %>
   <%= render(partial: 'trades/aggregates_inline', locals: { trade: @trade_card_want.trade }, formats: [:html]) %>
 <% end %>

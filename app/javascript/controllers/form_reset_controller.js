@@ -31,14 +31,14 @@ export default class extends Controller {
   }
 
   resetForm() {
-    // Find the form within the frame (this.element is the turbo-frame itself)
+    // Find the form within the element and reset it
     const form = this.element.querySelector("form")
     if (form) {
       // Reset the form to clear all user-entered values
       form.reset()
     }
 
-    // Hide the frame after form submission success
+    // Hide the element regardless of its type (TR, turbo-frame, or similar inline element)
     this.element.style.display = "none"
   }
 }

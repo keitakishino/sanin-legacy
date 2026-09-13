@@ -1,5 +1,5 @@
 <% if @trade_card_want.persisted? %>
-  <% frame_id = dom_id(@trade_card_want, :edit_form) %>
+  <% frame_id = dom_id(@trade_card_want, :edit_form_frame) %>
 <% else %>
   <% admin_context = @trade_id.present? %>
   <% frame_id = admin_context ? 'new_trade_card_want_admin' : 'new_trade_card_want' %>
