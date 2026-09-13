@@ -51,6 +51,29 @@ RSpec.describe "Admin::Trades", type: :request do
         expect(response.body).to include(I18n.t("activerecord.enums.trade.status.pending"))
       end
 
+      it "displays status select with correct initial value for pending status" do
+        get admin_event_trade_path(event, trade)
+        expect(response.body).to include(%(<option selected="selected" value="pending">))
+      end
+
+      it "displays status select with correct initial value for in_progress status" do
+        trade.update!(status: :in_progress)
+        get admin_event_trade_path(event, trade)
+        expect(response.body).to include(%(<option selected="selected" value="in_progress">))
+      end
+
+      it "displays status select with correct initial value for completed status" do
+        trade.update!(status: :completed)
+        get admin_event_trade_path(event, trade)
+        expect(response.body).to include(%(<option selected="selected" value="completed">))
+      end
+
+      it "displays status select with correct initial value for cancelled status" do
+        trade.update!(status: :cancelled)
+        get admin_event_trade_path(event, trade)
+        expect(response.body).to include(%(<option selected="selected" value="cancelled">))
+      end
+
       it "displays aggregated amounts" do
         get admin_event_trade_path(event, trade)
         expect(response.body).to include("出すカード合計")
@@ -311,6 +334,16 @@ RSpec.describe "Admin::Trades", type: :request do
               params: { trade: { status: :in_progress } },
               headers: { "Accept" => "text/vnd.turbo-stream.html" }
             expect(trade.reload.status).to eq("in_progress")
+          end
+
+          it "reflects updated status in turbo_stream response" do
+            patch admin_event_trade_path(event, trade),
+              params: { trade: { status: :in_progress } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+            expect(trade.reload.status).to eq("in_progress")
+            # Verify the updated status is reflected in the response
+            updated_status_label = I18n.t("activerecord.enums.trade.status.in_progress")
+            expect(response.body).to include(updated_status_label)
           end
         end
       end
