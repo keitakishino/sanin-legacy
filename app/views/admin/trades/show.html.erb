@@ -29,7 +29,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <%= render "status_display", trade: @trade %>
       <div>
-        <%= form_with url: admin_event_trade_path(@event, @trade), method: :patch, local: true, class: "space-y-3" do |f| %>
+        <%= form_with url: admin_event_trade_path(@event, @trade), method: :patch, model: @trade, local: true, class: "space-y-3" do |f| %>
           <div>
             <label for="trade_status" class="block text-sm font-semibold text-stone-800 mb-2">ステータス変更</label>
             <%= f.select :status,
