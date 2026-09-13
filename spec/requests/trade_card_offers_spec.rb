@@ -52,6 +52,26 @@ RSpec.describe "TradeCardOffers", type: :request do
       expect(response.body).not_to include('target="new_trade_card_offer_admin"')
     end
 
+    context "when an admin creates on their own trade via the general /trades/:event_id page" do
+      before do
+        delete "/signout"
+        post signin_path, params: { email: admin_user.email, password: "password123" }
+      end
+
+      let!(:other_trade) { create(:trade, event: event, user: other_user) }
+      let!(:admin_trade) { create(:trade, event: event, user: admin_user) }
+
+      it "resolves the admin's own trade and targets the non-admin frame (no trade_id param, mirroring the form rendered on this page)" do
+        expect {
+          post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        }.to change { admin_trade.trade_card_offers.count }.by(1)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('target="new_trade_card_offer"')
+        expect(response.body).not_to include('target="new_trade_card_offer_admin"')
+      end
+    end
+
     it "returns HTML redirect on success" do
       trade
       post "/trades/#{event.id}/card_offers", params: valid_params
