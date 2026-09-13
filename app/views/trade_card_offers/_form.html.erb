@@ -9,8 +9,8 @@
 <% frame_id ||= "new_trade_card_offer" %>
 
 <%= form_with url: form_url, method: form_method, model: trade_card_offer, local: true, data: { turbo: true, "turbo-frame": "_top" }, id: "#{frame_id}_form" do |f| %>
-  <!-- Hidden trade_id for admin operations only -->
-  <% if current_user.role_admin? %>
+  <!-- Hidden trade_id only in admin frames, so an admin viewing their own trade via /trades/:event_id doesn't submit a stray trade_id that breaks frame_id matching on turbo_stream replace -->
+  <% if frame_id.to_s.end_with?("_admin") %>
     <%= hidden_field_tag :trade_id, @trade.id %>
   <% end %>
 

@@ -127,6 +127,23 @@ RSpec.describe "Trades", type: :request do
         end
       end
 
+      context "when the current user is an admin viewing their own trade" do
+        it "does not render a hidden trade_id field on the new offer/want forms" do
+          admin_user = create(:admin_user)
+          create(:trade, event: event, user: admin_user)
+
+          post signin_path, params: { email: admin_user.email, password: "password123" }
+          get "/trades/#{event.id}"
+
+          expect(response.body).to include('id="new_trade_card_offer_form"')
+          expect(response.body).to include('id="new_trade_card_want_form"')
+          # A stray trade_id here would make the create response target the
+          # "_admin" frame, which does not exist on this page, silently
+          # breaking the form auto-clear/collapse.
+          expect(response.body).not_to include('name="trade_id"')
+        end
+      end
+
       context "with non-existent event id" do
         it "returns 404" do
           get "/trades/999999"

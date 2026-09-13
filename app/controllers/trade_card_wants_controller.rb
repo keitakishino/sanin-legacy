@@ -65,16 +65,11 @@ class TradeCardWantsController < ApplicationController
       raise ActiveRecord::RecordNotFound unless @trade.event_id == @event.id
     else
       # For create and other actions: get trade from event using existing logic
-      if current_user.role_admin?
-        # For admin: if trade_id is provided, validate it matches the event_id in the URL
-        if params[:trade_id].present?
-          @trade = Trade.find_by!(id: params[:trade_id], event_id: @event.id)
-        else
-          # Fallback for routes that don't provide trade_id
-          raise ActiveRecord::RecordNotFound if Trade.where(event_id: @event.id).count > 1
-          @trade = Trade.find_by!(event_id: @event.id)
-        end
+      if current_user.role_admin? && params[:trade_id].present?
+        # For admin acting on another user's trade: validate trade_id matches the event_id in the URL
+        @trade = Trade.find_by!(id: params[:trade_id], event_id: @event.id)
       else
+        # General user, or admin acting on their own trade: resolve by current_user
         @trade = Trade.find_by!(event_id: @event.id, user_id: current_user.id)
       end
     end
