@@ -311,9 +311,9 @@ RSpec.describe "TradeCardOffers", type: :request do
       expect(response).to have_http_status(:ok)
       # Verify the edit form row is replaced with display: none
       # This ensures form_reset_controller's resetForm() will hide the form row
-      expected_frame_id = "edit_form_trade_card_offer_#{offer.id}"
+      expected_edit_form_id = "edit_form_trade_card_offer_#{offer.id}"
       expect(response.body).to include('action="replace"')
-      expect(response.body).to include("target=\"#{expected_frame_id}\"")
+      expect(response.body).to include("target=\"#{expected_edit_form_id}\"")
       expect(response.body).to include("display: none;")
       # Verify data-controller attribute is present for form_reset_controller to initialize
       expect(response.body).to include("data-controller=\"form-reset\"")
@@ -352,7 +352,7 @@ RSpec.describe "TradeCardOffers", type: :request do
         patch "/trades/#{event.id}/card_offers/#{offer.id}", params: invalid_update_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
         expect(response).to have_http_status(:unprocessable_entity)
         # Edit validation error should use persisted dom_id frame
-        expected_frame_id = "edit_form_trade_card_offer_#{offer.id}"
+        expected_frame_id = "edit_form_frame_trade_card_offer_#{offer.id}"
         expect(response.body).to include("target=\"#{expected_frame_id}\"")
         expect(response.body).to include("id=\"#{expected_frame_id}\"")
       end
