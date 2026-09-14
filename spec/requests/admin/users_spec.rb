@@ -101,6 +101,16 @@ RSpec.describe "Admin::Users", type: :request do
         expect(td_count).to eq(4)
       end
 
+      it "header and body columns match in count" do
+        create(:user, username: "test_user")
+        get admin_users_path
+        doc = Nokogiri::HTML(response.body)
+        th_count = doc.css("thead tr th").count
+        first_row_td_count = doc.css("tbody tr").first.css("> td").count
+        expect(th_count).to eq(first_row_td_count),
+          "Header columns (#{th_count}) and body first row columns (#{first_row_td_count}) must match"
+      end
+
       context "with search parameter" do
         it "filters users by username" do
           user1 = create(:user, username: "john_doe")
