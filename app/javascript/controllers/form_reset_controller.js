@@ -61,12 +61,31 @@ export default class extends Controller {
       }
     }
     this.element.addEventListener("turbo:before-frame-render", this.handleFrameRender)
+
+    // Add turbo:submit-end listener to handle form submission completion.
+    // This ensures that the form is reset only when the submission is successful.
+    // On validation errors (when event.detail.success is false), the form remains open
+    // so the user can correct the errors and resubmit.
+    const form = this.element.querySelector('form')
+    this.handleFormSubmitEnd = (event) => {
+      if (event.detail.success) {
+        setTimeout(() => this.resetForm(), 0)
+      }
+    }
+    if (form) {
+      form.addEventListener('turbo:submit-end', this.handleFormSubmitEnd)
+    }
   }
 
   disconnect() {
-    // Clean up event listener to prevent memory leaks and multiple registrations
+    // Clean up event listeners to prevent memory leaks and multiple registrations
     if (this.handleFrameRender) {
       this.element.removeEventListener("turbo:before-frame-render", this.handleFrameRender)
+    }
+    // Clean up the turbo:submit-end listener from the form
+    const form = this.element.querySelector('form')
+    if (form && this.handleFormSubmitEnd) {
+      form.removeEventListener('turbo:submit-end', this.handleFormSubmitEnd)
     }
   }
 

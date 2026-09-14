@@ -309,11 +309,13 @@ RSpec.describe "TradeCardOffers", type: :request do
       offer
       patch "/trades/#{event.id}/card_offers/#{offer.id}", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
       expect(response).to have_http_status(:ok)
-      # Verify the edit form row is replaced with display: none
-      # This ensures form_reset_controller's resetForm() will hide the form row
-      expected_edit_form_id = "edit_form_trade_card_offer_#{offer.id}"
+      # Verify the inner turbo-frame is replaced (not the entire <tr>).
+      # This preserves the <tr> element and its data-controller="form-reset" attachment.
+      # The <tr> element maintains display: none; which hides the form row.
+      expected_frame_id = "edit_form_frame_trade_card_offer_#{offer.id}"
       expect(response.body).to include('action="replace"')
-      expect(response.body).to include("target=\"#{expected_edit_form_id}\"")
+      expect(response.body).to include("target=\"#{expected_frame_id}\"")
+      # The <tr> element contains display: none; (set in _trade_card_offer.html.erb)
       expect(response.body).to include("display: none;")
       # Verify data-controller attribute is present for form_reset_controller to initialize
       expect(response.body).to include("data-controller=\"form-reset\"")
