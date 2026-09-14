@@ -230,6 +230,49 @@ RSpec.describe "Admin::Users", type: :request do
           get admin_user_path(user)
           expect(response.body).to include("トレード履歴はありません")
         end
+
+        it "adds data-url attribute for trade row navigation" do
+          event = create(:event, title: "Test Event")
+          trade = create(:trade, user: user, event: event)
+          get admin_user_path(user)
+          doc = Nokogiri::HTML(response.body)
+          trade_rows = doc.css("tbody tr")
+          expect(trade_rows.count).to be > 0
+          trade_row = trade_rows.first
+          expect(trade_row.attr("data-url")).to include("/admin/events/#{event.id}/trades/#{trade.id}")
+        end
+
+        it "adds data-controller attribute for clickable rows" do
+          event = create(:event)
+          create(:trade, user: user, event: event)
+          get admin_user_path(user)
+          doc = Nokogiri::HTML(response.body)
+          trade_rows = doc.css("tbody tr")
+          expect(trade_rows.count).to be > 0
+          expect(trade_rows.first.attr("data-controller")).to eq("clickable-row")
+        end
+
+        it "hides event date column on mobile screens with hidden md:table-cell class" do
+          event = create(:event, title: "Test Event")
+          create(:trade, user: user, event: event)
+          get admin_user_path(user)
+          doc = Nokogiri::HTML(response.body)
+          date_cells = doc.css("tbody tr td:nth-child(2)")
+          expect(date_cells.count).to be > 0
+          expect(date_cells.first.attr("class")).to include("hidden md:table-cell")
+        end
+
+        it "removes view details link column" do
+          event = create(:event)
+          create(:trade, user: user, event: event)
+          get admin_user_path(user)
+          doc = Nokogiri::HTML(response.body)
+          trade_rows = doc.css("tbody tr")
+          expect(trade_rows.count).to be > 0
+          # tr要素の直下のtd要素が3列（イベント名、開催日、ステータス）であることを確認
+          td_count = trade_rows.first.css("> td").count
+          expect(td_count).to eq(3)
+        end
       end
     end
   end

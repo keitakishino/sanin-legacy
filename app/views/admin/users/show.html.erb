@@ -73,16 +73,15 @@
           <thead class="bg-stone-100 border-b border-stone-200">
             <tr>
               <th class="px-4 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.users.event_title") %></th>
-              <th class="px-4 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.users.event_date") %></th>
+              <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.users.event_date") %></th>
               <th class="px-4 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.trade.status") %></th>
-              <th class="px-4 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.users.view_details") %></th>
             </tr>
           </thead>
           <tbody>
             <% @trades.each do |trade| %>
-              <tr class="border-b border-stone-200 hover:bg-stone-50">
+              <tr class="border-b border-stone-200 hover:bg-stone-50 cursor-pointer" data-controller="clickable-row" data-url="<%= admin_event_trade_path(trade.event, trade) %>">
                 <td class="px-4 py-3"><%= trade.event.title %></td>
-                <td class="px-4 py-3"><%= trade.event.event_date.strftime("%Y年%m月%d日") %></td>
+                <td class="hidden md:table-cell px-4 py-3"><%= trade.event.event_date.strftime("%Y年%m月%d日") %></td>
                 <td class="px-4 py-3">
                   <span class="
                     <%= case trade.status
@@ -100,9 +99,6 @@
                     px-3 py-1 rounded text-xs font-semibold">
                     <%= t("activerecord.enums.trade.status.#{trade.status}") %>
                   </span>
-                </td>
-                <td class="px-4 py-3">
-                  <%= link_to t("admin.users.view_details"), admin_event_trade_path(trade.event, trade), class: "text-indigo-700 hover:text-indigo-800 font-medium" %>
                 </td>
               </tr>
             <% end %>
