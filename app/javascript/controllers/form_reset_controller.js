@@ -17,8 +17,12 @@ export default class extends Controller {
     //
     // disconnect() でリスナーを明示的に解除し、同一フレーム内での複数回接続による
     // イベントリスナーの重複登録およびメモリリークを防止する。
-    this.handleFrameRender = () => {
-      setTimeout(() => this.resetForm(), 0)
+    this.handleFrameRender = (event) => {
+      // 自分自身の要素での turbo:before-frame-render のみを処理
+      // 入れ子フレーム（例: expansion_suggestions）でのイベント発火は無視する
+      if (event.target === this.element) {
+        setTimeout(() => this.resetForm(), 0)
+      }
     }
     this.element.addEventListener("turbo:before-frame-render", this.handleFrameRender)
   }
