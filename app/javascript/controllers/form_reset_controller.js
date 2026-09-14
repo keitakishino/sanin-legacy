@@ -33,19 +33,24 @@ export default class extends Controller {
 
     // Determine the expected frame to listen for
     // Case 1: If this.element is itself a turbo-frame, use its id
-    // Case 2: If this.element is a parent (e.g., TR), find the turbo-frame child by id
+    // Case 2: If this.element is a parent (e.g., TR), find the turbo-frame descendant
+    //
+    // In the edit form case, the structure is:
+    //   <tr data-controller="form-reset">
+    //     <td colspan="12">
+    //       <turbo-frame id="...edit_form_frame">  ← this is what we need (descendant, not direct child)
+    //         <form>
+    //           <div data-controller="expansion-select">
+    //             <turbo-frame id="expansion_suggestions">  ← nested, ignored
+    //
+    // querySelector('turbo-frame') finds descendants in document order,
+    // so it will find the main edit_form_frame before any nested expansion_suggestions.
     let expectedFrameId = null
     if (this.element.tagName === 'TURBO-FRAME') {
       expectedFrameId = this.element.id
     } else {
-      // Find the turbo-frame child and store its id
-      // Prefer the first turbo-frame that is a direct child
-      for (const child of this.element.children) {
-        if (child.tagName === 'TURBO-FRAME') {
-          expectedFrameId = child.id
-          break
-        }
-      }
+      const frameElement = this.element.querySelector('turbo-frame')
+      expectedFrameId = frameElement?.id
     }
 
     this.handleFrameRender = (event) => {
