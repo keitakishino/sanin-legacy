@@ -14,19 +14,44 @@ export default class extends Controller {
     // turbo:before-frame-render イベントは、turbo-frameが新しいコンテンツで置き換わる直前に
     // 当該turbo-frame要素で発火する。このイベントはバブリングするため、親要素のリスナーも
     // 反応する可能性がある。子要素のフレーム置き換え（例：expansion_suggestions）を
-    // 誤検知しないよう、event.composedPath()[0] で実際の発火元を確認し、自分自身の
-    // 直下の turbo-frame 要素の置き換えにのみ反応する。
+    // 誤検知しないよう、id 属性による明確なマッチングを用いる。
+    // 以下の2つのケースに対応する：
+    //   1. 新規フォーム: this.element = turbo-frame 自体
+    //      → form_reset コントローラーが turbo-frame に直接接続されている
+    //   2. 編集フォーム: this.element = TR 要素
+    //      → form_reset コントローラーが TR に接続されている
+    //
+    // 両ケースとも、フレーム置き換え時のイベント発火元 (target) の id を確認し、
+    // 初期化時に記録しておいた expectedFrameId と一致する場合のみ resetForm() を実行する。
+    // これにより、入れ子の expansion_suggestions フレーム更新などを誤検知しない。
     //
     // setTimeout(..., 0) により、フレームの置き換え処理が完了した後にリセット処理が
     // 実行されるようにしている。
     //
     // disconnect() でリスナーを明示的に解除し、同一フレーム内での複数回接続による
     // イベントリスナーの重複登録およびメモリリークを防止する。
+
+    // Determine the expected frame to listen for
+    // Case 1: If this.element is itself a turbo-frame, use its id
+    // Case 2: If this.element is a parent (e.g., TR), find the turbo-frame child by id
+    let expectedFrameId = null
+    if (this.element.tagName === 'TURBO-FRAME') {
+      expectedFrameId = this.element.id
+    } else {
+      // Find the turbo-frame child and store its id
+      // Prefer the first turbo-frame that is a direct child
+      for (const child of this.element.children) {
+        if (child.tagName === 'TURBO-FRAME') {
+          expectedFrameId = child.id
+          break
+        }
+      }
+    }
+
     this.handleFrameRender = (event) => {
       const target = event.composedPath()[0]
-      // 直下の turbo-frame 要素のみに反応する（入れ子の expansion_suggestions は無視）
-      const directChild = this.element.querySelector("turbo-frame")
-      if (directChild && target === directChild) {
+      // Only reset if the event target matches our expected frame
+      if (expectedFrameId && target?.id === expectedFrameId) {
         setTimeout(() => this.resetForm(), 0)
       }
     }
