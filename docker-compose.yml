@@ -26,6 +26,7 @@ services:
     volumes:
       - .:/rails
       - bundle:/usr/local/bundle
+    user: "${UID}:${GID}"
     # Port configuration: Override APP_PORT environment variable for worktree isolation
     # Default: 3000 (main branch), can be overridden in .env for worktree instances
     # Set automatically by scripts/create_worktree.sh
