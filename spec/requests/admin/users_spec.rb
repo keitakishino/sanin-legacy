@@ -53,14 +53,52 @@ RSpec.describe "Admin::Users", type: :request do
         expect(pos2).to be < pos1
       end
 
-      it "includes turbo_frame=\"_top\" attribute on view_details link" do
+      it "adds data-url attribute with correct path to user detail page" do
         test_user = create(:user, username: "test_user")
         get admin_users_path
-        doc = Nokogiri::HTML.parse(response.body)
-        # Find the link with href matching admin_user_path pattern
-        user_link = doc.css("a[href='#{admin_user_path(test_user)}']").first
-        expect(user_link).not_to be_nil, "User link with href '#{admin_user_path(test_user)}' not found"
-        expect(user_link["data-turbo-frame"]).to eq("_top")
+        doc = Nokogiri::HTML(response.body)
+        user_rows = doc.css("tbody tr")
+        expect(user_rows.count).to be > 0
+        user_row = user_rows.first
+        expect(user_row.attr("data-url")).to include(admin_user_path(test_user))
+      end
+
+      it "adds data-controller attribute for clickable rows" do
+        create(:user, username: "test_user")
+        get admin_users_path
+        doc = Nokogiri::HTML(response.body)
+        user_rows = doc.css("tbody tr")
+        expect(user_rows.count).to be > 0
+        expect(user_rows.first.attr("data-controller")).to eq("clickable-row")
+      end
+
+      it "hides email column on mobile screens with hidden md:table-cell class" do
+        test_user = create(:user, username: "test_user", email: "test@example.com")
+        get admin_users_path
+        doc = Nokogiri::HTML(response.body)
+        email_cells = doc.css("tbody tr td:nth-child(2)")
+        expect(email_cells.count).to be > 0
+        expect(email_cells.first.attr("class")).to include("hidden md:table-cell")
+      end
+
+      it "hides registered_at column on mobile screens with hidden md:table-cell class" do
+        create(:user, username: "test_user")
+        get admin_users_path
+        doc = Nokogiri::HTML(response.body)
+        date_cells = doc.css("tbody tr td:nth-child(4)")
+        expect(date_cells.count).to be > 0
+        expect(date_cells.first.attr("class")).to include("hidden md:table-cell")
+      end
+
+      it "removes view details link column" do
+        create(:user, username: "test_user")
+        get admin_users_path
+        doc = Nokogiri::HTML(response.body)
+        user_rows = doc.css("tbody tr")
+        expect(user_rows.count).to be > 0
+        # tr要素の直下のtd要素が4列（ユーザー名、メール、ロール、登録日）であることを確認
+        td_count = user_rows.first.css("> td").count
+        expect(td_count).to eq(4)
       end
 
       context "with search parameter" do
