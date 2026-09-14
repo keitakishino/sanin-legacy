@@ -79,7 +79,7 @@
           </thead>
           <tbody>
             <% @trades.each do |trade| %>
-              <tr class="border-b border-stone-200 hover:bg-stone-50 cursor-pointer" data-controller="clickable-row" data-url="<%= admin_event_trade_path(trade.event, trade) %>">
+              <tr class="border-b border-stone-200 hover:bg-stone-50 cursor-pointer" data-controller="clickable-row" data-action="click->clickable-row#click" data-url="<%= admin_event_trade_path(trade.event, trade) %>">
                 <td class="px-4 py-3"><%= trade.event.title %></td>
                 <td class="hidden md:table-cell px-4 py-3"><%= trade.event.event_date.strftime("%Y年%m月%d日") %></td>
                 <td class="px-4 py-3">

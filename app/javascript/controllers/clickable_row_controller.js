@@ -2,8 +2,10 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   click(event) {
-    // セル内のリンク要素のクリックは行遷移を無視
-    if (event.target.closest("a, button")) {
+    const clickedElement = event.target.closest("a, button")
+
+    // リンク・ボタンのクリックは通常の遷移に任せ、行タップ処理は行わない
+    if (clickedElement) {
       return
     }
 
