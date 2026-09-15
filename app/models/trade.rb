@@ -13,8 +13,8 @@ class Trade < ApplicationRecord
   validates :offers_total_amount, :wants_total_amount, :net_amount, numericality: { only_integer: true }
 
   def recalculate_totals!
-    new_offers_total = trade_card_offers.sum(:amount) || 0
-    new_wants_total = trade_card_wants.sum(:amount) || 0
+    new_offers_total = trade_card_offers.sum("amount * quantity") || 0
+    new_wants_total = trade_card_wants.sum("amount * quantity") || 0
     new_net = new_offers_total - new_wants_total
 
     update!(

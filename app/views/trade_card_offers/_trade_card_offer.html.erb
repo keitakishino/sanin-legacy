@@ -11,6 +11,8 @@
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.expansion&.scryfall_set_code&.upcase || "—" %></td>
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800 truncate" title="<%= trade_card_offer.note %>"><%= trade_card_offer.note.present? ? trade_card_offer.note : "—" %></td>
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.amount.present? ? "¥#{number_with_delimiter(trade_card_offer.amount)}" : "—" %></td>
+  <% subtotal = (trade_card_offer.amount.present? && trade_card_offer.quantity.present?) ? (trade_card_offer.amount * trade_card_offer.quantity) : nil %>
+  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= subtotal.present? ? "¥#{number_with_delimiter(subtotal)}" : "—" %></td>
 
   <!-- Mobile: Card name only -->
   <td class="md:hidden px-4 py-3 text-sm text-stone-800 flex-1 truncate" title="<%= trade_card_offer.card_name %>"><%= trade_card_offer.card_name %></td>
@@ -52,7 +54,11 @@
         <p><strong>備考:</strong> <%= trade_card_offer.note %></p>
       <% end %>
       <% if trade_card_offer.amount.present? %>
-        <p><strong>金額:</strong> ¥<%= number_with_delimiter(trade_card_offer.amount) %></p>
+        <p><strong>単価:</strong> ¥<%= number_with_delimiter(trade_card_offer.amount) %></p>
+      <% end %>
+      <% subtotal = (trade_card_offer.amount.present? && trade_card_offer.quantity.present?) ? (trade_card_offer.amount * trade_card_offer.quantity) : nil %>
+      <% if subtotal.present? %>
+        <p><strong>小計:</strong> ¥<%= number_with_delimiter(subtotal) %></p>
       <% end %>
     </div>
   </td>
