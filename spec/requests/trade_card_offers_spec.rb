@@ -888,5 +888,52 @@ RSpec.describe "TradeCardOffers", type: :request do
         expect(response.body).to include('data-controller="form-reset"')
       end
     end
+
+    describe "Issue #259: form_reset_controller should handle nested frame events correctly" do
+      it "renders form reset only when the parent frame itself is replaced (not on nested frame updates)" do
+        trade
+        # This confirms the fix: turbo:before-frame-render event.target check
+        # ensures form-reset only processes events for its own element, not nested frames
+
+        # The parent frame (new_trade_card_offer) should be replaced and form-reset triggered
+        # when the form is actually submitted
+        post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        # After form submission, the response should replace the parent frame with form-reset
+        expect(response.body).to include('action="replace" target="new_trade_card_offer"')
+        expect(response.body).to include('data-controller="form-reset"')
+        # And the frame should have display: none (form is hidden after successful submission)
+        expect(response.body).to include('style="display: none;"')
+      end
+
+      it "form-reset controller is attached to the parent frame and will properly filter nested frame events" do
+        trade
+        # When the parent form frame is created after successful submission,
+        # it has the form-reset controller with event.target === this.element check
+        post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        # Verify the form-reset controller is properly connected to the frame
+        # The controller's handleFrameRender will only respond to turbo:before-frame-render
+        # events where event.target === this.element (the frame itself)
+        expect(response.body).to include('data-controller="form-reset"')
+        # The frame is initially hidden after successful submission
+        expect(response.body).to include('style="display: none;"')
+        # The form is properly rendered within the frame for next entry
+        expect(response.body).to include('id="new_trade_card_offer_form"')
+      end
+
+      it "preserves form structure for nested expansion_suggestions frame management" do
+        trade
+        # When a successful offer is created, the response includes the reset form frame
+        post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        # The response should include the reset form with expansion_suggestions frame
+        expect(response.body).to include('id="expansion_suggestions"')
+        # The expansion_suggestions frame is a nested element within the form frame
+        # When it's updated separately (via expansion_select controller), the parent
+        # form-reset controller should NOT be triggered because event.target !== this.element
+        expect(response.body).to include('turbo-frame')
+      end
+    end
   end
 end

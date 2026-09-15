@@ -6,6 +6,12 @@ import { Controller } from "@hotwired/stimulus"
 // freshly rendered markup that is already closed (display: none) by default,
 // so no JS is needed to close the form after a submission. This controller
 // only needs to handle the client-side-only "cancel" action.
+//
+// This intentionally does not listen for turbo:before-frame-render (as an
+// earlier version did, to work around Issue #259's nested expansion_suggestions
+// frame incorrectly bubbling a reset up to the parent form). Since this
+// controller no longer reacts to frame-render events at all, that whole class
+// of bug can't occur here anymore.
 export default class extends Controller {
   connect() {
     this.resetForm()
