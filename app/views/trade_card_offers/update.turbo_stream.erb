@@ -1,13 +1,8 @@
-<%= turbo_stream.replace dom_id(@trade_card_offer) do %>
-  <%= render 'trade_card_offer', trade_card_offer: @trade_card_offer %>
-<% end %>
-
-<!-- Hide the edit form row and reset form after successful update -->
-<!-- Only replace the inner turbo-frame to preserve the <tr> element and its data-controller="form-reset" attachment -->
-<%= turbo_stream.replace dom_id(@trade_card_offer, :edit_form_frame) do %>
-  <turbo-frame id="<%= dom_id(@trade_card_offer, :edit_form_frame) %>" class="">
-    <%= render 'trade_card_offers/form', trade_card_offer: @trade_card_offer, frame_id: dom_id(@trade_card_offer, :edit_form_frame) %>
-  </turbo-frame>
+<!-- Replace the whole row group (main row + mobile expansion row + edit form row) as one atomic -->
+<!-- unit so the freshly rendered edit form (closed by default) fully replaces the old one, with -->
+<!-- no leftover/duplicate row sharing the same id. -->
+<%= turbo_stream.replace dom_id(@trade_card_offer, :group) do %>
+  <%= render(partial: 'trade_card_offer', locals: { trade_card_offer: @trade_card_offer }, formats: [:html]) %>
 <% end %>
 
 <%= turbo_stream.replace "trade_aggregates" do %>

@@ -2,7 +2,7 @@
 <% frame_id = admin_context ? 'new_trade_card_want_admin' : 'new_trade_card_want' %>
 
 <%= turbo_stream.append "trade_card_wants" do %>
-  <%= render 'trade_card_want', trade_card_want: @trade_card_want %>
+  <%= render(partial: 'trade_card_want', locals: { trade_card_want: @trade_card_want }, formats: [:html]) %>
 <% end %>
 
 <% if @trade.trade_card_wants.count == 1 %>

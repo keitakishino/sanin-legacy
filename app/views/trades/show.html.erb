@@ -33,7 +33,7 @@
     </div>
 
     <div class="overflow-x-auto border border-stone-200 rounded-lg">
-      <table class="w-full">
+      <table class="w-full" id="trade_card_offers">
         <thead class="bg-stone-100">
           <tr>
             <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
@@ -50,17 +50,17 @@
             <th class="px-4 py-3 text-right text-xs font-bold text-stone-500">操作</th>
           </tr>
         </thead>
-        <tbody id="trade_card_offers">
-          <% if @trade.trade_card_offers.any? %>
-            <% @trade.trade_card_offers.each do |offer| %>
-              <%= render offer %>
-            <% end %>
-          <% else %>
-            <tr id="trade_card_offers_empty">
+        <% if @trade.trade_card_offers.any? %>
+          <% @trade.trade_card_offers.each do |offer| %>
+            <%= render offer %>
+          <% end %>
+        <% else %>
+          <tbody id="trade_card_offers_empty">
+            <tr>
               <td colspan="12" class="px-4 py-8 text-center text-stone-400 text-xs">カード明細はまだありません</td>
             </tr>
-          <% end %>
-        </tbody>
+          </tbody>
+        <% end %>
       </table>
     </div>
 
@@ -86,7 +86,7 @@
     </div>
 
     <div class="overflow-x-auto border border-stone-200 rounded-lg">
-      <table class="w-full">
+      <table class="w-full" id="trade_card_wants">
         <thead class="bg-stone-100">
           <tr>
             <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
@@ -102,17 +102,17 @@
             <th class="px-4 py-3 text-right text-xs font-bold text-stone-500">操作</th>
           </tr>
         </thead>
-        <tbody id="trade_card_wants">
-          <% if @trade.trade_card_wants.any? %>
-            <% @trade.trade_card_wants.each do |want| %>
-              <%= render want %>
-            <% end %>
-          <% else %>
-            <tr id="trade_card_wants_empty">
+        <% if @trade.trade_card_wants.any? %>
+          <% @trade.trade_card_wants.each do |want| %>
+            <%= render want %>
+          <% end %>
+        <% else %>
+          <tbody id="trade_card_wants_empty">
+            <tr>
               <td colspan="11" class="px-4 py-8 text-center text-stone-400 text-xs">カード明細はまだありません</td>
             </tr>
-          <% end %>
-        </tbody>
+          </tbody>
+        <% end %>
       </table>
     </div>
 
