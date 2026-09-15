@@ -29,7 +29,7 @@ gem "bcrypt", "~> 3.1.7"
 gem "omniauth", "~> 2.1"
 gem "omniauth-google-oauth2", "~> 1.1"
 gem "omniauth-twitter", "~> 1.4"
-gem "omniauth-rails_csrf_protection", "~> 1.0"
+gem "omniauth-rails_csrf_protection", "~> 2.0"
 
 # Google Sheets API integration
 gem "google-apis-sheets_v4", "~> 0.15.0"
