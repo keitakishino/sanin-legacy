@@ -1,9 +1,19 @@
 require 'capybara/rails'
 require 'capybara/rspec'
 require 'selenium-webdriver'
+require 'tmpdir'
 
 Capybara.register_driver :selenium_chrome_headless do |app|
   options = Selenium::WebDriver::Chrome::Options.new
+  # Use the apt-installed chromium (present in both the CI runner and the dev
+  # container) instead of letting Selenium Manager download its own Chrome for
+  # Testing build, which doesn't always match what's available in these
+  # environments.
+  options.binary = "/usr/bin/chromium" if File.exist?("/usr/bin/chromium")
+  # $HOME isn't guaranteed to be writable for the app's non-root user (it isn't
+  # in the dev container), and Chrome fails outright ("Failed to create
+  # headless user data directory container") without a writable profile dir.
+  options.add_argument("--user-data-dir=#{Dir.mktmpdir('chromium-user-data')}")
   options.add_argument("--headless")
   options.add_argument("--no-sandbox")
   options.add_argument("--disable-dev-shm-usage")
