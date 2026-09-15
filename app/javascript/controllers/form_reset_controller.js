@@ -25,8 +25,11 @@ export default class extends Controller {
     // 初期化時に記録しておいた expectedFrameId と一致する場合のみ resetForm() を実行する。
     // これにより、入れ子の expansion_suggestions フレーム更新などを誤検知しない。
     //
-    // setTimeout(..., 0) により、フレームの置き換え処理が完了した後にリセット処理が
-    // 実行されるようにしている。
+    // フレーム置き換え時の handleFormSubmitEnd リスナー登録:
+    // フレームが置き換わると、form要素も新しいものに置き換わる。そのため、最初に登録した
+    // リスナーは古いform要素に残されたままになり、新しいform要素には登録されない。
+    // これを防ぐため、turbo:before-frame-render内で古いリスナーを削除し、
+    // setTimeout(..., 0) で新しいform要素にリスナーを再登録する。
     //
     // disconnect() でリスナーを明示的に解除し、同一フレーム内での複数回接続による
     // イベントリスナーの重複登録およびメモリリークを防止する。
@@ -57,24 +60,20 @@ export default class extends Controller {
       const target = event.composedPath()[0]
       // Only reset if the event target matches our expected frame
       if (expectedFrameId && target?.id === expectedFrameId) {
-        setTimeout(() => this.resetForm(), 0)
+        // Remove the old turbo:submit-end listener before the frame is replaced
+        this.detachFormSubmitEnd()
+
+        // After the frame replacement, re-attach the listener to the new form element
+        setTimeout(() => {
+          this.resetForm()
+          this.attachFormSubmitEnd()
+        }, 0)
       }
     }
     this.element.addEventListener("turbo:before-frame-render", this.handleFrameRender)
 
-    // Add turbo:submit-end listener to handle form submission completion.
-    // This ensures that the form is reset only when the submission is successful.
-    // On validation errors (when event.detail.success is false), the form remains open
-    // so the user can correct the errors and resubmit.
-    const form = this.element.querySelector('form')
-    this.handleFormSubmitEnd = (event) => {
-      if (event.detail.success) {
-        setTimeout(() => this.resetForm(), 0)
-      }
-    }
-    if (form) {
-      form.addEventListener('turbo:submit-end', this.handleFormSubmitEnd)
-    }
+    // Initial attachment of turbo:submit-end listener
+    this.attachFormSubmitEnd()
   }
 
   disconnect() {
@@ -83,6 +82,30 @@ export default class extends Controller {
       this.element.removeEventListener("turbo:before-frame-render", this.handleFrameRender)
     }
     // Clean up the turbo:submit-end listener from the form
+    this.detachFormSubmitEnd()
+  }
+
+  attachFormSubmitEnd() {
+    // Attach turbo:submit-end listener to handle form submission completion.
+    // This ensures that the form is reset only when the submission is successful.
+    // On validation errors (when event.detail.success is false), the form remains open
+    // so the user can correct the errors and resubmit.
+    const form = this.element.querySelector('form')
+    if (!form) {
+      return
+    }
+
+    this.handleFormSubmitEnd = (event) => {
+      if (event.detail.success) {
+        setTimeout(() => this.resetForm(), 0)
+      }
+    }
+
+    form.addEventListener('turbo:submit-end', this.handleFormSubmitEnd)
+  }
+
+  detachFormSubmitEnd() {
+    // Remove the turbo:submit-end listener from the form to prevent double handling
     const form = this.element.querySelector('form')
     if (form && this.handleFormSubmitEnd) {
       form.removeEventListener('turbo:submit-end', this.handleFormSubmitEnd)

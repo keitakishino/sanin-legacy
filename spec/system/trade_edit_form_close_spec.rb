@@ -130,4 +130,139 @@ RSpec.describe "Trade Edit Form Close (Issue #258)", type: :system do
     )
     expect(form_row_display).not_to eq("none")
   end
+
+  it "問題2: 編集→更新→編集→更新（2回連続）で、2回目の更新後もフォーム行が閉じること" do
+    card_offer = create(:trade_card_offer, trade: trade, expansion: expansion, card_name: "Original")
+    visit trade_path(event)
+
+    form_id = "trade_card_offer_#{card_offer.id}_edit_form"
+
+    # ===== 1回目: 編集→更新 =====
+    click_button "編集", match: :first
+    sleep 0.3
+    expect(page).to have_css("tr[id='#{form_id}']")
+
+    # 1回目の更新
+    fill_in "カード名", with: "Updated1"
+    click_button "更新"
+    sleep 1
+
+    form_row_display = evaluate_script(
+      "window.getComputedStyle(document.getElementById('#{form_id}')).display"
+    )
+    expect(form_row_display).to eq("none")
+
+    # ===== 2回目: 編集→更新 =====
+    click_button "編集", match: :first
+    sleep 0.3
+    expect(page).to have_css("tr[id='#{form_id}']")
+
+    # 2回目の更新
+    fill_in "カード名", with: "Updated2"
+    click_button "更新"
+    sleep 1
+
+    # 2回目の更新後も、フォーム行がdisplay:noneになっていることを検証
+    form_row_display = evaluate_script(
+      "window.getComputedStyle(document.getElementById('#{form_id}')).display"
+    )
+    expect(form_row_display).to eq("none")
+    expect(page).to have_content("Updated2")
+  end
+
+  it "問題1: キャンセル→再度編集で、DBの値が正しく表示されること（空にならないこと）" do
+    card_offer = create(:trade_card_offer,
+                       trade: trade,
+                       expansion: expansion,
+                       card_name: "OriginalCard",
+                       quantity: 3,
+                       language: :ja,
+                       condition: :nm)
+    visit trade_path(event)
+
+    # 1回目: 編集を開く
+    click_button "編集", match: :first
+    sleep 0.3
+
+    form_id = "trade_card_offer_#{card_offer.id}_edit_form"
+    card_name_before = evaluate_script(
+      "document.querySelector('input[name=\"trade_card_offer[card_name]\"]').value"
+    )
+    expect(card_name_before).to eq("OriginalCard")
+
+    # キャンセルボタンをクリック
+    click_button "キャンセル"
+    sleep 0.5
+
+    # フォーム行が非表示になったことを確認
+    form_row_display = evaluate_script(
+      "window.getComputedStyle(document.getElementById('#{form_id}')).display"
+    )
+    expect(form_row_display).to eq("none")
+
+    # 2回目: 再度編集を開く
+    click_button "編集", match: :first
+    sleep 0.3
+
+    # フォームが開いている
+    expect(page).to have_css("tr[id='#{form_id}']")
+
+    # DBの値がフォームに正しく表示されていることを確認
+    card_name_after = evaluate_script(
+      "document.querySelector('input[name=\"trade_card_offer[card_name]\"]').value"
+    )
+    expect(card_name_after).to eq("OriginalCard")
+
+    # 数量も確認
+    quantity = evaluate_script(
+      "document.querySelector('input[name=\"trade_card_offer[quantity]\"]').value"
+    )
+    expect(quantity).to eq("3")
+
+    # 言語の確認
+    language = evaluate_script(
+      "document.querySelector('select[name=\"trade_card_offer[language]\"]').value"
+    )
+    expect(language).to eq("ja")
+  end
+
+  it "シナリオC（回帰確認）: 1回目の編集→更新でフォーム行が閉じること" do
+    card_offer = create(:trade_card_offer, trade: trade, expansion: expansion)
+    visit trade_path(event)
+
+    click_button "編集", match: :first
+    sleep 0.3
+
+    form_id = "trade_card_offer_#{card_offer.id}_edit_form"
+    fill_in "カード名", with: "RegressionTest"
+    click_button "更新"
+    sleep 1
+
+    form_row_display = evaluate_script(
+      "window.getComputedStyle(document.getElementById('#{form_id}')).display"
+    )
+    expect(form_row_display).to eq("none")
+  end
+
+  it "シナリオC（回帰確認）: バリデーションエラー時はフォームが開いたままであること" do
+    card_offer = create(:trade_card_offer, trade: trade, expansion: expansion)
+    visit trade_path(event)
+
+    click_button "編集", match: :first
+    sleep 0.3
+
+    form_id = "trade_card_offer_#{card_offer.id}_edit_form"
+    # カード名を空にしてバリデーションエラーを発生させる
+    fill_in "カード名", with: ""
+    click_button "更新"
+    sleep 1
+
+    # バリデーションエラー時はフォーム行が開いたままであることを確認
+    form_row_display = evaluate_script(
+      "window.getComputedStyle(document.getElementById('#{form_id}')).display"
+    )
+    expect(form_row_display).to eq("table-row")
+    # エラーメッセージを確認
+    expect(page).to have_content("エラー")
+  end
 end
