@@ -10,7 +10,6 @@ Capybara.register_driver :selenium_chrome_headless do |app|
   options.add_argument("--disable-gpu")
   options.add_argument("--disable-extensions")
   options.add_argument("--disable-setuid-sandbox")
-  options.add_argument("--single-process")
   options.add_argument("--disable-background-networking")
   options.add_argument("--disable-breakpad")
   options.add_argument("--disable-client-side-phishing-detection")
