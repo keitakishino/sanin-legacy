@@ -85,7 +85,11 @@ jobs:
 
     steps:
       - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libvips chromium
+        # Note: chromium is intentionally not installed here. Ubuntu's apt chromium
+        # package is a snap wrapper that doesn't launch in this sandboxed context;
+        # GitHub-hosted runners already ship a working Chrome that Selenium Manager
+        # auto-detects.
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libvips
 
       - name: Checkout code
         uses: actions/checkout@v6
