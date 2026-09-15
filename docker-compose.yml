@@ -42,6 +42,7 @@ services:
       DATABASE_USER: sanin_legacy
       DATABASE_PASSWORD: development_password
       RAILS_ENV: development
+      SELENIUM_MANAGER_CACHE: /home/rails/.cache/selenium
     stdin_open: true
     tty: true
 
