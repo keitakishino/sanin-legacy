@@ -309,13 +309,12 @@ RSpec.describe "TradeCardOffers", type: :request do
       offer
       patch "/trades/#{event.id}/card_offers/#{offer.id}", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
       expect(response).to have_http_status(:ok)
-      # Verify the inner turbo-frame is replaced (not the entire <tr>).
-      # This preserves the <tr> element and its data-controller="form-reset" attachment.
-      # The <tr> element maintains display: none; which hides the form row.
-      expected_frame_id = "edit_form_frame_trade_card_offer_#{offer.id}"
+      # Verify the whole row group (<tbody>) is replaced atomically, rather than a single
+      # sibling <tr>, so no duplicate-id row is left behind by the replace.
+      expected_group_id = "group_trade_card_offer_#{offer.id}"
       expect(response.body).to include('action="replace"')
-      expect(response.body).to include("target=\"#{expected_frame_id}\"")
-      # The <tr> element contains display: none; (set in _trade_card_offer.html.erb)
+      expect(response.body).to include("target=\"#{expected_group_id}\"")
+      # The freshly rendered edit form <tr> contains display: none; (set in _trade_card_offer.html.erb)
       expect(response.body).to include("display: none;")
       # Verify data-controller attribute is present for form_reset_controller to initialize
       expect(response.body).to include("data-controller=\"form-reset\"")
@@ -659,8 +658,9 @@ RSpec.describe "TradeCardOffers", type: :request do
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('action="append" target="trade_card_offers"')
         expect(response.body).to include('id="trade_card_offers_empty"')
-        # Verify empty state is rendered as table row (tr > td)
-        expect(response.body).to include('<tr id="trade_card_offers_empty">')
+        # Verify empty state is rendered as its own <tbody> (so it can sit as a sibling
+        # of the per-offer row groups directly under the <table>)
+        expect(response.body).to include('<tbody id="trade_card_offers_empty">')
         expect(response.body).to include('colspan="12"')
         expect(response.body).to include('カード明細はまだありません')
       end
