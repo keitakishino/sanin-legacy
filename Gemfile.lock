@@ -129,7 +129,7 @@ GEM
       railties (>= 6.1.0)
     faker (3.8.0)
       i18n (>= 1.8.11, < 2)
-    faraday (2.14.3)
+    faraday (2.14.4)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
@@ -156,8 +156,8 @@ GEM
       retriable (>= 3.1, < 5.0)
     google-apis-drive_v3 (0.32.0)
       google-apis-core (>= 0.9.1, < 2.a)
-    google-apis-sheets_v4 (0.15.0)
-      google-apis-core (>= 0.6, < 2.a)
+    google-apis-sheets_v4 (0.48.0)
+      google-apis-core (>= 0.15.0, < 2.a)
     google-cloud-env (2.4.0)
       base64 (~> 0.2)
       faraday (>= 1.0, < 3.a)
@@ -191,7 +191,7 @@ GEM
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
     json (2.21.2)
-    jwt (3.2.0)
+    jwt (3.3.0)
       base64
     kamal (2.12.0)
       activesupport (>= 7.0)
@@ -237,7 +237,7 @@ GEM
       drb (~> 2.0)
       prism (~> 1.5)
     msgpack (1.8.4)
-    multi_json (1.21.1)
+    multi_json (1.21.2)
     multi_xml (0.9.1)
       bigdecimal (>= 3.1, < 5)
     net-http (0.9.1)
@@ -528,10 +528,11 @@ DEPENDENCIES
   faker (~> 3.0)
   foreman
   google-apis-drive_v3 (~> 0.32.0)
-  google-apis-sheets_v4 (~> 0.15.0)
+  google-apis-sheets_v4 (~> 0.48.0)
   image_processing (~> 1.2)
   importmap-rails
   jbuilder
+  json (~> 2.21)
   kamal
   kaminari (~> 1.2.2)
   omniauth (~> 2.1)
