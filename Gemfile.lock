@@ -129,7 +129,7 @@ GEM
       railties (>= 6.1.0)
     faker (3.8.0)
       i18n (>= 1.8.11, < 2)
-    faraday (2.14.3)
+    faraday (2.14.4)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
@@ -190,7 +190,7 @@ GEM
     jbuilder (2.15.1)
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
-    json (3.0.2)
+    json (2.21.2)
     jwt (3.3.0)
       base64
     kamal (2.12.0)
@@ -532,6 +532,7 @@ DEPENDENCIES
   image_processing (~> 1.2)
   importmap-rails
   jbuilder
+  json (~> 2.21)
   kamal
   kaminari (~> 1.2.2)
   omniauth (~> 2.1)
@@ -561,4 +562,4 @@ RUBY VERSION
    ruby 3.3.12p206
 
 BUNDLED WITH
-   2.4.19
+   2.5.22

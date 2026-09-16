@@ -38,6 +38,11 @@ gem "google-apis-drive_v3", "~> 0.87.0"
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
+# Pin json below 3.0: breaks session/param handling in request specs on Rails 8.1.3.1
+# (ArgumentError: wrong number of arguments) when pulled in transitively. Remove once
+# Rails is upgraded to a version compatible with json 3.x.
+gem "json", "~> 2.21"
+
 # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
 gem "solid_cache"
 gem "solid_queue"
