@@ -1088,7 +1088,7 @@ RSpec.describe "TradeCardWants", type: :request do
             frame: :normal,
             expansion_id: expansion.id,
             note: "Test note",
-            conditions: []
+            conditions: [ 0 ]
           }
         }
       end
@@ -1134,7 +1134,7 @@ RSpec.describe "TradeCardWants", type: :request do
               language: :en,
               foil: :non_foil,
               frame: :extended,
-              conditions: []
+              conditions: [ 0 ]
             }
           }
         end
@@ -1219,7 +1219,7 @@ RSpec.describe "TradeCardWants", type: :request do
             frame: :normal,
             expansion_id: expansion.id,
             note: "Test note",
-            conditions: []
+            conditions: [ 0 ]
           }
         }
       end
@@ -1238,7 +1238,7 @@ RSpec.describe "TradeCardWants", type: :request do
           trade_card_want: {
             card_name: "Updated Card",
             quantity: 2,
-            conditions: []
+            conditions: [ 0 ]
           }
         }
         original_name = want.card_name
@@ -1268,7 +1268,7 @@ RSpec.describe "TradeCardWants", type: :request do
             frame: :normal,
             expansion_id: expansion.id,
             note: "Test note",
-            conditions: []
+            conditions: [ 0 ]
           }
         }
       end
