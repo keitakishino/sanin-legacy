@@ -508,6 +508,63 @@ describe TradeCardWant, type: :model do
     end
   end
 
+  describe 'logical deletion' do
+    let(:want) { create(:trade_card_want) }
+
+    describe '#discard!' do
+      it 'sets discarded_at to current time' do
+        expect(want.discarded_at).to be_nil
+        want.discard!
+        expect(want.discarded_at).not_to be_nil
+        expect(want.reload.discarded_at).not_to be_nil
+      end
+    end
+
+    describe '#restore!' do
+      let(:discarded_want) { create(:trade_card_want, discarded_at: Time.current) }
+
+      it 'clears discarded_at' do
+        expect(discarded_want.discarded_at).not_to be_nil
+        discarded_want.restore!
+        expect(discarded_want.discarded_at).to be_nil
+        expect(discarded_want.reload.discarded_at).to be_nil
+      end
+    end
+
+    describe '#discarded?' do
+      it 'returns true when discarded_at is present' do
+        want.discard!
+        expect(want.discarded?).to be true
+      end
+
+      it 'returns false when discarded_at is nil' do
+        expect(want.discarded?).to be false
+      end
+    end
+  end
+
+  describe 'default_scope' do
+    let(:trade) { create(:trade) }
+    let!(:active_want) { create(:trade_card_want, trade: trade) }
+    let!(:discarded_want) { create(:trade_card_want, trade: trade, discarded_at: Time.current) }
+
+    it 'excludes discarded wants by default' do
+      expect(TradeCardWant.all).to contain_exactly(active_want)
+    end
+
+    describe '.with_discarded' do
+      it 'includes discarded wants' do
+        expect(TradeCardWant.with_discarded.all).to contain_exactly(active_want, discarded_want)
+      end
+    end
+
+    describe '.only_discarded' do
+      it 'returns only discarded wants' do
+        expect(TradeCardWant.only_discarded.all).to contain_exactly(discarded_want)
+      end
+    end
+  end
+
   describe 'automatic trade totals recalculation (Issue #47)' do
     let(:trade) { create(:trade) }
 

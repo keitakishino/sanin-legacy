@@ -363,6 +363,63 @@ describe TradeCardOffer, type: :model do
     end
   end
 
+  describe 'logical deletion' do
+    let(:offer) { create(:trade_card_offer) }
+
+    describe '#discard!' do
+      it 'sets discarded_at to current time' do
+        expect(offer.discarded_at).to be_nil
+        offer.discard!
+        expect(offer.discarded_at).not_to be_nil
+        expect(offer.reload.discarded_at).not_to be_nil
+      end
+    end
+
+    describe '#restore!' do
+      let(:discarded_offer) { create(:trade_card_offer, discarded_at: Time.current) }
+
+      it 'clears discarded_at' do
+        expect(discarded_offer.discarded_at).not_to be_nil
+        discarded_offer.restore!
+        expect(discarded_offer.discarded_at).to be_nil
+        expect(discarded_offer.reload.discarded_at).to be_nil
+      end
+    end
+
+    describe '#discarded?' do
+      it 'returns true when discarded_at is present' do
+        offer.discard!
+        expect(offer.discarded?).to be true
+      end
+
+      it 'returns false when discarded_at is nil' do
+        expect(offer.discarded?).to be false
+      end
+    end
+  end
+
+  describe 'default_scope' do
+    let(:trade) { create(:trade) }
+    let!(:active_offer) { create(:trade_card_offer, trade: trade) }
+    let!(:discarded_offer) { create(:trade_card_offer, trade: trade, discarded_at: Time.current) }
+
+    it 'excludes discarded offers by default' do
+      expect(TradeCardOffer.all).to contain_exactly(active_offer)
+    end
+
+    describe '.with_discarded' do
+      it 'includes discarded offers' do
+        expect(TradeCardOffer.with_discarded.all).to contain_exactly(active_offer, discarded_offer)
+      end
+    end
+
+    describe '.only_discarded' do
+      it 'returns only discarded offers' do
+        expect(TradeCardOffer.only_discarded.all).to contain_exactly(discarded_offer)
+      end
+    end
+  end
+
   describe 'automatic trade totals recalculation (Issue #47)' do
     let(:trade) { create(:trade) }
 

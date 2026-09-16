@@ -38,6 +38,98 @@ describe Trade, type: :model do
     end
   end
 
+  describe 'logical deletion' do
+    let(:trade) { create(:trade) }
+
+    describe '#discard!' do
+      it 'sets discarded_at to current time' do
+        expect(trade.discarded_at).to be_nil
+        trade.discard!
+        expect(trade.discarded_at).not_to be_nil
+        expect(trade.reload.discarded_at).not_to be_nil
+      end
+
+      it 'cascades discard to trade_card_offers' do
+        offer1 = create(:trade_card_offer, trade: trade)
+        offer2 = create(:trade_card_offer, trade: trade)
+
+        expect(offer1.discarded?).to be false
+        expect(offer2.discarded?).to be false
+
+        trade.discard!
+
+        expect(offer1.reload.discarded?).to be true
+        expect(offer2.reload.discarded?).to be true
+      end
+
+      it 'cascades discard to trade_card_wants' do
+        want1 = create(:trade_card_want, trade: trade)
+        want2 = create(:trade_card_want, trade: trade)
+
+        expect(want1.discarded?).to be false
+        expect(want2.discarded?).to be false
+
+        trade.discard!
+
+        expect(want1.reload.discarded?).to be true
+        expect(want2.reload.discarded?).to be true
+      end
+
+      it 'cascades discard to both offers and wants' do
+        offer = create(:trade_card_offer, trade: trade)
+        want = create(:trade_card_want, trade: trade)
+
+        trade.discard!
+
+        expect(offer.reload.discarded?).to be true
+        expect(want.reload.discarded?).to be true
+      end
+    end
+
+    describe '#restore!' do
+      let(:discarded_trade) { create(:trade, discarded_at: Time.current) }
+
+      it 'clears discarded_at' do
+        expect(discarded_trade.discarded_at).not_to be_nil
+        discarded_trade.restore!
+        expect(discarded_trade.discarded_at).to be_nil
+        expect(discarded_trade.reload.discarded_at).to be_nil
+      end
+    end
+
+    describe '#discarded?' do
+      it 'returns true when discarded_at is present' do
+        trade.discard!
+        expect(trade.discarded?).to be true
+      end
+
+      it 'returns false when discarded_at is nil' do
+        expect(trade.discarded?).to be false
+      end
+    end
+  end
+
+  describe 'default_scope' do
+    let!(:active_trade) { create(:trade) }
+    let!(:discarded_trade) { create(:trade, discarded_at: Time.current) }
+
+    it 'excludes discarded trades by default' do
+      expect(Trade.all).to contain_exactly(active_trade)
+    end
+
+    describe '.with_discarded' do
+      it 'includes discarded trades' do
+        expect(Trade.with_discarded.all).to contain_exactly(active_trade, discarded_trade)
+      end
+    end
+
+    describe '.only_discarded' do
+      it 'returns only discarded trades' do
+        expect(Trade.only_discarded.all).to contain_exactly(discarded_trade)
+      end
+    end
+  end
+
   describe '#recalculate_totals!' do
     let(:trade) { create(:trade) }
 

@@ -20,6 +20,7 @@ class Event < ApplicationRecord
   # Logical deletion methods
   def discard!
     update(discarded_at: Time.current)
+    trades.each { |trade| trade.discard! }
   end
 
   def restore!

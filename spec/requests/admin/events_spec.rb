@@ -446,15 +446,16 @@ RSpec.describe "Admin::Events", type: :request do
         expect(response.body).not_to include(event_title)
       end
 
-      it "preserves related trades when event is deleted" do
+      it "cascades logical deletion to related trades when event is deleted" do
         trade = create(:trade, event: event, user: general_user)
         trade_id = trade.id
 
         delete admin_event_path(event)
 
         expect(event.reload.discarded?).to be true
-        expect(Trade.find_by(id: trade_id)).not_to be_nil
-        expect(Trade.find_by(id: trade_id).event_id).to eq(event.id)
+        expect(Trade.find_by(id: trade_id)).to be_nil
+        expect(Trade.with_discarded.find_by(id: trade_id)).not_to be_nil
+        expect(Trade.with_discarded.find_by(id: trade_id).discarded?).to be true
       end
     end
   end
