@@ -10,6 +10,8 @@
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_want.expansion&.scryfall_set_code&.upcase || "—" %></td>
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800 truncate" title="<%= trade_card_want.note %>"><%= trade_card_want.note.present? ? trade_card_want.note : "—" %></td>
   <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_want.amount.present? ? "¥#{number_with_delimiter(trade_card_want.amount)}" : "—" %></td>
+  <% subtotal = (trade_card_want.amount.present? && trade_card_want.quantity.present?) ? (trade_card_want.amount * trade_card_want.quantity) : nil %>
+  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= subtotal.present? ? "¥#{number_with_delimiter(subtotal)}" : "—" %></td>
 
   <!-- Mobile: Card name only -->
   <td class="md:hidden px-4 py-3 text-sm text-stone-800 flex-1 truncate" title="<%= trade_card_want.card_name %>"><%= trade_card_want.card_name %></td>
@@ -50,7 +52,11 @@
         <p><strong>備考:</strong> <%= trade_card_want.note %></p>
       <% end %>
       <% if trade_card_want.amount.present? %>
-        <p><strong>金額:</strong> ¥<%= number_with_delimiter(trade_card_want.amount) %></p>
+        <p><strong>単価:</strong> ¥<%= number_with_delimiter(trade_card_want.amount) %></p>
+      <% end %>
+      <% subtotal = (trade_card_want.amount.present? && trade_card_want.quantity.present?) ? (trade_card_want.amount * trade_card_want.quantity) : nil %>
+      <% if subtotal.present? %>
+        <p><strong>小計:</strong> ¥<%= number_with_delimiter(subtotal) %></p>
       <% end %>
     </div>
   </td>
@@ -58,7 +64,7 @@
 
 <!-- Edit form row (hidden by default) -->
 <tr id="<%= dom_id(trade_card_want, :edit_form) %>" class="border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.1 150); display: none;" data-controller="form-reset">
-  <td colspan="11" class="px-4 py-4 bg-stone-50">
+  <td colspan="12" class="px-4 py-4 bg-stone-50">
     <turbo-frame id="<%= dom_id(trade_card_want, :edit_form_frame) %>" class="">
       <%= render 'trade_card_wants/form', trade_card_want: trade_card_want, frame_id: dom_id(trade_card_want, :edit_form_frame) %>
     </turbo-frame>
