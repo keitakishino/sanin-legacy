@@ -120,13 +120,14 @@ class GoogleSheetWriter
     rows = []
 
     # Header row
-    rows << [ "カード名", "枚数", "言語", "状態", "特殊", "枠", "PW", "金額" ]
+    rows << [ "カード名", "枚数", "言語", "状態", "特殊", "枠", "PW", "金額", "小計" ]
 
     # Offers (出すカード)
-    rows << [ "", "", "", "", "", "", "", "" ]  # Blank row for separation
+    rows << [ "", "", "", "", "", "", "", "", "" ]  # Blank row for separation
     rows << [ "【 出すカード 】" ]
 
     @trade.trade_card_offers.each do |offer|
+      subtotal = offer.amount.present? ? (offer.amount * offer.quantity).to_s : ""
       rows << [
         offer.card_name,
         offer.quantity.to_s,
@@ -135,15 +136,17 @@ class GoogleSheetWriter
         offer.foil,
         offer.frame,
         offer.pw_mark? ? "○" : "",
-        offer.amount.to_s
+        offer.amount.to_s,
+        subtotal
       ]
     end
 
     # Wants (欲しいカード)
-    rows << [ "", "", "", "", "", "", "", "" ]  # Blank row for separation
+    rows << [ "", "", "", "", "", "", "", "", "" ]  # Blank row for separation
     rows << [ "【 欲しいカード 】" ]
 
     @trade.trade_card_wants.each do |want|
+      subtotal = want.amount.present? ? (want.amount * want.quantity).to_s : ""
       rows << [
         want.card_name,
         want.quantity.to_s,
@@ -152,16 +155,17 @@ class GoogleSheetWriter
         want.foil.present? ? want.foil : "不問",
         want.frame.present? ? want.frame : "不問",
         "",
-        want.amount.to_s
+        want.amount.to_s,
+        subtotal
       ]
     end
 
     # Summary rows
-    rows << [ "", "", "", "", "", "", "", "" ]  # Blank row
+    rows << [ "", "", "", "", "", "", "", "", "" ]  # Blank row
     rows << [ "合計" ]
-    rows << [ "出すカード合計", "", "", "", "", "", "", @trade.offers_total_amount.to_s ]
-    rows << [ "欲しいカード合計", "", "", "", "", "", "", @trade.wants_total_amount.to_s ]
-    rows << [ "差額（出す - 欲しい）", "", "", "", "", "", "", @trade.net_amount.to_s ]
+    rows << [ "出すカード合計", "", "", "", "", "", "", "", @trade.offers_total_amount.to_s ]
+    rows << [ "欲しいカード合計", "", "", "", "", "", "", "", @trade.wants_total_amount.to_s ]
+    rows << [ "差額（出す - 欲しい）", "", "", "", "", "", "", "", @trade.net_amount.to_s ]
 
     rows
   end
