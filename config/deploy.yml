@@ -116,7 +116,7 @@ accessories:
     image: postgres:17-alpine
     # Placeholder: Replace <本番サーバーIP> with your actual production server IP address
     host: <本番サーバーIP>
-    port: 5432
+    port: "127.0.0.1:5432:5432"
     env:
       secret:
         # POSTGRES_PASSWORD is mapped from DATABASE_PASSWORD in .kamal/secrets using Kamal's secret aliasing syntax.
