@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_29_000500) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_29_000800) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -70,6 +70,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_000500) do
     t.string "card_name", null: false
     t.integer "condition", null: false
     t.datetime "created_at", null: false
+    t.datetime "discarded_at", comment: "論理削除フラグ（null=有効、datetime=削除日時）"
     t.bigint "expansion_id"
     t.integer "foil", null: false
     t.integer "frame", null: false
@@ -79,6 +80,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_000500) do
     t.integer "quantity", null: false
     t.bigint "trade_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_trade_card_offers_on_discarded_at"
     t.index ["expansion_id"], name: "index_trade_card_offers_on_expansion_id"
     t.index ["trade_id"], name: "index_trade_card_offers_on_trade_id"
     t.check_constraint "quantity > 0", name: "trade_card_offers_quantity_positive"
@@ -89,6 +91,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_000500) do
     t.string "card_name", null: false
     t.integer "conditions", array: true
     t.datetime "created_at", null: false
+    t.datetime "discarded_at", comment: "論理削除フラグ（null=有効、datetime=削除日時）"
     t.bigint "expansion_id"
     t.integer "foil"
     t.integer "frame"
@@ -97,6 +100,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_000500) do
     t.integer "quantity", null: false
     t.bigint "trade_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_trade_card_wants_on_discarded_at"
     t.index ["expansion_id"], name: "index_trade_card_wants_on_expansion_id"
     t.index ["trade_id"], name: "index_trade_card_wants_on_trade_id"
     t.check_constraint "quantity > 0", name: "trade_card_wants_quantity_positive"
@@ -107,6 +111,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_000500) do
     t.datetime "completed_at"
     t.bigint "completed_by_id"
     t.datetime "created_at", null: false
+    t.datetime "discarded_at", comment: "論理削除フラグ（null=有効、datetime=削除日時）"
     t.bigint "event_id", null: false
     t.integer "net_amount", default: 0, null: false
     t.integer "offers_total_amount", default: 0, null: false
@@ -118,6 +123,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_000500) do
     t.bigint "user_id", null: false
     t.integer "wants_total_amount", default: 0, null: false
     t.index ["completed_by_id"], name: "index_trades_on_completed_by_id"
+    t.index ["discarded_at"], name: "index_trades_on_discarded_at"
     t.index ["event_id", "user_id"], name: "index_trades_on_event_id_and_user_id", unique: true
     t.index ["event_id"], name: "index_trades_on_event_id"
     t.index ["spreadsheet_exported_by_id"], name: "index_trades_on_spreadsheet_exported_by_id"

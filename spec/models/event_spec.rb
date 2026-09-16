@@ -119,6 +119,34 @@ RSpec.describe Event, type: :model do
         expect(event.discarded_at).not_to be_nil
         expect(event.reload.discarded_at).not_to be_nil
       end
+
+      it 'cascades discard to all associated trades' do
+        trade1 = create(:trade, event: event)
+        trade2 = create(:trade, event: event)
+
+        expect(trade1.discarded?).to be false
+        expect(trade2.discarded?).to be false
+
+        event.discard!
+
+        expect(trade1.reload.discarded?).to be true
+        expect(trade2.reload.discarded?).to be true
+      end
+
+      it 'cascades discard through trades to trade_card_offers and trade_card_wants' do
+        trade = create(:trade, event: event)
+        offer = create(:trade_card_offer, trade: trade)
+        want = create(:trade_card_want, trade: trade)
+
+        expect(offer.discarded?).to be false
+        expect(want.discarded?).to be false
+
+        event.discard!
+
+        expect(trade.reload.discarded?).to be true
+        expect(offer.reload.discarded?).to be true
+        expect(want.reload.discarded?).to be true
+      end
     end
 
     describe '#restore!' do
