@@ -8,15 +8,15 @@
       <p class="text-stone-500"><%= t("admin.events.no_events") %></p>
     </div>
   <% else %>
-    <div class="bg-white border border-stone-200 rounded-lg overflow-hidden">
+    <div class="bg-white border border-stone-200 rounded-lg overflow-x-auto">
       <table class="w-full">
         <thead class="bg-stone-100 border-b border-stone-200">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.title") %></th>
-            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.description") %></th>
-            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.event_date") %></th>
-            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.created_by_id") %></th>
-            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.created_at") %></th>
+            <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.description") %></th>
+            <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.event_date") %></th>
+            <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.created_by_id") %></th>
+            <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.created_at") %></th>
             <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.events.actions") %></th>
           </tr>
         </thead>
@@ -24,10 +24,10 @@
           <% @events.each do |event| %>
             <tr class="border-b border-stone-200 hover:bg-stone-50">
               <td class="px-6 py-4 text-sm"><%= event.title %></td>
-              <td class="px-6 py-4 text-sm"><%= truncate(event.description, length: 50) %></td>
-              <td class="px-6 py-4 text-sm"><%= event.event_date.strftime("%Y年%m月%d日") %></td>
-              <td class="px-6 py-4 text-sm"><%= event.created_by&.email %></td>
-              <td class="px-6 py-4 text-sm"><%= event.created_at.strftime("%Y年%m月%d日 %H:%M") %></td>
+              <td class="hidden md:table-cell px-6 py-4 text-sm"><%= truncate(event.description, length: 50) %></td>
+              <td class="hidden md:table-cell px-6 py-4 text-sm"><%= event.event_date.strftime("%Y年%m月%d日") %></td>
+              <td class="hidden md:table-cell px-6 py-4 text-sm"><%= event.created_by&.email %></td>
+              <td class="hidden md:table-cell px-6 py-4 text-sm"><%= event.created_at.strftime("%Y年%m月%d日 %H:%M") %></td>
               <td class="px-6 py-4 text-sm space-x-2">
                 <%= link_to t("admin.events.edit"), edit_admin_event_path(event), class: "text-indigo-700 hover:text-indigo-800 font-medium" %>
                 <%= button_to t("admin.events.delete"), admin_event_path(event), method: :delete, data: { turbo_confirm: t("admin.events.confirm_delete") }, class: "text-red-700 hover:text-red-800 font-medium" %>

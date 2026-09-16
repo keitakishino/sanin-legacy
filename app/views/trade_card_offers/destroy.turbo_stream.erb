@@ -1,10 +1,19 @@
-<turbo-stream action="remove" target="<%= dom_id(@trade_card_offer) %>">
-</turbo-stream>
+<%= turbo_stream.remove dom_id(@trade_card_offer, :group) %>
 
-<turbo-stream action="replace" target="trade_aggregates">
-  <template><%= render(partial: 'trades/aggregates_inline', locals: { trade: @trade_card_offer.trade }, formats: [:html]) %></template>
-</turbo-stream>
+<% if @trade_card_offer.trade.trade_card_offers.count == 0 %>
+  <%= turbo_stream.append "trade_card_offers" do %>
+    <tbody id="trade_card_offers_empty">
+      <tr>
+        <td colspan="12" class="px-4 py-8 text-center text-stone-400 text-xs">カード明細はまだありません</td>
+      </tr>
+    </tbody>
+  <% end %>
+<% end %>
 
-<turbo-stream action="append" target="toast-container">
-  <template><%= render(partial: 'shared/toast', locals: { message: t('toasts.trade_card_offer.destroy', card_name: @trade_card_offer.card_name) }, formats: [:html]) %></template>
-</turbo-stream>
+<%= turbo_stream.replace "trade_aggregates" do %>
+  <%= render(partial: 'trades/aggregates_inline', locals: { trade: @trade_card_offer.trade }, formats: [:html]) %>
+<% end %>
+
+<%= turbo_stream.append "toast-container" do %>
+  <%= render(partial: 'shared/toast', locals: { message: t('toasts.trade_card_offer.destroy', card_name: @trade_card_offer.card_name) }, formats: [:html]) %>
+<% end %>

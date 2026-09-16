@@ -7,7 +7,7 @@ class ErrorsController < ApplicationController
     @title = t("errors.unauthorized.title", default: "認証が必要です")
     @message = t("errors.unauthorized.message", default: "このページを表示するにはサインインが必要です")
     @button_path = signin_path
-    render :show, status: :unauthorized
+    render :show, status: :unauthorized, formats: [ :html ]
   end
 
   def forbidden
@@ -15,7 +15,7 @@ class ErrorsController < ApplicationController
     @title = t("errors.forbidden.title", default: "アクセスが拒否されました")
     @message = t("errors.forbidden.message", default: "このページにアクセスする権限がありません")
     @button_path = user_signed_in? ? root_path : signin_path
-    render :show, status: :forbidden
+    render :show, status: :forbidden, formats: [ :html ]
   end
 
   def not_found
@@ -23,6 +23,6 @@ class ErrorsController < ApplicationController
     @title = t("errors.not_found.title", default: "ページが見つかりません")
     @message = t("errors.not_found.message", default: "お探しのページは見つかりませんでした")
     @button_path = user_signed_in? ? root_path : signin_path
-    render :show, status: :not_found
+    render :show, status: :not_found, formats: [ :html ]
   end
 end
