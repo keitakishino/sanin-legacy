@@ -1,4 +1,5 @@
 <tr id="<%= dom_id(invitation) %>" class="border-b border-stone-200 hover:bg-stone-50">
+  <!-- Mobile: Code and status only -->
   <td class="px-6 py-3 text-sm font-mono"><%= invitation.code %></td>
   <td class="px-6 py-3 text-sm">
     <span class="px-3 py-1 rounded-full text-xs font-semibold
@@ -16,13 +17,38 @@
       <%= t("activerecord.attributes.invitation.statuses.#{invitation.status}") %>
     </span>
   </td>
-  <td class="px-6 py-3 text-sm">
+
+  <!-- Desktop: Additional columns (hidden on mobile) -->
+  <td class="hidden md:table-cell px-6 py-3 text-sm">
     <%= invitation.expires_at.strftime("%Y-%m-%d %H:%M") %>
     <% if invitation.expired? %>
       <span class="text-red-700 text-xs ml-2"><%= t("admin.invitations.expired_label") %></span>
     <% end %>
   </td>
-  <td class="px-6 py-3 text-sm"><%= invitation.issued_by.username %></td>
-  <td class="px-6 py-3 text-sm"><%= invitation.used_by&.username || "—" %></td>
-  <td class="px-6 py-3 text-sm"><%= invitation.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+  <td class="hidden md:table-cell px-6 py-3 text-sm"><%= invitation.issued_by.username %></td>
+  <td class="hidden md:table-cell px-6 py-3 text-sm"><%= invitation.used_by&.username || "—" %></td>
+  <td class="hidden md:table-cell px-6 py-3 text-sm"><%= invitation.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+
+  <!-- Mobile: Expand button -->
+  <td class="px-6 py-3 text-right">
+    <button
+      type="button"
+      class="px-2 py-1 text-stone-500 hover:bg-stone-100 text-xs expand-btn"
+      data-toggle-expand="<%= dom_id(invitation) %>"
+      aria-expanded="false">
+      ▼
+    </button>
+  </td>
+</tr>
+
+<!-- Mobile expansion row -->
+<tr id="<%= dom_id(invitation, :expand) %>" class="border-b border-stone-200" style="display: none;">
+  <td colspan="6" class="px-6 py-3 bg-stone-50">
+    <div class="space-y-2 text-sm">
+      <p><strong><%= t("activerecord.attributes.invitation.expires_at") %>:</strong> <%= invitation.expires_at.strftime("%Y-%m-%d %H:%M") %><% if invitation.expired? %> <span class="text-red-700 text-xs"><%= t("admin.invitations.expired_label") %></span><% end %></p>
+      <p><strong><%= t("activerecord.attributes.invitation.issued_by_id") %>:</strong> <%= invitation.issued_by.username %></p>
+      <p><strong><%= t("activerecord.attributes.invitation.used_by_id") %>:</strong> <%= invitation.used_by&.username || "—" %></p>
+      <p><strong><%= t("activerecord.attributes.invitation.created_at") %>:</strong> <%= invitation.created_at.strftime("%Y-%m-%d %H:%M") %></p>
+    </div>
+  </td>
 </tr>

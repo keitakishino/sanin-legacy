@@ -17,7 +17,7 @@ class ApplicationController < ActionController::Base
     @title = t("errors.forbidden.title", default: "アクセスが拒否されました")
     @message = t("errors.forbidden.message", default: "このページにアクセスする権限がありません")
     @button_path = user_signed_in? ? root_path : signin_path
-    render "errors/show", status: :forbidden, layout: "error"
+    render "errors/show", status: :forbidden, layout: "error", formats: [ :html ]
   end
 
   def current_user
