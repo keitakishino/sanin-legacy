@@ -27,12 +27,12 @@ gem "bcrypt", "~> 3.1.7"
 
 # Authentication & OAuth
 gem "omniauth", "~> 2.1"
-gem "omniauth-google-oauth2", "~> 1.1"
+gem "omniauth-google-oauth2", "~> 1.2"
 gem "omniauth-twitter", "~> 1.4"
 gem "omniauth-rails_csrf_protection", "~> 2.0"
 
 # Google Sheets API integration
-gem "google-apis-sheets_v4", "~> 0.15.0"
+gem "google-apis-sheets_v4", "~> 0.48.0"
 gem "google-apis-drive_v3", "~> 0.32.0"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
@@ -77,10 +77,10 @@ group :development, :test do
   gem "whenever", require: false
 
   # Testing framework
-  gem "rspec-rails", "~> 6.0"
+  gem "rspec-rails", "~> 8.0"
   gem "factory_bot_rails", "~> 6.2"
   gem "faker", "~> 3.0"
-  gem "shoulda-matchers", "~> 6.0"
+  gem "shoulda-matchers", "~> 8.0"
 end
 
 group :development do
