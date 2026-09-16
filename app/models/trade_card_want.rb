@@ -20,6 +20,24 @@ class TradeCardWant < ApplicationRecord
   after_save :recalculate_trade_totals
   after_destroy :recalculate_trade_totals
 
+  # Scopes for logical deletion
+  default_scope { where(discarded_at: nil) }
+  scope :with_discarded, -> { unscope(where: :discarded_at) }
+  scope :only_discarded, -> { with_discarded.where.not(discarded_at: nil) }
+
+  # Logical deletion methods
+  def discard!
+    update(discarded_at: Time.current)
+  end
+
+  def restore!
+    update(discarded_at: nil)
+  end
+
+  def discarded?
+    discarded_at.present?
+  end
+
   def conditions_to_display
     return "不問" if conditions.nil? || conditions.empty?
 
