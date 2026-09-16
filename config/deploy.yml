@@ -2,12 +2,14 @@
 service: sanin_legacy
 
 # Name of the container image (use your-user/app-name on external registries).
-image: sanin_legacy
+# Placeholder: Replace <Docker Hub ユーザー名> with your actual Docker Hub username
+image: "<Docker Hub ユーザー名>/sanin_legacy"
 
 # Deploy to these servers.
+# Placeholder: Replace <本番サーバーIP> with your actual production server IP address
 servers:
   web:
-    - 192.168.0.1
+    - <本番サーバーIP>
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -20,26 +22,33 @@ servers:
 #
 # Don't use this when deploying to multiple web servers (then you have to terminate SSL at your load balancer).
 #
-# proxy:
-#   ssl: true
-#   host: app.example.com
+proxy:
+  ssl: true
+  host: sanin-legacy.win
 
 # Where you keep your container images.
 registry:
   # Alternatives: hub.docker.com / registry.digitalocean.com / ghcr.io / ...
-  server: localhost:5555
+  server: docker.io
 
   # Needed for authenticated registries.
-  # username: your-user
+  # Placeholder: Replace <Docker Hub ユーザー名> with your actual Docker Hub username
+  username: "<Docker Hub ユーザー名>"
 
   # Always use an access token rather than real password when possible.
-  # password:
-  #   - KAMAL_REGISTRY_PASSWORD
+  password:
+    - KAMAL_REGISTRY_PASSWORD
 
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:
   secret:
     - RAILS_MASTER_KEY
+    - DATABASE_PASSWORD
+    - GOOGLE_OAUTH_CLIENT_ID
+    - GOOGLE_OAUTH_CLIENT_SECRET
+    - TWITTER_OAUTH_API_KEY
+    - TWITTER_OAUTH_API_SECRET
+    - KAMAL_REGISTRY_PASSWORD
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
@@ -95,25 +104,14 @@ builder:
 #   user: app
 
 # Use accessory services (secrets come from .kamal/secrets).
-# accessories:
-#   db:
-#     image: mysql:8.0
-#     host: 192.168.0.2
-#     # Change to 3306 to expose port to the world instead of just local network.
-#     port: "127.0.0.1:3306:3306"
-#     env:
-#       clear:
-#         MYSQL_ROOT_HOST: '%'
-#       secret:
-#         - MYSQL_ROOT_PASSWORD
-#     files:
-#       - config/mysql/production.cnf:/etc/mysql/my.cnf
-#       - db/production.sql:/docker-entrypoint-initdb.d/setup.sql
-#     directories:
-#       - data:/var/lib/mysql
-#   redis:
-#     image: valkey/valkey:8
-#     host: 192.168.0.2
-#     port: 6379
-#     directories:
-#       - data:/data
+accessories:
+  db:
+    image: postgres:17-alpine
+    # Placeholder: Replace <本番サーバーIP> with your actual production server IP address
+    host: <本番サーバーIP>
+    port: 5432
+    env:
+      secret:
+        - POSTGRES_PASSWORD
+    volumes:
+      - data:/var/lib/postgresql/data
