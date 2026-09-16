@@ -121,7 +121,7 @@ accessories:
     # Placeholder: Replace <本番サーバーIP> with your actual staging server IP address
     # Note: This can be the same server as production when using Kamal destination feature
     host: <本番サーバーIP>
-    port: 5433
+    port: "127.0.0.1:5433:5433"
     env:
       secret:
         # POSTGRES_PASSWORD is mapped from DATABASE_PASSWORD using Kamal's secret aliasing syntax.
