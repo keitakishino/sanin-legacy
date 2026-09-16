@@ -1,113 +1,113 @@
 # SaninLegacy
 
-Rails 8 application for Magic: The Gathering card trade management (MVP).
+マジック:ザ・ギャザリングのカードトレード管理を行う Rails 8 アプリケーション（MVP）。
 
-## Setup
+## セットアップ
 
-### Prerequisites
+### 前提条件
 - Docker & Docker Compose
-- Ruby 3.3.12 (for local development)
+- Ruby 3.3.12（ローカル開発の場合）
 - PostgreSQL 17
 
-### Development Setup
+### 開発環境のセットアップ
 
-#### Initial Setup
+#### 初回セットアップ
 
-On the first setup, build the Docker image with the development stage and start all services:
+初回は、development ステージを含む Docker イメージをビルドし、全サービスを起動します。
 
 ```bash
 docker compose up --build
 ```
 
-This command will:
-- Build the Docker image including the development stage (with all gems including development and test dependencies)
-- Start the PostgreSQL database service
-- Run database preparation (`db:prepare`)
-- Start the Rails application server on http://localhost:3000
+このコマンドは以下を行います。
+- development・test 依存関係を含む全gemをインストールした Docker イメージのビルド
+- PostgreSQL データベースサービスの起動
+- データベースの準備（`db:prepare`）の実行
+- Rails アプリケーションサーバーを http://localhost:3000 で起動
 
-#### Subsequent Startups
+#### 2回目以降の起動
 
-For subsequent startups (when the Docker image is already built), simply use:
+Docker イメージがビルド済みの場合、2回目以降は以下のみで起動できます。
 
 ```bash
 docker compose up
 ```
 
-#### Stopping Services
+#### サービスの停止
 
-To stop all services:
+全サービスを停止するには以下を実行します。
 
 ```bash
 docker compose down
 ```
 
-#### Common Development Tasks
+#### よく使う開発コマンド
 
-View application logs:
+アプリケーションログの確認:
 
 ```bash
 docker compose logs -f app
 ```
 
-Access the Rails console:
+Rails コンソールへの接続:
 
 ```bash
 docker compose exec app bundle exec rails console
 ```
 
-Run database migrations:
+データベースマイグレーションの実行:
 
 ```bash
 docker compose exec app bundle exec rails db:migrate
 ```
 
-Seed the database:
+データベースへのシード投入:
 
 ```bash
 docker compose exec app bundle exec rails db:seed
 ```
 
-Run tests:
+テストの実行:
 
 ```bash
 docker compose exec app bundle exec rspec
 ```
 
-Run code quality checks:
+コード品質チェックの実行:
 
 ```bash
 docker compose exec app bundle exec rubocop
 ```
 
-The application will be available at `http://localhost:3000`
+アプリケーションは `http://localhost:3000` でアクセスできます。
 
-### Environment Configuration
+### 環境設定
 
-Copy `.env.example` to `.env` and update as needed:
+`.env.example` を `.env` にコピーし、必要に応じて編集してください。
 
 ```bash
 cp .env.example .env
 ```
 
-## Google Sheets API Configuration
+## Google Sheets API 設定
 
-### Phase 7.1: Service Account Authentication
+### Phase 7.1: サービスアカウント認証
 
-The application uses Google Sheets API for exporting trade data. Service account authentication is configured via Rails credentials (encrypted `config/credentials.yml.enc`).
+本アプリケーションはトレードデータのエクスポートに Google Sheets API を使用します。サービスアカウント認証は Rails credentials（暗号化された `config/credentials.yml.enc`）経由で設定します。
 
-#### Setting up Google Sheets Service Account Credentials
+#### Google Sheets サービスアカウント認証情報のセットアップ
 
-1. **Obtain GCP Service Account Key**
-   - Create a Google Cloud Project and enable Google Sheets API / Google Drive API
-   - Create a Service Account and download the JSON key file
+1. **GCP サービスアカウントキーの取得**
+   - Google Cloud Project を作成し、Google Sheets API / Google Drive API を有効化する
+   - サービスアカウントを作成し、JSON キーファイルをダウンロードする
 
-2. **Add credentials to Rails credentials**
+2. **Rails credentials への追加**
 
    ```bash
    bin/rails credentials:edit
    ```
 
-   Add the following structure under `google_sheets:` (replace placeholder values with actual service account JSON content):
+   `google_sheets:` 以下に次の構造を追加します（プレースホルダーの値は実際のサービスアカウント JSON の内容に置き換えてください）。
 
    ```yaml
    google_sheets:
@@ -123,15 +123,15 @@ The application uses Google Sheets API for exporting trade data. Service account
      client_x509_cert_url: "https://www.googleapis.com/certificates/..."
    ```
 
-   **Important**: The `private_key` field must preserve line breaks as `\n` (not literal newlines).
+   **重要**: `private_key` フィールドの改行は、実際の改行文字ではなく `\n` として保持してください。
 
-3. **In Production (Kamal Deployment)**
-   - The `RAILS_MASTER_KEY` is automatically injected via `.kamal/secrets` → `config/deploy.yml`
-   - No additional configuration is needed; existing secrets management will handle credentials decryption
+3. **本番環境（Kamal デプロイ）の場合**
+   - `RAILS_MASTER_KEY` は `.kamal/secrets` → `config/deploy.yml` 経由で自動的に注入されます
+   - 追加の設定は不要で、既存のシークレット管理の仕組みが認証情報の復号を行います
 
-### Client Usage
+### クライアントの使い方
 
-The application provides `GoogleSheetsConfig` module for accessing authenticated API clients:
+本アプリケーションは、認証済み API クライアントにアクセスするための `GoogleSheetsConfig` モジュールを提供します。
 
 ```ruby
 # Sheets API
@@ -141,19 +141,20 @@ sheets_client = GoogleSheetsConfig.sheets_client
 drive_client = GoogleSheetsConfig.drive_client
 ```
 
-Both clients are pre-configured with appropriate OAuth scopes for:
-- Reading/writing Google Sheets
-- Managing Google Drive files
+両クライアントには、以下の用途に適した OAuth スコープがあらかじめ設定されています。
 
-If credentials are not configured, both methods will raise `GoogleSheetsConfig::CredentialsNotConfiguredError`.
+- Google Sheets の読み書き
+- Google Drive ファイルの管理
 
-## Testing
+認証情報が設定されていない場合、両メソッドとも `GoogleSheetsConfig::CredentialsNotConfiguredError` を発生させます。
+
+## テスト
 
 ```bash
 docker compose exec app bundle exec rspec
 ```
 
-## Code Quality
+## コード品質チェック
 
 ```bash
 docker compose exec app bundle exec rubocop

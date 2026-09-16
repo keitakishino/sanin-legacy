@@ -129,6 +129,29 @@ RSpec.describe "Errors", type: :request do
     end
   end
 
+  describe "Accessing static files" do
+    describe "non-existent static files through wildcard route" do
+      it "returns 404 for favicon.svg (not found)" do
+        get "/favicon.svg"
+        expect(response).to have_http_status(:not_found)
+        expect(response.content_type).to include("text/html")
+        expect(response.body).to include("ページが見つかりません")
+      end
+    end
+
+    describe "existing static files served by Rack::Static" do
+      it "returns 200 for icon.png (served as static file)" do
+        get "/icon.png"
+        expect(response).to have_http_status(:ok)
+      end
+
+      it "returns 200 for robots.txt (served as static file)" do
+        get "/robots.txt"
+        expect(response).to have_http_status(:ok)
+      end
+    end
+  end
+
   describe "public/500.html" do
     it "file exists and contains error message" do
       file_path = Rails.root.join("public", "500.html")

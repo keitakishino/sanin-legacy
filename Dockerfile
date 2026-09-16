@@ -69,6 +69,14 @@ FROM build AS development
 ENV BUNDLE_WITHOUT="" \
     BUNDLE_DEPLOYMENT="0"
 
+# Install Chromium for system tests (development only, not in production)
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y chromium && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# Create Selenium Manager cache directory with proper permissions
+RUN mkdir -p /.cache/selenium && chmod 777 /.cache/selenium
+
 RUN bundle install
 
 # Ensure application code is available
