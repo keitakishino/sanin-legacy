@@ -8,6 +8,12 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
+# Block seeding in production environment for security - prevent hardcoded admin accounts from being created
+if Rails.env.production?
+  puts 'Skipping db:seed on production environment. Create admin account manually via console.'
+  return
+end
+
 # Skip seeding in test environment to avoid conflicts with test fixtures
 unless Rails.env.test?
   User.create!(email: 'admin@example.com', password: 'adminTEST@', password_confirmation: 'adminTEST@', username: 'admin', role: 'admin')
