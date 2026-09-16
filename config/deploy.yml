@@ -36,8 +36,7 @@ registry:
   username: "<Docker Hub ユーザー名>"
 
   # Always use an access token rather than real password when possible.
-  password:
-    - KAMAL_REGISTRY_PASSWORD
+  password: $KAMAL_REGISTRY_PASSWORD
 
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:
@@ -49,6 +48,9 @@ env:
     - TWITTER_OAUTH_API_KEY
     - TWITTER_OAUTH_API_SECRET
     - KAMAL_REGISTRY_PASSWORD
+  # Note: DATABASE_PASSWORD and accessories.db.env.secret.POSTGRES_PASSWORD should be configured
+  # with the same value in .kamal/secrets. DATABASE_PASSWORD is used by the Rails app (via DATABASE_URL or ActiveRecord config),
+  # while POSTGRES_PASSWORD is required by the PostgreSQL container itself.
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
@@ -60,9 +62,12 @@ env:
     # Set number of cores available to the application on each server (default: 1).
     # WEB_CONCURRENCY: 2
 
-    # Match this to any external database server to configure Active Record correctly
-    # Use sanin_legacy-db for a db accessory server on same machine via local kamal docker network.
-    # DB_HOST: 192.168.0.2
+    # DB_HOST is commented out by design: the db accessory service is deployed on the same server
+    # as the application container. Kamal's Docker internal network allows the application to connect
+    # to the database service using the service name (sanin_legacy-db) as the hostname, so explicit
+    # DB_HOST configuration is not required. If an explicit host is needed (e.g., external DB server),
+    # uncomment and set appropriately.
+    # DB_HOST: sanin_legacy-db
 
     # Log everything from Rails
     # RAILS_LOG_LEVEL: debug
