@@ -309,11 +309,12 @@ RSpec.describe "TradeCardOffers", type: :request do
       offer
       patch "/trades/#{event.id}/card_offers/#{offer.id}", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
       expect(response).to have_http_status(:ok)
-      # Verify the edit form row is replaced with display: none
-      # This ensures form_reset_controller's resetForm() will hide the form row
-      expected_edit_form_id = "edit_form_trade_card_offer_#{offer.id}"
+      # Verify the whole row group (<tbody>) is replaced atomically, rather than a single
+      # sibling <tr>, so no duplicate-id row is left behind by the replace.
+      expected_group_id = "group_trade_card_offer_#{offer.id}"
       expect(response.body).to include('action="replace"')
-      expect(response.body).to include("target=\"#{expected_edit_form_id}\"")
+      expect(response.body).to include("target=\"#{expected_group_id}\"")
+      # The freshly rendered edit form <tr> contains display: none; (set in _trade_card_offer.html.erb)
       expect(response.body).to include("display: none;")
       # Verify data-controller attribute is present for form_reset_controller to initialize
       expect(response.body).to include("data-controller=\"form-reset\"")
@@ -657,8 +658,9 @@ RSpec.describe "TradeCardOffers", type: :request do
         expect(response).to have_http_status(:ok)
         expect(response.body).to include('action="append" target="trade_card_offers"')
         expect(response.body).to include('id="trade_card_offers_empty"')
-        # Verify empty state is rendered as table row (tr > td)
-        expect(response.body).to include('<tr id="trade_card_offers_empty">')
+        # Verify empty state is rendered as its own <tbody> (so it can sit as a sibling
+        # of the per-offer row groups directly under the <table>)
+        expect(response.body).to include('<tbody id="trade_card_offers_empty">')
         expect(response.body).to include('colspan="12"')
         expect(response.body).to include('カード明細はまだありません')
       end
@@ -931,6 +933,43 @@ RSpec.describe "TradeCardOffers", type: :request do
         # When it's updated separately (via expansion_select controller), the parent
         # form-reset controller should NOT be triggered because event.target !== this.element
         expect(response.body).to include('turbo-frame')
+      end
+    end
+  end
+
+  describe "GET /trades/:event_id (show trade with offers and edit toggle)" do
+    it "renders edit button with toggleEditForm onclick handler" do
+      trade_card_offer = create(:trade_card_offer, trade: trade)
+      get trade_path(event)
+
+      expect(response).to have_http_status(:ok)
+      # Check that the onclick handler is present with correct form and expand IDs
+      form_id = "edit_form_trade_card_offer_#{trade_card_offer.id}"
+      expand_id = "expand_trade_card_offer_#{trade_card_offer.id}"
+      expect(response.body).to include(%Q{onclick="toggleEditForm('#{form_id}', '#{expand_id}')"})
+    end
+
+    it "renders edit form row with display:none style by default" do
+      trade_card_offer = create(:trade_card_offer, trade: trade)
+      get trade_path(event)
+
+      expect(response).to have_http_status(:ok)
+      form_id = "edit_form_trade_card_offer_#{trade_card_offer.id}"
+      # Check that the edit form row has display: none style
+      expect(response.body).to include(%Q(id="#{form_id}"))
+      expect(response.body).to include(%Q{style="border-left: 3px solid oklch(52% 0.12 231); display: none;"})
+    end
+
+    it "renders multiple edit buttons with unique form IDs for each offer" do
+      offers = create_list(:trade_card_offer, 3, trade: trade)
+      get trade_path(event)
+
+      expect(response).to have_http_status(:ok)
+      offers.each do |offer|
+        form_id = "edit_form_trade_card_offer_#{offer.id}"
+        expand_id = "expand_trade_card_offer_#{offer.id}"
+        expect(response.body).to include(%Q{onclick="toggleEditForm('#{form_id}', '#{expand_id}')"})
+        expect(response.body).to include(%Q(id="#{form_id}"))
       end
     end
   end
