@@ -1074,4 +1074,228 @@ RSpec.describe "TradeCardWants", type: :request do
       end
     end
   end
+
+  describe "Completed Trade Protection" do
+    describe "when trade is in completed status" do
+      let(:completed_trade) { create(:trade, event: event, user: user, status: :completed) }
+      let(:valid_params) do
+        {
+          trade_card_want: {
+            card_name: "Black Lotus",
+            quantity: 1,
+            language: :ja,
+            foil: :foil,
+            frame: :normal,
+            expansion_id: expansion.id,
+            note: "Test note",
+            conditions: []
+          }
+        }
+      end
+
+      describe "POST /trades/:event_id/card_wants (create)" do
+        it "rejects creation with 422 status for turbo_stream" do
+          completed_trade
+          post "/trades/#{event.id}/card_wants", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it "does not create a card want" do
+          completed_trade
+          expect {
+            post "/trades/#{event.id}/card_wants", params: valid_params
+          }.not_to change { TradeCardWant.count }
+        end
+
+        it "returns redirect with alert for HTML request" do
+          completed_trade
+          post "/trades/#{event.id}/card_wants", params: valid_params
+          expect(response).to redirect_to(trade_path(event))
+          expect(flash[:alert]).to include("完了状態のトレード内容は変更できません")
+        end
+
+        it "includes error toast in turbo_stream response" do
+          completed_trade
+          post "/trades/#{event.id}/card_wants", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response.body).to include('action="append" target="toast-container"')
+          expect(response.body).to include("完了状態のトレード内容は変更できません")
+          expect(response.body).to include('border-danger')
+        end
+      end
+
+      describe "PATCH /trades/:event_id/card_wants/:id (update)" do
+        let(:want) { create(:trade_card_want, trade: completed_trade) }
+        let(:update_params) do
+          {
+            trade_card_want: {
+              card_name: "Updated Card",
+              quantity: 2,
+              language: :en,
+              foil: :non_foil,
+              frame: :extended,
+              conditions: []
+            }
+          }
+        end
+
+        it "rejects update with 422 status for turbo_stream" do
+          want
+          patch "/trades/#{event.id}/card_wants/#{want.id}", params: update_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it "does not update the card want" do
+          want
+          original_name = want.card_name
+          patch "/trades/#{event.id}/card_wants/#{want.id}", params: update_params
+          want.reload
+          expect(want.card_name).to eq(original_name)
+        end
+
+        it "returns redirect with alert for HTML request" do
+          want
+          patch "/trades/#{event.id}/card_wants/#{want.id}", params: update_params
+          expect(response).to redirect_to(trade_path(event))
+          expect(flash[:alert]).to include("完了状態のトレード内容は変更できません")
+        end
+
+        it "includes error toast in turbo_stream response" do
+          want
+          patch "/trades/#{event.id}/card_wants/#{want.id}", params: update_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response.body).to include('action="append" target="toast-container"')
+          expect(response.body).to include("完了状態のトレード内容は変更できません")
+        end
+      end
+
+      describe "DELETE /trades/:event_id/card_wants/:id (destroy)" do
+        let(:want) { create(:trade_card_want, trade: completed_trade) }
+
+        it "rejects deletion with 422 status for turbo_stream" do
+          want
+          delete "/trades/#{event.id}/card_wants/#{want.id}", headers: { "Accept" => "text/vnd.turbo-stream.html" }
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it "does not delete the card want" do
+          want
+          expect {
+            delete "/trades/#{event.id}/card_wants/#{want.id}"
+          }.not_to change { TradeCardWant.count }
+        end
+
+        it "returns redirect with alert for HTML request" do
+          want
+          delete "/trades/#{event.id}/card_wants/#{want.id}"
+          expect(response).to redirect_to(trade_path(event))
+          expect(flash[:alert]).to include("完了状態のトレード内容は変更できません")
+        end
+
+        it "includes error toast in turbo_stream response" do
+          want
+          delete "/trades/#{event.id}/card_wants/#{want.id}", headers: { "Accept" => "text/vnd.turbo-stream.html" }
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response.body).to include('action="append" target="toast-container"')
+          expect(response.body).to include("完了状態のトレード内容は変更できません")
+        end
+      end
+    end
+
+    describe "admin user should also be blocked for completed trades" do
+      before do
+        delete "/signout"
+        post signin_path, params: { email: admin_user.email, password: "password123" }
+      end
+
+      let(:completed_trade) { create(:trade, event: event, user: other_user, status: :completed) }
+      let(:valid_params) do
+        {
+          trade_card_want: {
+            card_name: "Black Lotus",
+            quantity: 1,
+            language: :ja,
+            foil: :foil,
+            frame: :normal,
+            expansion_id: expansion.id,
+            note: "Test note",
+            conditions: []
+          }
+        }
+      end
+
+      it "admin cannot create want for completed trade" do
+        completed_trade
+        expect {
+          post "/trades/#{event.id}/card_wants", params: valid_params.merge(trade_id: completed_trade.id), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        }.not_to change { TradeCardWant.count }
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "admin cannot update want for completed trade" do
+        want = create(:trade_card_want, trade: completed_trade)
+        update_params = {
+          trade_card_want: {
+            card_name: "Updated Card",
+            quantity: 2,
+            conditions: []
+          }
+        }
+        original_name = want.card_name
+        patch "/trades/#{event.id}/card_wants/#{want.id}", params: update_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+        want.reload
+        expect(want.card_name).to eq(original_name)
+      end
+
+      it "admin cannot delete want for completed trade" do
+        want = create(:trade_card_want, trade: completed_trade)
+        expect {
+          delete "/trades/#{event.id}/card_wants/#{want.id}", headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        }.not_to change { TradeCardWant.count }
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+    end
+
+    describe "other trade statuses should allow operations" do
+      let(:valid_params) do
+        {
+          trade_card_want: {
+            card_name: "Black Lotus",
+            quantity: 1,
+            language: :ja,
+            foil: :foil,
+            frame: :normal,
+            expansion_id: expansion.id,
+            note: "Test note",
+            conditions: []
+          }
+        }
+      end
+
+      it "allows operations on pending trade" do
+        pending_trade = create(:trade, event: event, user: user, status: :pending)
+        expect {
+          post "/trades/#{event.id}/card_wants", params: valid_params
+        }.to change { TradeCardWant.count }.by(1)
+        expect(response).to redirect_to(trade_path(event))
+      end
+
+      it "allows operations on in_progress trade" do
+        in_progress_trade = create(:trade, event: event, user: user, status: :in_progress)
+        expect {
+          post "/trades/#{event.id}/card_wants", params: valid_params
+        }.to change { TradeCardWant.count }.by(1)
+        expect(response).to redirect_to(trade_path(event))
+      end
+
+      it "allows operations on cancelled trade" do
+        cancelled_trade = create(:trade, event: event, user: user, status: :cancelled)
+        expect {
+          post "/trades/#{event.id}/card_wants", params: valid_params
+        }.to change { TradeCardWant.count }.by(1)
+        expect(response).to redirect_to(trade_path(event))
+      end
+    end
+  end
 end

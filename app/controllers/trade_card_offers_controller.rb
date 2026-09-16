@@ -1,8 +1,11 @@
 class TradeCardOffersController < ApplicationController
+  include CompletedTradeProtector
+
   before_action :authenticate_user!
   before_action :set_event
   before_action :set_trade
   before_action :authorize_user_or_admin!
+  before_action :check_trade_not_completed, only: [ :create, :update, :destroy ]
   before_action :set_trade_card_offer, only: [ :update, :destroy ]
   before_action :validate_trade_id_param, only: [ :update, :destroy ]
 

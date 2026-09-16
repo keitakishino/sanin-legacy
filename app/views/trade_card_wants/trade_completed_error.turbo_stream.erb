@@ -1,0 +1,3 @@
+<%= turbo_stream.append "toast-container" do %>
+  <%= render(partial: "shared/toast", locals: { message: "完了状態のトレード内容は変更できません", variant: :danger }, formats: [:html]) %>
+<% end %>
