@@ -1,6 +1,9 @@
 # Name of your application. Used to uniquely configure containers.
 service: sanin-legacy-staging
 
+# Port for the web application service (must differ from production when running multiple destinations on same server).
+port: 3001
+
 # Name of the container image (use your-user/app-name on external registries).
 # Placeholder: Replace <Docker Hub ユーザー名> with your actual Docker Hub username
 image: "<Docker Hub ユーザー名>/sanin_legacy"
