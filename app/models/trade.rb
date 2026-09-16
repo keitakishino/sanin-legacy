@@ -11,11 +11,10 @@ class Trade < ApplicationRecord
 
   validates :status, presence: true
   validates :offers_total_amount, :wants_total_amount, :net_amount, numericality: { only_integer: true }
-  validate :validate_status_transition
 
   def recalculate_totals!
-    new_offers_total = trade_card_offers.sum(:amount) || 0
-    new_wants_total = trade_card_wants.sum(:amount) || 0
+    new_offers_total = trade_card_offers.sum("amount * quantity") || 0
+    new_wants_total = trade_card_wants.sum("amount * quantity") || 0
     new_net = new_offers_total - new_wants_total
 
     update!(
@@ -24,26 +23,4 @@ class Trade < ApplicationRecord
       net_amount: new_net
     )
   end
-
-  private
-
-  def validate_status_transition
-    return if status_was.nil? || status.nil?
-    return if status == status_was
-
-    allowed_transitions = {
-      "pending" => %w[in_progress completed cancelled],
-      "in_progress" => %w[completed cancelled],
-      "completed" => [],
-      "cancelled" => []
-    }
-
-    return if allowed_transitions[status_was]&.include?(status)
-
-    errors.add(:status, "は現在のステータス（#{status_was}）から変更することができません")
-  end
-
-  # A18: Custom validation for duplicate card entries will be implemented in Issue #45
-  # A17: Automatic calculation of offers_total_amount, wants_total_amount, and net_amount
-  #      will be implemented in Issue #47
 end

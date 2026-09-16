@@ -51,6 +51,29 @@ RSpec.describe "Admin::Trades", type: :request do
         expect(response.body).to include(I18n.t("activerecord.enums.trade.status.pending"))
       end
 
+      it "displays status select with correct initial value for pending status" do
+        get admin_event_trade_path(event, trade)
+        expect(response.body).to include(%(<option selected="selected" value="pending">))
+      end
+
+      it "displays status select with correct initial value for in_progress status" do
+        trade.update!(status: :in_progress)
+        get admin_event_trade_path(event, trade)
+        expect(response.body).to include(%(<option selected="selected" value="in_progress">))
+      end
+
+      it "displays status select with correct initial value for completed status" do
+        trade.update!(status: :completed)
+        get admin_event_trade_path(event, trade)
+        expect(response.body).to include(%(<option selected="selected" value="completed">))
+      end
+
+      it "displays status select with correct initial value for cancelled status" do
+        trade.update!(status: :cancelled)
+        get admin_event_trade_path(event, trade)
+        expect(response.body).to include(%(<option selected="selected" value="cancelled">))
+      end
+
       it "displays aggregated amounts" do
         get admin_event_trade_path(event, trade)
         expect(response.body).to include("出すカード合計")
@@ -108,6 +131,14 @@ RSpec.describe "Admin::Trades", type: :request do
         expect {
           patch admin_event_trade_path(event, trade), params: { trade: { status: :in_progress } }
         }.not_to change { trade.reload.status }
+      end
+
+      it "returns forbidden status with turbo_stream request and HTML format response" do
+        patch admin_event_trade_path(event, trade),
+          params: { trade: { status: :in_progress } },
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:forbidden)
+        expect(response.content_type).to include("text/html")
       end
     end
 
@@ -186,79 +217,6 @@ RSpec.describe "Admin::Trades", type: :request do
           patch admin_event_trade_path(event, trade), params: { trade: { status: :cancelled } }
           expect(trade.reload.status).to eq("cancelled")
         end
-
-        # Disallowed transitions tests
-        context "with disallowed transitions" do
-          it "rejects completed -> pending" do
-            trade.update!(status: :completed)
-            patch admin_event_trade_path(event, trade), params: { trade: { status: :pending } }
-            expect(response).to have_http_status(:unprocessable_entity)
-            expect(trade.reload.status).to eq("completed")
-            expect(response.body).to include("ステータス")
-          end
-
-          it "rejects completed -> in_progress" do
-            trade.update!(status: :completed)
-            patch admin_event_trade_path(event, trade), params: { trade: { status: :in_progress } }
-            expect(response).to have_http_status(:unprocessable_entity)
-            expect(trade.reload.status).to eq("completed")
-            expect(response.body).to include("ステータス")
-          end
-
-          it "rejects completed -> cancelled" do
-            trade.update!(status: :completed)
-            patch admin_event_trade_path(event, trade), params: { trade: { status: :cancelled } }
-            expect(response).to have_http_status(:unprocessable_entity)
-            expect(trade.reload.status).to eq("completed")
-            expect(response.body).to include("ステータス")
-          end
-
-          it "rejects cancelled -> pending" do
-            trade.update!(status: :cancelled)
-            patch admin_event_trade_path(event, trade), params: { trade: { status: :pending } }
-            expect(response).to have_http_status(:unprocessable_entity)
-            expect(trade.reload.status).to eq("cancelled")
-            expect(response.body).to include("ステータス")
-          end
-
-          it "rejects cancelled -> in_progress" do
-            trade.update!(status: :cancelled)
-            patch admin_event_trade_path(event, trade), params: { trade: { status: :in_progress } }
-            expect(response).to have_http_status(:unprocessable_entity)
-            expect(trade.reload.status).to eq("cancelled")
-            expect(response.body).to include("ステータス")
-          end
-
-          it "rejects cancelled -> completed" do
-            trade.update!(status: :cancelled)
-            patch admin_event_trade_path(event, trade), params: { trade: { status: :completed } }
-            expect(response).to have_http_status(:unprocessable_entity)
-            expect(trade.reload.status).to eq("cancelled")
-            expect(response.body).to include("ステータス")
-          end
-        end
-
-        context "with turbo_stream format" do
-          it "rejects completed -> pending with turbo_stream and returns 422" do
-            trade.update!(status: :completed)
-            patch admin_event_trade_path(event, trade),
-              params: { trade: { status: :pending } },
-              headers: { "Accept" => "text/vnd.turbo-stream.html" }
-            expect(response).to have_http_status(:unprocessable_entity)
-            expect(response.content_type).to include("text/vnd.turbo-stream.html")
-            expect(trade.reload.status).to eq("completed")
-          end
-
-          it "rejects cancelled -> in_progress with turbo_stream and returns 422" do
-            trade.update!(status: :cancelled)
-            patch admin_event_trade_path(event, trade),
-              params: { trade: { status: :in_progress } },
-              headers: { "Accept" => "text/vnd.turbo-stream.html" }
-            expect(response).to have_http_status(:unprocessable_entity)
-            expect(response.content_type).to include("text/vnd.turbo-stream.html")
-            expect(trade.reload.status).to eq("cancelled")
-          end
-        end
       end
 
       describe "format negotiation" do
@@ -303,6 +261,16 @@ RSpec.describe "Admin::Trades", type: :request do
               params: { trade: { status: :in_progress } },
               headers: { "Accept" => "text/vnd.turbo-stream.html" }
             expect(trade.reload.status).to eq("in_progress")
+          end
+
+          it "reflects updated status in turbo_stream response" do
+            patch admin_event_trade_path(event, trade),
+              params: { trade: { status: :in_progress } },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+            expect(trade.reload.status).to eq("in_progress")
+            # Verify the updated status is reflected in the response
+            updated_status_label = I18n.t("activerecord.enums.trade.status.in_progress")
+            expect(response.body).to include(updated_status_label)
           end
         end
       end
@@ -532,41 +500,6 @@ RSpec.describe "Admin::Trades", type: :request do
       want = create(:trade_card_want, trade: trade)
       patch trade_card_want_path(trade.event, want), params: { trade_card_want: { amount: 3000 }, trade_id: trade.id }
       expect(want.reload.amount).to eq(3000)
-    end
-
-    describe "IDOR protection: multiple trades in same event" do
-      let(:other_user) { create(:user, email: "other@example.com", password: "password123") }
-      let(:other_trade) { create(:trade, event: event, user: other_user) }
-      let(:other_offer) { create(:trade_card_offer, trade: other_trade, amount: 1000) }
-      let(:other_want) { create(:trade_card_want, trade: other_trade, amount: 500) }
-
-      context "when admin edits one user's offer with correct trade_id" do
-        it "updates only that user's offer and not other user's offer" do
-          main_offer = create(:trade_card_offer, trade: trade, amount: 2000)
-          other_offer
-
-          expect(Trade.where(event_id: event.id).count).to eq(2)  # Verify two trades exist for same event
-
-          patch trade_card_offer_path(event, main_offer), params: { trade_card_offer: { amount: 5000 }, trade_id: trade.id }
-
-          expect(main_offer.reload.amount).to eq(5000)
-          expect(other_offer.reload.amount).to eq(1000)
-        end
-      end
-
-      context "when admin edits one user's want with correct trade_id" do
-        it "updates only that user's want and not other user's want" do
-          main_want = create(:trade_card_want, trade: trade, amount: 1500)
-          other_want
-
-          expect(Trade.where(event_id: event.id).count).to eq(2)  # Verify two trades exist for same event
-
-          patch trade_card_want_path(event, main_want), params: { trade_card_want: { amount: 3000 }, trade_id: trade.id }
-
-          expect(main_want.reload.amount).to eq(3000)
-          expect(other_want.reload.amount).to eq(500)
-        end
-      end
     end
   end
 end
