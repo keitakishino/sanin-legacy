@@ -936,4 +936,41 @@ RSpec.describe "TradeCardOffers", type: :request do
       end
     end
   end
+
+  describe "GET /trades/:event_id (show trade with offers and edit toggle)" do
+    it "renders edit button with toggleEditForm onclick handler" do
+      trade_card_offer = create(:trade_card_offer, trade: trade)
+      get trade_path(event)
+
+      expect(response).to have_http_status(:ok)
+      # Check that the onclick handler is present with correct form and expand IDs
+      form_id = "edit_form_trade_card_offer_#{trade_card_offer.id}"
+      expand_id = "expand_trade_card_offer_#{trade_card_offer.id}"
+      expect(response.body).to include(%Q{onclick="toggleEditForm('#{form_id}', '#{expand_id}')"})
+    end
+
+    it "renders edit form row with display:none style by default" do
+      trade_card_offer = create(:trade_card_offer, trade: trade)
+      get trade_path(event)
+
+      expect(response).to have_http_status(:ok)
+      form_id = "edit_form_trade_card_offer_#{trade_card_offer.id}"
+      # Check that the edit form row has display: none style
+      expect(response.body).to include(%Q(id="#{form_id}"))
+      expect(response.body).to include(%Q{style="border-left: 3px solid oklch(52% 0.12 231); display: none;"})
+    end
+
+    it "renders multiple edit buttons with unique form IDs for each offer" do
+      offers = create_list(:trade_card_offer, 3, trade: trade)
+      get trade_path(event)
+
+      expect(response).to have_http_status(:ok)
+      offers.each do |offer|
+        form_id = "edit_form_trade_card_offer_#{offer.id}"
+        expand_id = "expand_trade_card_offer_#{offer.id}"
+        expect(response.body).to include(%Q{onclick="toggleEditForm('#{form_id}', '#{expand_id}')"})
+        expect(response.body).to include(%Q(id="#{form_id}"))
+      end
+    end
+  end
 end
