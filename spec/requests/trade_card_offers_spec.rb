@@ -52,6 +52,26 @@ RSpec.describe "TradeCardOffers", type: :request do
       expect(response.body).not_to include('target="new_trade_card_offer_admin"')
     end
 
+    context "when an admin creates on their own trade via the general /trades/:event_id page" do
+      before do
+        delete "/signout"
+        post signin_path, params: { email: admin_user.email, password: "password123" }
+      end
+
+      let!(:other_trade) { create(:trade, event: event, user: other_user) }
+      let!(:admin_trade) { create(:trade, event: event, user: admin_user) }
+
+      it "resolves the admin's own trade and targets the non-admin frame (no trade_id param, mirroring the form rendered on this page)" do
+        expect {
+          post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        }.to change { admin_trade.trade_card_offers.count }.by(1)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('target="new_trade_card_offer"')
+        expect(response.body).not_to include('target="new_trade_card_offer_admin"')
+      end
+    end
+
     it "returns HTML redirect on success" do
       trade
       post "/trades/#{event.id}/card_offers", params: valid_params
@@ -67,6 +87,14 @@ RSpec.describe "TradeCardOffers", type: :request do
       expect(response.body).to include('data-controller="toast"')
       # Verify card_name is embedded in the message
       expect(response.body).to include(valid_params[:trade_card_offer][:card_name])
+    end
+
+    it "removes empty state element when adding first offer to empty trade" do
+      trade
+      expect(trade.trade_card_offers.count).to eq(0)
+      post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('action="remove" target="trade_card_offers_empty"')
     end
 
     context "with invalid params" do
@@ -128,6 +156,33 @@ RSpec.describe "TradeCardOffers", type: :request do
         # Verify error messages are in the toast (check for X icon for danger variant)
         expect(response.body).to include('text-danger')
         expect(response.body).to include('bg-danger-soft')
+      end
+
+      it "uses correct frame_id for non-admin user validation error" do
+        trade
+        post "/trades/#{event.id}/card_offers", params: invalid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+        # General user validation error should target 'new_trade_card_offer' frame
+        expect(response.body).to include('target="new_trade_card_offer"')
+        expect(response.body).to include('id="new_trade_card_offer"')
+      end
+
+      context "when admin user creates with invalid params" do
+        before do
+          delete "/signout"
+          post signin_path, params: { email: admin_user.email, password: "password123" }
+        end
+
+        let(:admin_trade) { create(:trade, event: event, user: admin_user) }
+
+        it "uses admin frame_id for validation error" do
+          admin_trade
+          post "/trades/#{event.id}/card_offers", params: invalid_params.merge(trade_id: admin_trade.id), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+          expect(response).to have_http_status(:unprocessable_entity)
+          # Admin context validation error should target 'new_trade_card_offer_admin' frame
+          expect(response.body).to include('target="new_trade_card_offer_admin"')
+          expect(response.body).to include('id="new_trade_card_offer_admin"')
+        end
       end
     end
 
@@ -248,6 +303,69 @@ RSpec.describe "TradeCardOffers", type: :request do
       expect(response.body).to include('action="append" target="toast-container"')
       expect(response.body).to include("Updated Card")
       expect(response.body).to include("の出すカード明細を更新しました")
+    end
+
+    it "includes hidden edit form row in turbo_stream response after successful update" do
+      offer
+      patch "/trades/#{event.id}/card_offers/#{offer.id}", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:ok)
+      # Verify the whole row group (<tbody>) is replaced atomically, rather than a single
+      # sibling <tr>, so no duplicate-id row is left behind by the replace.
+      expected_group_id = "group_trade_card_offer_#{offer.id}"
+      expect(response.body).to include('action="replace"')
+      expect(response.body).to include("target=\"#{expected_group_id}\"")
+      # The freshly rendered edit form <tr> contains display: none; (set in _trade_card_offer.html.erb)
+      expect(response.body).to include("display: none;")
+      # Verify data-controller attribute is present for form_reset_controller to initialize
+      expect(response.body).to include("data-controller=\"form-reset\"")
+    end
+
+    context "with invalid params on update" do
+      let(:invalid_update_params) do
+        {
+          trade_card_offer: {
+            card_name: "",
+            quantity: -1,
+            language: :ja,
+            condition: :nm,
+            foil: :foil,
+            frame: :normal,
+            pw_mark: false
+          }
+        }
+      end
+
+      it "does not update the trade card offer" do
+        offer
+        patch "/trades/#{event.id}/card_offers/#{offer.id}", params: invalid_update_params
+        offer.reload
+        expect(offer.card_name).not_to eq("")
+      end
+
+      it "returns unprocessable_entity status" do
+        offer
+        patch "/trades/#{event.id}/card_offers/#{offer.id}", params: invalid_update_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "uses correct frame_id for validation error on update" do
+        offer
+        patch "/trades/#{event.id}/card_offers/#{offer.id}", params: invalid_update_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+        # Edit validation error should use persisted dom_id frame
+        expected_frame_id = "edit_form_frame_trade_card_offer_#{offer.id}"
+        expect(response.body).to include("target=\"#{expected_frame_id}\"")
+        expect(response.body).to include("id=\"#{expected_frame_id}\"")
+      end
+
+      it "includes error toast notification in turbo_stream response" do
+        offer
+        patch "/trades/#{event.id}/card_offers/#{offer.id}", params: invalid_update_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.body).to include('action="append" target="toast-container"')
+        expect(response.body).to include('data-controller="toast"')
+        expect(response.body).to include('border-danger')
+      end
     end
 
     context "when general user tries to set amount" do
@@ -385,21 +503,58 @@ RSpec.describe "TradeCardOffers", type: :request do
         end
       end
 
-      context "when admin tries to update with mismatched trade_id" do
-        let(:other_event) { create(:event) }
-        let(:other_trade) { create(:trade, event: other_event, user: other_user) }
-        let(:main_offer) { create(:trade_card_offer, trade: trade, amount: 2000) }
-
-        it "returns 404 when trade_id belongs to different event" do
+      context "trade_id validation on update/destroy" do
+        it "returns 404 when trade_id param does not match the offer's actual trade (update)" do
           main_offer
-          expect(Trade.where(event_id: event.id).count).to be >= 1
+          original_card_name = main_offer.card_name
 
           patch "/trades/#{event.id}/card_offers/#{main_offer.id}",
-            params: valid_params.merge(trade_id: other_trade.id)
+            params: valid_params.merge(trade_id: another_trade.id)
 
           expect(response).to have_http_status(:not_found)
-          expect(main_offer.reload.card_name).not_to eq("Updated Card")
-          expect(main_offer.reload.amount).to eq(2000)
+          expect(main_offer.reload.card_name).to eq(original_card_name)
+        end
+
+        it "returns 404 when trade_id param does not match the offer's actual trade (destroy)" do
+          main_offer
+
+          expect {
+            delete "/trades/#{event.id}/card_offers/#{main_offer.id}",
+              params: { trade_id: another_trade.id }
+          }.not_to change { TradeCardOffer.count }
+
+          expect(response).to have_http_status(:not_found)
+        end
+
+        it "updates successfully when trade_id param matches the offer's actual trade" do
+          main_offer
+
+          patch "/trades/#{event.id}/card_offers/#{main_offer.id}",
+            params: valid_params.merge(trade_id: trade.id),
+            headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+          expect(response).to have_http_status(:ok)
+          expect(main_offer.reload.card_name).to eq("Updated Card")
+        end
+
+        it "deletes successfully when trade_id param matches the offer's actual trade" do
+          main_offer
+
+          expect {
+            delete "/trades/#{event.id}/card_offers/#{main_offer.id}",
+              params: { trade_id: trade.id },
+              headers: { "Accept" => "text/vnd.turbo-stream.html" }
+          }.to change { TradeCardOffer.count }.by(-1)
+
+          expect(response).to have_http_status(:ok)
+        end
+
+        it "updates successfully when trade_id param is not provided (existing behavior)" do
+          main_offer
+
+          patch "/trades/#{event.id}/card_offers/#{main_offer.id}", params: valid_params
+
+          expect(main_offer.reload.card_name).to eq("Updated Card")
         end
       end
     end
@@ -407,6 +562,34 @@ RSpec.describe "TradeCardOffers", type: :request do
 
   describe "DELETE /trades/:event_id/card_offers/:id (destroy)" do
     let(:offer) { create(:trade_card_offer, trade: trade) }
+
+    context "when other user tries to delete offer" do
+      before do
+        delete "/signout"
+        post signin_path, params: { email: other_user.email, password: "password123" }
+      end
+
+      it "returns forbidden status with HTML request" do
+        offer
+        delete "/trades/#{event.id}/card_offers/#{offer.id}"
+        expect(response).to have_http_status(:forbidden)
+      end
+
+      it "returns forbidden status with turbo_stream request and HTML format response" do
+        offer
+        delete "/trades/#{event.id}/card_offers/#{offer.id}",
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:forbidden)
+        expect(response.content_type).to include("text/html")
+      end
+
+      it "does not delete the trade card offer" do
+        offer
+        expect {
+          delete "/trades/#{event.id}/card_offers/#{offer.id}"
+        }.not_to change { TradeCardOffer.count }
+      end
+    end
 
     it "deletes the trade card offer" do
       offer
@@ -436,6 +619,62 @@ RSpec.describe "TradeCardOffers", type: :request do
       delete "/trades/#{event.id}/card_offers/#{offer.id}"
       expect(response).to redirect_to(trade_path(event))
       expect(flash[:notice]).to include("カード明細を削除しました")
+    end
+
+    it "shows empty state when deleting last offer" do
+      offer
+      expect(trade.trade_card_offers.count).to eq(1)
+      delete "/trades/#{event.id}/card_offers/#{offer.id}", headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('action="append" target="trade_card_offers"')
+      expect(response.body).to include('id="trade_card_offers_empty"')
+      expect(response.body).to include('カード明細はまだありません')
+    end
+
+    it "does not show empty state when deleting non-last offer" do
+      offer1 = create(:trade_card_offer, trade: trade)
+      offer2 = create(:trade_card_offer, trade: trade)
+      expect(trade.trade_card_offers.count).to eq(2)
+      delete "/trades/#{event.id}/card_offers/#{offer1.id}", headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:ok)
+      # Should not have append action for empty state if not empty after deletion
+      expect(response.body).not_to include('id="trade_card_offers_empty"')
+    end
+
+    context "when admin deletes last offer (admin context)" do
+      before do
+        delete "/signout"
+        post signin_path, params: { email: admin_user.email, password: "password123" }
+      end
+
+      let(:admin_trade) { create(:trade, event: event, user: admin_user) }
+      let(:admin_offer) { create(:trade_card_offer, trade: admin_trade) }
+
+      it "shows empty state when deleting last offer" do
+        admin_offer
+        expect(admin_trade.trade_card_offers.count).to eq(1)
+        # Admin context deletion with trade_id param
+        delete "/trades/#{event.id}/card_offers/#{admin_offer.id}", params: { trade_id: admin_trade.id }, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('action="append" target="trade_card_offers"')
+        expect(response.body).to include('id="trade_card_offers_empty"')
+        # Verify empty state is rendered as its own <tbody> (so it can sit as a sibling
+        # of the per-offer row groups directly under the <table>)
+        expect(response.body).to include('<tbody id="trade_card_offers_empty">')
+        expect(response.body).to include('colspan="12"')
+        expect(response.body).to include('カード明細はまだありません')
+      end
+
+      it "does not show empty state when admin deletes non-last offer" do
+        offer1 = create(:trade_card_offer, trade: admin_trade)
+        offer2 = create(:trade_card_offer, trade: admin_trade)
+        expect(admin_trade.trade_card_offers.count).to eq(2)
+        # Admin context deletion with trade_id param
+        delete "/trades/#{event.id}/card_offers/#{offer1.id}", params: { trade_id: admin_trade.id }, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        # Should not have append action for empty state if not empty after deletion
+        expect(response.body).not_to include('id="trade_card_offers_empty"')
+      end
     end
 
     context "when offer with amount is deleted" do
@@ -587,6 +826,150 @@ RSpec.describe "TradeCardOffers", type: :request do
           expect(response).to redirect_to(trade_path(event))
           expect(flash[:alert]).to be_present
         end
+      end
+    end
+  end
+
+  describe "form reset and lifecycle" do
+    let(:valid_params) do
+      {
+        trade_card_offer: {
+          card_name: "Black Lotus",
+          quantity: 1,
+          language: :ja,
+          condition: :nm,
+          foil: :foil,
+          frame: :normal,
+          pw_mark: true,
+          expansion_id: expansion.id,
+          note: "Test note"
+        }
+      }
+    end
+
+    describe "POST /trades/:event_id/card_offers (create) with turbo_stream" do
+      it "includes form-reset Stimulus controller in turbo_stream response" do
+        trade
+        post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('data-controller="form-reset"')
+      end
+
+      it "does not include script tag for manual form reset" do
+        trade
+        post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).not_to include("form.reset()")
+      end
+
+      it "uses turbo_stream.replace for form updates" do
+        trade
+        post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('action="replace" target="new_trade_card_offer"')
+      end
+
+      it "renders form with pw_mark radio buttons in replacement" do
+        trade
+        post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("PWマーク")
+      end
+    end
+
+    describe "admin context" do
+      it "uses correct frame id for admin users" do
+        post signin_path, params: { email: admin_user.email, password: "password123" }
+        trade
+        post "/trades/#{event.id}/card_offers", params: valid_params.merge(trade_id: trade.id),
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include('id="new_trade_card_offer_admin"')
+        expect(response.body).to include('data-controller="form-reset"')
+      end
+    end
+
+    describe "Issue #259: form_reset_controller should handle nested frame events correctly" do
+      it "renders form reset only when the parent frame itself is replaced (not on nested frame updates)" do
+        trade
+        # This confirms the fix: turbo:before-frame-render event.target check
+        # ensures form-reset only processes events for its own element, not nested frames
+
+        # The parent frame (new_trade_card_offer) should be replaced and form-reset triggered
+        # when the form is actually submitted
+        post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        # After form submission, the response should replace the parent frame with form-reset
+        expect(response.body).to include('action="replace" target="new_trade_card_offer"')
+        expect(response.body).to include('data-controller="form-reset"')
+        # And the frame should have display: none (form is hidden after successful submission)
+        expect(response.body).to include('style="display: none;"')
+      end
+
+      it "form-reset controller is attached to the parent frame and will properly filter nested frame events" do
+        trade
+        # When the parent form frame is created after successful submission,
+        # it has the form-reset controller with event.target === this.element check
+        post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        # Verify the form-reset controller is properly connected to the frame
+        # The controller's handleFrameRender will only respond to turbo:before-frame-render
+        # events where event.target === this.element (the frame itself)
+        expect(response.body).to include('data-controller="form-reset"')
+        # The frame is initially hidden after successful submission
+        expect(response.body).to include('style="display: none;"')
+        # The form is properly rendered within the frame for next entry
+        expect(response.body).to include('id="new_trade_card_offer_form"')
+      end
+
+      it "preserves form structure for nested expansion_suggestions frame management" do
+        trade
+        # When a successful offer is created, the response includes the reset form frame
+        post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+        # The response should include the reset form with expansion_suggestions frame
+        expect(response.body).to include('id="expansion_suggestions"')
+        # The expansion_suggestions frame is a nested element within the form frame
+        # When it's updated separately (via expansion_select controller), the parent
+        # form-reset controller should NOT be triggered because event.target !== this.element
+        expect(response.body).to include('turbo-frame')
+      end
+    end
+  end
+
+  describe "GET /trades/:event_id (show trade with offers and edit toggle)" do
+    it "renders edit button with toggleEditForm onclick handler" do
+      trade_card_offer = create(:trade_card_offer, trade: trade)
+      get trade_path(event)
+
+      expect(response).to have_http_status(:ok)
+      # Check that the onclick handler is present with correct form and expand IDs
+      form_id = "edit_form_trade_card_offer_#{trade_card_offer.id}"
+      expand_id = "expand_trade_card_offer_#{trade_card_offer.id}"
+      expect(response.body).to include(%Q{onclick="toggleEditForm('#{form_id}', '#{expand_id}')"})
+    end
+
+    it "renders edit form row with display:none style by default" do
+      trade_card_offer = create(:trade_card_offer, trade: trade)
+      get trade_path(event)
+
+      expect(response).to have_http_status(:ok)
+      form_id = "edit_form_trade_card_offer_#{trade_card_offer.id}"
+      # Check that the edit form row has display: none style
+      expect(response.body).to include(%Q(id="#{form_id}"))
+      expect(response.body).to include(%Q{style="border-left: 3px solid oklch(52% 0.12 231); display: none;"})
+    end
+
+    it "renders multiple edit buttons with unique form IDs for each offer" do
+      offers = create_list(:trade_card_offer, 3, trade: trade)
+      get trade_path(event)
+
+      expect(response).to have_http_status(:ok)
+      offers.each do |offer|
+        form_id = "edit_form_trade_card_offer_#{offer.id}"
+        expand_id = "expand_trade_card_offer_#{offer.id}"
+        expect(response.body).to include(%Q{onclick="toggleEditForm('#{form_id}', '#{expand_id}')"})
+        expect(response.body).to include(%Q(id="#{form_id}"))
       end
     end
   end

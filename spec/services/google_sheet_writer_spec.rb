@@ -225,6 +225,134 @@ RSpec.describe GoogleSheetWriter, type: :service do
     end
   end
 
+  describe '#build_spreadsheet_rows' do
+    let(:event) { create(:event, spreadsheet_id: 'test-spreadsheet-id') }
+    let(:trade) { create(:trade, event: event, user: user) }
+
+    before do
+      allow(Rails.application.credentials).to receive(:google_sheets).and_return(mock_credentials)
+    end
+
+    context 'with offers and wants having amounts' do
+      before do
+        create(:trade_card_offer, trade: trade, card_name: 'Card A', quantity: 2, amount: 100)
+        create(:trade_card_offer, trade: trade, card_name: 'Card B', quantity: 3, amount: 50)
+        create(:trade_card_want, trade: trade, card_name: 'Card C', quantity: 1, amount: 200)
+        create(:trade_card_want, trade: trade, card_name: 'Card D', quantity: 4, amount: 75)
+      end
+
+      it 'includes "小計" in the header row' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        rows = writer.send(:build_spreadsheet_rows)
+
+        header_row = rows[0]
+        expect(header_row).to include("小計")
+        expect(header_row).to eq([ "カード名", "枚数", "言語", "状態", "特殊", "枠", "PW", "金額", "小計" ])
+      end
+
+      it 'calculates offers subtotal correctly (amount × quantity)' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        rows = writer.send(:build_spreadsheet_rows)
+
+        # Find offer rows (after "【 出すカード 】" row, filter out non-card rows)
+        offer_section_index = rows.find_index { |row| row[0] == "【 出すカード 】" }
+        want_section_index = rows.find_index { |row| row[0] == "【 欲しいカード 】" }
+        offer_rows = rows[(offer_section_index + 1)...want_section_index].reject { |row| row.all? { |cell| cell == "" } }
+
+        expect(offer_rows.length).to eq(2)
+        expect(offer_rows[0][-1]).to eq("200")  # 2 × 100
+        expect(offer_rows[1][-1]).to eq("150")  # 3 × 50
+      end
+
+      it 'calculates wants subtotal correctly (amount × quantity)' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        rows = writer.send(:build_spreadsheet_rows)
+
+        # Find want rows (after "【 欲しいカード 】" row, filter out blank rows and section headers)
+        want_section_index = rows.find_index { |row| row[0] == "【 欲しいカード 】" }
+        summary_index = rows.find_index { |row| row[0] == "合計" }
+        want_rows = rows[(want_section_index + 1)...summary_index].reject { |row| row.all? { |cell| cell == "" } || row[0]&.start_with?("【") }
+
+        expect(want_rows.length).to eq(2)
+        expect(want_rows[0][-1]).to eq("200")  # 1 × 200
+        expect(want_rows[1][-1]).to eq("300")  # 4 × 75
+      end
+
+      it 'ensures all card data rows have 9 columns' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        rows = writer.send(:build_spreadsheet_rows)
+
+        # Check header row and all card data rows (skip section headers and blank rows)
+        rows.each_with_index do |row, index|
+          if row[0] && (row[0].start_with?("【") || row[0] == "合計") || row.all? { |cell| cell == "" }
+            # Section headers, category labels, and blank rows can be variable length
+            next
+          else
+            # All other rows should have 9 columns
+            expect(row.length).to eq(9), "Row #{index} (#{row[0]}) has #{row.length} columns, expected 9"
+          end
+        end
+      end
+    end
+
+    context 'with offers having nil amounts' do
+      before do
+        create(:trade_card_offer, trade: trade, card_name: 'Card A', quantity: 2, amount: nil)
+        create(:trade_card_offer, trade: trade, card_name: 'Card B', quantity: 3, amount: 50)
+      end
+
+      it 'outputs empty string for subtotal when amount is nil' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        rows = writer.send(:build_spreadsheet_rows)
+
+        offer_section_index = rows.find_index { |row| row[0] == "【 出すカード 】" }
+        want_section_index = rows.find_index { |row| row[0] == "【 欲しいカード 】" }
+        offer_rows = rows[(offer_section_index + 1)...want_section_index].reject { |row| row.all? { |cell| cell == "" } }
+
+        expect(offer_rows[0][-1]).to eq("")  # nil amount → empty string subtotal
+        expect(offer_rows[1][-1]).to eq("150")  # 3 × 50
+      end
+    end
+
+    context 'with wants having nil amounts' do
+      before do
+        create(:trade_card_want, trade: trade, card_name: 'Card A', quantity: 2, amount: nil)
+        create(:trade_card_want, trade: trade, card_name: 'Card B', quantity: 3, amount: 75)
+      end
+
+      it 'outputs empty string for subtotal when amount is nil' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        rows = writer.send(:build_spreadsheet_rows)
+
+        want_section_index = rows.find_index { |row| row[0] == "【 欲しいカード 】" }
+        summary_index = rows.find_index { |row| row[0] == "合計" }
+        want_rows = rows[(want_section_index + 1)...summary_index].reject { |row| row.all? { |cell| cell == "" } || row[0]&.start_with?("【") }
+
+        expect(want_rows[0][-1]).to eq("")  # nil amount → empty string subtotal
+        expect(want_rows[1][-1]).to eq("225")  # 3 × 75
+      end
+    end
+
+    context 'summary rows structure' do
+      before do
+        create(:trade_card_offer, trade: trade, card_name: 'Card A', quantity: 2, amount: 100)
+        create(:trade_card_want, trade: trade, card_name: 'Card B', quantity: 1, amount: 200)
+      end
+
+      it 'ensures all summary data rows have 9 elements' do
+        writer = GoogleSheetWriter.new(event, trade, admin_user)
+        rows = writer.send(:build_spreadsheet_rows)
+
+        # Find all summary rows (those that start with "出すカード合計", "欲しいカード合計", "差額" - exclude "合計" section header)
+        summary_rows = rows.select { |row| (row[0]&.include?("合計") || row[0]&.include?("差額")) && row[0] != "合計" }
+
+        summary_rows.each do |row|
+          expect(row.length).to eq(9), "Summary row '#{row[0]}' has #{row.length} columns, expected 9"
+        end
+      end
+    end
+  end
+
   describe '#sanitize_tab_name' do
     let(:event) { create(:event, spreadsheet_id: 'test-spreadsheet-id') }
     let(:trade) { create(:trade, event: event, user: user) }
