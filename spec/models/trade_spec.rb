@@ -51,48 +51,48 @@ describe Trade, type: :model do
     end
 
     context 'with multiple offers' do
-      it 'calculates offers_total_amount as sum of trade_card_offers amount' do
-        create(:trade_card_offer, trade: trade, amount: 1000)
-        create(:trade_card_offer, trade: trade, amount: 2000)
+      it 'calculates offers_total_amount as sum of trade_card_offers (amount * quantity)' do
+        create(:trade_card_offer, trade: trade, amount: 1000, quantity: 1)
+        create(:trade_card_offer, trade: trade, amount: 2000, quantity: 2)
         trade.recalculate_totals!
-        expect(trade.offers_total_amount).to eq(3000)
+        expect(trade.offers_total_amount).to eq(5000)
       end
     end
 
     context 'with multiple wants' do
-      it 'calculates wants_total_amount as sum of trade_card_wants amount' do
-        create(:trade_card_want, trade: trade, amount: 500)
-        create(:trade_card_want, trade: trade, amount: 1500)
+      it 'calculates wants_total_amount as sum of trade_card_wants (amount * quantity)' do
+        create(:trade_card_want, trade: trade, amount: 500, quantity: 2)
+        create(:trade_card_want, trade: trade, amount: 1500, quantity: 1)
         trade.recalculate_totals!
-        expect(trade.wants_total_amount).to eq(2000)
+        expect(trade.wants_total_amount).to eq(2500)
       end
     end
 
     context 'with both offers and wants' do
-      it 'calculates net_amount as offers_total_amount - wants_total_amount' do
-        create(:trade_card_offer, trade: trade, amount: 5000)
-        create(:trade_card_want, trade: trade, amount: 2000)
+      it 'calculates net_amount as offers_total_amount - wants_total_amount (with amount * quantity)' do
+        create(:trade_card_offer, trade: trade, amount: 5000, quantity: 2)
+        create(:trade_card_want, trade: trade, amount: 2000, quantity: 3)
         trade.recalculate_totals!
-        expect(trade.net_amount).to eq(3000)
+        expect(trade.net_amount).to eq(4000)
       end
     end
 
     context 'with nil amounts' do
-      it 'treats nil amounts as 0' do
-        create(:trade_card_offer, trade: trade, amount: 1000)
-        create(:trade_card_offer, trade: trade, amount: nil)
-        create(:trade_card_want, trade: trade, amount: nil)
+      it 'treats nil amounts as 0 (even when quantity is present)' do
+        create(:trade_card_offer, trade: trade, amount: 1000, quantity: 2)
+        create(:trade_card_offer, trade: trade, amount: nil, quantity: 1)
+        create(:trade_card_want, trade: trade, amount: nil, quantity: 1)
         trade.recalculate_totals!
-        expect(trade.offers_total_amount).to eq(1000)
+        expect(trade.offers_total_amount).to eq(2000)
         expect(trade.wants_total_amount).to eq(0)
-        expect(trade.net_amount).to eq(1000)
+        expect(trade.net_amount).to eq(2000)
       end
     end
 
     context 'when net_amount becomes negative' do
-      it 'correctly calculates negative net_amount' do
-        create(:trade_card_offer, trade: trade, amount: 1000)
-        create(:trade_card_want, trade: trade, amount: 3000)
+      it 'correctly calculates negative net_amount (with amount * quantity)' do
+        create(:trade_card_offer, trade: trade, amount: 1000, quantity: 1)
+        create(:trade_card_want, trade: trade, amount: 3000, quantity: 1)
         trade.recalculate_totals!
         expect(trade.net_amount).to eq(-2000)
       end

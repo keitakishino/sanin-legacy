@@ -94,6 +94,21 @@ describe TradeCardOffer, type: :model do
         expect(subject).to be_valid
       end
 
+      it 'allows amount = 100_000_000 (upper limit)' do
+        subject.amount = 100_000_000
+        expect(subject).to be_valid
+      end
+
+      it 'rejects amount = 100_000_001 (exceeds upper limit)' do
+        subject.amount = 100_000_001
+        expect(subject).to be_invalid
+      end
+
+      it 'rejects amount = 2147483648 (integer type upper limit, 2^31)' do
+        subject.amount = 2_147_483_648
+        expect(subject).to be_invalid
+      end
+
       context 'error messages' do
         it 'returns correct message when amount is negative' do
           with_locale(:ja) do
@@ -116,6 +131,22 @@ describe TradeCardOffer, type: :model do
             subject.amount = "invalid"
             subject.valid?
             expect(subject.errors[:amount]).to include("は数値で入力してください")
+          end
+        end
+
+        it 'returns correct message when amount exceeds upper limit' do
+          with_locale(:ja) do
+            subject.amount = 100_000_001
+            subject.valid?
+            expect(subject.errors[:amount]).to include("は100000000以下の値で入力してください")
+          end
+        end
+
+        it 'returns correct message when amount is 2^31 (does not raise ActiveModel::RangeError)' do
+          with_locale(:ja) do
+            subject.amount = 2_147_483_648
+            subject.valid?
+            expect(subject.errors[:amount]).to include("は100000000以下の値で入力してください")
           end
         end
       end

@@ -1,11 +1,14 @@
-<turbo-stream action="replace" target="<%= dom_id(@trade_card_offer) %>">
-  <template><%= render 'trade_card_offer', trade_card_offer: @trade_card_offer %></template>
-</turbo-stream>
+<!-- Replace the whole row group (main row + mobile expansion row + edit form row) as one atomic -->
+<!-- unit so the freshly rendered edit form (closed by default) fully replaces the old one, with -->
+<!-- no leftover/duplicate row sharing the same id. -->
+<%= turbo_stream.replace dom_id(@trade_card_offer, :group) do %>
+  <%= render(partial: 'trade_card_offer', locals: { trade_card_offer: @trade_card_offer }, formats: [:html]) %>
+<% end %>
 
-<turbo-stream action="replace" target="trade_aggregates">
-  <template><%= render(partial: 'trades/aggregates_inline', locals: { trade: @trade_card_offer.trade }, formats: [:html]) %></template>
-</turbo-stream>
+<%= turbo_stream.replace "trade_aggregates" do %>
+  <%= render(partial: 'trades/aggregates_inline', locals: { trade: @trade_card_offer.trade }, formats: [:html]) %>
+<% end %>
 
-<turbo-stream action="append" target="toast-container">
-  <template><%= render(partial: 'shared/toast', locals: { message: t('toasts.trade_card_offer.update', card_name: @trade_card_offer.card_name) }, formats: [:html]) %></template>
-</turbo-stream>
+<%= turbo_stream.append "toast-container" do %>
+  <%= render(partial: 'shared/toast', locals: { message: t('toasts.trade_card_offer.update', card_name: @trade_card_offer.card_name) }, formats: [:html]) %>
+<% end %>
