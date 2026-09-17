@@ -153,7 +153,6 @@
           e.stopPropagation();
           const rowId = this.getAttribute('data-toggle-expand');
           const expandRow = document.getElementById('expand_' + rowId);
-          const editFormRow = document.getElementById('edit_form_' + rowId);
 
           if (expandRow) {
             const isHidden = expandRow.style.display === 'none';
