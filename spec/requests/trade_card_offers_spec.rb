@@ -452,7 +452,7 @@ RSpec.describe "TradeCardOffers", type: :request do
         # Verify the heading "集計値（表示のみ）" is NOT included in turbo_stream response
         expect(response.body).not_to include("集計値（表示のみ）")
         # Verify the grid structure is present
-        expect(response.body).to include('class="grid grid-cols-3 gap-4"')
+        expect(response.body).to include('class="grid grid-cols-1 md:grid-cols-3 gap-4"')
         # Verify individual tiles are rendered
         expect(response.body).to include("出すカード合計")
         expect(response.body).to include("欲しいカード合計")
@@ -766,7 +766,7 @@ RSpec.describe "TradeCardOffers", type: :request do
         # Verify the heading "集計値（表示のみ）" is NOT included in turbo_stream response
         expect(response.body).not_to include("集計値（表示のみ）")
         # Verify the grid structure is present
-        expect(response.body).to include('class="grid grid-cols-3 gap-4"')
+        expect(response.body).to include('class="grid grid-cols-1 md:grid-cols-3 gap-4"')
         # Verify individual tiles are rendered
         expect(response.body).to include("出すカード合計")
         expect(response.body).to include("欲しいカード合計")
