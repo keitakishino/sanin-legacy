@@ -54,10 +54,10 @@ env:
   # Note: DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, and DATABASE_PORT are injected into the Rails app container.
   # These correspond to values defined in .kamal/secrets (see Issue #279) and are required by config/database.yml in production.
   # POSTGRES_PASSWORD for the PostgreSQL accessory is mapped from DATABASE_PASSWORD using Kamal's secret aliasing syntax.
-  clear:
-    # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
-    # When you start using multiple servers, you should split out job processing to a dedicated machine.
-    SOLID_QUEUE_IN_PUMA: true
+  clear: {}
+    # Solid Queue is not used by this app yet (config.active_job.queue_adapter = :async).
+    # Re-enable once background jobs are actually needed, alongside a proper `queue` database.
+    # SOLID_QUEUE_IN_PUMA: true
 
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3

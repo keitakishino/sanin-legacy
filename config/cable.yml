@@ -8,10 +8,10 @@ development:
 test:
   adapter: test
 
+# ActionCable/Solid Cable is not used anywhere in this app (no app/channels, no turbo_stream_from,
+# no broadcasts_to). Using the async adapter avoids needing a separate "cable" database.
+# If real-time broadcasting is ever needed, switch back to solid_cable and add a proper
+# `cable` entry to config/database.yml (see db/cable_schema.rb in git history / regenerate via
+# `bin/rails generate solid_cable:install`).
 production:
-  adapter: solid_cable
-  connects_to:
-    database:
-      writing: cable
-  polling_interval: 0.1.seconds
-  message_retention: 1.day
+  adapter: async
