@@ -120,6 +120,12 @@ accessories:
     host: 49.212.128.192
     port: "127.0.0.1:5433:5432"
     env:
+      clear:
+        # POSTGRES_USER/POSTGRES_DB must match the Rails app's DATABASE_USER and expected database name
+        # (config/database.yml production default: sanin_legacy_production), otherwise the postgres image
+        # initializes with the default "postgres" user/db and the app can't authenticate.
+        POSTGRES_USER: sanin_legacy
+        POSTGRES_DB: sanin_legacy_production
       secret:
         # POSTGRES_PASSWORD is mapped from DATABASE_PASSWORD using Kamal's secret aliasing syntax.
         # This allows the PostgreSQL container to receive the database password under its expected environment variable name.
