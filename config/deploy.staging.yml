@@ -6,14 +6,14 @@ port: 3001
 
 # Name of the container image (use your-user/app-name on external registries).
 # Placeholder: Replace <Docker Hub ユーザー名> with your actual Docker Hub username
-image: "<Docker Hub ユーザー名>/sanin_legacy"
+image: "keitakishino/sanin_legacy"
 
 # Deploy to these servers.
 # Placeholder: Replace <本番サーバーIP> with your actual staging server IP address
 # Note: This can be the same server as production when using Kamal destination feature
 servers:
   web:
-    - <本番サーバーIP>
+    - 49.212.128.192
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -37,7 +37,7 @@ registry:
 
   # Needed for authenticated registries.
   # Placeholder: Replace <Docker Hub ユーザー名> with your actual Docker Hub username
-  username: "<Docker Hub ユーザー名>"
+  username: "keitakishino"
 
   # Always use an access token rather than real password when possible.
   password: <%= ENV['KAMAL_REGISTRY_PASSWORD'] %>
@@ -120,7 +120,7 @@ accessories:
     image: postgres:17-alpine
     # Placeholder: Replace <本番サーバーIP> with your actual staging server IP address
     # Note: This can be the same server as production when using Kamal destination feature
-    host: <本番サーバーIP>
+    host: 49.212.128.192
     port: "127.0.0.1:5433:5433"
     env:
       secret:
