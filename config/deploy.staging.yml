@@ -1,9 +1,6 @@
 # Name of your application. Used to uniquely configure containers.
 service: sanin-legacy-staging
 
-# Port for the web application service (must differ from production when running multiple destinations on same server).
-port: 3001
-
 # Name of the container image (use your-user/app-name on external registries).
 # Placeholder: Replace <Docker Hub ユーザー名> with your actual Docker Hub username
 image: "keitakishino/sanin_legacy"
@@ -111,8 +108,8 @@ builder:
   #   - RAILS_MASTER_KEY
 
 # Use a different ssh user than root
-# ssh:
-#   user: app
+ssh:
+  user: ubuntu
 
 # Use accessory services (secrets come from .kamal/secrets).
 accessories:
@@ -121,7 +118,7 @@ accessories:
     # Placeholder: Replace <本番サーバーIP> with your actual staging server IP address
     # Note: This can be the same server as production when using Kamal destination feature
     host: 49.212.128.192
-    port: "127.0.0.1:5433:5433"
+    port: "127.0.0.1:5433:5432"
     env:
       secret:
         # POSTGRES_PASSWORD is mapped from DATABASE_PASSWORD using Kamal's secret aliasing syntax.
