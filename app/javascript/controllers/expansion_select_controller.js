@@ -42,11 +42,15 @@ export default class extends Controller {
 
   attachDropdownHandlers() {
     this.frameTarget.querySelectorAll("[data-expansion-code]").forEach(item => {
-      item.addEventListener("click", (e) => this.selectExpansion(e))
+      item.addEventListener("click", (e) => {
+        e.stopPropagation()
+        this.selectExpansion(e)
+      })
     })
   }
 
   selectExpansion(event) {
+    event.stopPropagation()
     const item = event.currentTarget
     const expansionId = item.dataset.expansionId
     const expansionCode = item.dataset.expansionCode
