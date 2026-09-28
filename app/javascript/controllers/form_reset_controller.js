@@ -13,10 +13,6 @@ import { Controller } from "@hotwired/stimulus"
 // controller no longer reacts to frame-render events at all, that whole class
 // of bug can't occur here anymore.
 export default class extends Controller {
-  connect() {
-    this.resetForm()
-  }
-
   resetForm() {
     const form = this.element.querySelector("form")
     if (form) {
