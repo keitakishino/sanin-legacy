@@ -109,6 +109,21 @@ RSpec.describe "TradeCardWants", type: :request do
       expect(response.body).to include(valid_params[:trade_card_want][:card_name])
     end
 
+    it "includes hidden edit form row with correct values after successful create (acceptance criterion #1)" do
+      trade
+      post "/trades/#{event.id}/card_wants", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+      expect(response).to have_http_status(:ok)
+      # Verify the edit form row is included in the response with display:none
+      # This ensures users can immediately click edit after adding and see the correct values
+      expect(response.body).to include("display: none;")
+      # Verify the form contains the created values so clicking edit immediately shows the correct values
+      expect(response.body).to include('value="Black Lotus"')
+      expect(response.body).to include('value="1"')
+      # Verify the response includes a cancel button for closing the form
+      # (Actual cancel behavior is tested in system specs, acceptance criterion #2)
+      expect(response.body).to include('type="reset"')
+    end
+
     it "removes empty state element when adding first want to empty trade" do
       trade
       expect(trade.trade_card_wants.count).to eq(0)
@@ -418,7 +433,7 @@ RSpec.describe "TradeCardWants", type: :request do
       expect(response.body).to include("の欲しいカード明細を更新しました")
     end
 
-    it "includes hidden edit form row in turbo_stream response after successful update" do
+    it "includes hidden edit form row with correct values in turbo_stream response after successful update" do
       want
       patch "/trades/#{event.id}/card_wants/#{want.id}", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
       expect(response).to have_http_status(:ok)
@@ -431,6 +446,11 @@ RSpec.describe "TradeCardWants", type: :request do
       expect(response.body).to include("display: none;")
       # Verify data-controller attribute is present for form_reset_controller to initialize
       expect(response.body).to include("data-controller=\"form-reset\"")
+      # Verify the form contains the updated values (not automatically reset on render)
+      expect(response.body).to include('value="Updated Card"')
+      expect(response.body).to include('value="2"')
+      # Verify cancel button has the correct data-action to reset form only when clicked
+      expect(response.body).to include('data-action="click->form-reset#resetForm"')
     end
 
     context "with invalid params on update" do
