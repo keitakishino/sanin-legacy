@@ -265,4 +265,83 @@ RSpec.describe "Trade Edit Form Close (Issue #258)", type: :system do
     # エラーメッセージを確認
     expect(page).to have_content("エラー")
   end
+
+  it "受け入れ条件テスト: 新規追加直後に編集→キャンセルでフォームが閉じること（acceptance criterion #2）" do
+    visit trade_path(event)
+
+    # 新規追加ボタンをクリックしてフォームを表示
+    click_button "カード明細を追加", match: :first
+    sleep 0.3
+
+    # フォーム内のフィールドに値を入力
+    within("#new_trade_card_offer") do
+      fill_in "trade_card_offer[card_name]", with: "Newly Added Card"
+      fill_in "trade_card_offer[quantity]", with: "2"
+      click_button "追加", match: :first
+    end
+    sleep 1
+
+    # 追加直後に編集ボタンをクリック
+    click_button "編集", match: :first
+    sleep 0.3
+
+    # フォームが表示されていることを確認
+    form_input = evaluate_script(
+      "document.querySelector('input[name=\"trade_card_offer[card_name]\"]').value"
+    )
+    expect(form_input).to eq("Newly Added Card")
+
+    # キャンセルボタンをクリック
+    click_button "キャンセル"
+    sleep 0.5
+
+    # フォーム行が非表示になっていることを確認
+    # #trade_card_offers の tbody 内の最後の行をチェック（offer テーブルに限定）
+    form_row_display = evaluate_script(
+      "window.getComputedStyle(document.querySelector('#trade_card_offers tbody tr:last-child')).display"
+    )
+    expect(form_row_display).to eq("none")
+  end
+
+  it "受け入れ条件テスト: 新規追加直後に編集→キャンセルでWantもフォームが閉じること（acceptance criterion #2）" do
+    visit trade_path(event)
+
+    # ウォントリストの新規追加ボタンをクリック（ページの下の方）
+    all_add_buttons = all("button", text: "カード明細を追加")
+    all_add_buttons.last.click if all_add_buttons.present?
+    sleep 0.3
+
+    # ウォントリスト側の新規追加フォーム内に入力
+    within("#new_trade_card_want") do
+      fill_in "trade_card_want[card_name]", with: "Newly Wanted Card"
+      fill_in "trade_card_want[quantity]", with: "1"
+      click_button "追加", match: :first
+    end
+    sleep 1
+
+    # 追加直後に編集ボタンをクリック（ウォントリスト側）
+    # #trade_card_wants テーブル内に限定して、最後の編集ボタンをクリック
+    within("#trade_card_wants tbody") do
+      all_edit_buttons = all("button", text: "編集")
+      all_edit_buttons.last.click if all_edit_buttons.present?
+    end
+    sleep 0.3
+
+    # フォームが表示されていることを確認
+    form_input = evaluate_script(
+      "document.querySelector('input[name=\"trade_card_want[card_name]\"]').value"
+    )
+    expect(form_input).to eq("Newly Wanted Card")
+
+    # キャンセルボタンをクリック
+    click_button "キャンセル"
+    sleep 0.5
+
+    # フォーム行が非表示になっていることを確認
+    # #trade_card_wants の tbody 内の最後の行をチェック（want テーブルに限定）
+    form_row_display = evaluate_script(
+      "window.getComputedStyle(document.querySelector('#trade_card_wants tbody tr:last-child')).display"
+    )
+    expect(form_row_display).to eq("none")
+  end
 end
