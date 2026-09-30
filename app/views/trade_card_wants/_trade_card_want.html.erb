@@ -1,23 +1,23 @@
 <tbody id="<%= dom_id(trade_card_want, :group) %>">
 <tr id="<%= dom_id(trade_card_want) %>" class="border-b border-stone-200 hover:bg-stone-50" style="border-left: 3px solid oklch(52% 0.1 150)">
   <!-- Desktop: Full columns -->
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800 truncate" title="<%= trade_card_want.card_name %>"><%= trade_card_want.card_name %></td>
-  <td class="px-4 py-3 text-sm text-stone-800"><%= trade_card_want.quantity %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_want.language.present? ? I18n.t("activerecord.enums.trade_card_want.language.#{trade_card_want.language}") : "不問" %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_want.conditions.present? && trade_card_want.conditions.any? ? trade_card_want.conditions.map { |c| I18n.t("activerecord.enums.trade_card_want_condition.#{c}") }.join(", ") : "不問" %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_want.foil.present? ? I18n.t("activerecord.enums.trade_card_want.foil.#{trade_card_want.foil}") : "不問" %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_want.frame.present? ? I18n.t("activerecord.enums.trade_card_want.frame.#{trade_card_want.frame}") : "不問" %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_want.expansion&.scryfall_set_code&.upcase || "—" %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800 truncate" title="<%= trade_card_want.note %>"><%= trade_card_want.note.present? ? trade_card_want.note : "—" %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_want.amount.present? ? "¥#{number_with_delimiter(trade_card_want.amount)}" : "—" %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800 wrap-anywhere" title="<%= trade_card_want.card_name %>"><%= trade_card_want.card_name %></td>
+  <td class="px-4 md:px-2 lg:px-4 py-3 text-sm text-stone-800"><%= trade_card_want.quantity %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= trade_card_want.language.present? ? I18n.t("activerecord.enums.trade_card_want.language.#{trade_card_want.language}") : "不問" %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= trade_card_want.conditions.present? && trade_card_want.conditions.any? ? trade_card_want.conditions.map { |c| I18n.t("activerecord.enums.trade_card_want_condition.#{c}") }.join(", ") : "不問" %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= trade_card_want.foil.present? ? I18n.t("activerecord.enums.trade_card_want.foil.#{trade_card_want.foil}") : "不問" %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= trade_card_want.frame.present? ? I18n.t("activerecord.enums.trade_card_want.frame.#{trade_card_want.frame}") : "不問" %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= trade_card_want.expansion&.scryfall_set_code&.upcase || "—" %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800" title="<%= trade_card_want.note %>"><div class="max-w-64 line-clamp-2 wrap-anywhere"><%= trade_card_want.note.present? ? trade_card_want.note : "—" %></div></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= trade_card_want.amount.present? ? "¥#{number_with_delimiter(trade_card_want.amount)}" : "—" %></td>
   <% subtotal = (trade_card_want.amount.present? && trade_card_want.quantity.present?) ? (trade_card_want.amount * trade_card_want.quantity) : nil %>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= subtotal.present? ? "¥#{number_with_delimiter(subtotal)}" : "—" %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= subtotal.present? ? "¥#{number_with_delimiter(subtotal)}" : "—" %></td>
 
   <!-- Mobile: Card name only -->
   <td class="md:hidden px-4 py-3 text-sm text-stone-800 flex-1 truncate" title="<%= trade_card_want.card_name %>"><%= trade_card_want.card_name %></td>
 
   <!-- Actions -->
-  <td class="px-4 py-3 text-right">
+  <td class="px-4 md:px-2 lg:px-4 py-3 text-right">
     <div class="flex items-center justify-end gap-2">
       <button
         type="button"

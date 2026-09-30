@@ -1,24 +1,24 @@
 <tbody id="<%= dom_id(trade_card_offer, :group) %>">
 <tr id="<%= dom_id(trade_card_offer) %>" class="border-b border-stone-200 hover:bg-stone-50" style="border-left: 3px solid oklch(52% 0.12 231)">
   <!-- Desktop: Full columns -->
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800 truncate" title="<%= trade_card_offer.card_name %>"><%= trade_card_offer.card_name %></td>
-  <td class="px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.quantity %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.language.#{trade_card_offer.language}") %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.condition.#{trade_card_offer.condition}") %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.foil.#{trade_card_offer.foil}") %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.frame.#{trade_card_offer.frame}") %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.pw_mark ? "あり" : "なし" %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.expansion&.scryfall_set_code&.upcase || "—" %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800 truncate" title="<%= trade_card_offer.note %>"><%= trade_card_offer.note.present? ? trade_card_offer.note : "—" %></td>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.amount.present? ? "¥#{number_with_delimiter(trade_card_offer.amount)}" : "—" %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800 wrap-anywhere" title="<%= trade_card_offer.card_name %>"><%= trade_card_offer.card_name %></td>
+  <td class="px-4 md:px-2 lg:px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.quantity %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.language.#{trade_card_offer.language}") %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.condition.#{trade_card_offer.condition}") %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.foil.#{trade_card_offer.foil}") %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.frame.#{trade_card_offer.frame}") %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.pw_mark ? "あり" : "なし" %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.expansion&.scryfall_set_code&.upcase || "—" %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800" title="<%= trade_card_offer.note %>"><div class="max-w-64 line-clamp-2 wrap-anywhere"><%= trade_card_offer.note.present? ? trade_card_offer.note : "—" %></div></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.amount.present? ? "¥#{number_with_delimiter(trade_card_offer.amount)}" : "—" %></td>
   <% subtotal = (trade_card_offer.amount.present? && trade_card_offer.quantity.present?) ? (trade_card_offer.amount * trade_card_offer.quantity) : nil %>
-  <td class="hidden md:table-cell px-4 py-3 text-sm text-stone-800"><%= subtotal.present? ? "¥#{number_with_delimiter(subtotal)}" : "—" %></td>
+  <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= subtotal.present? ? "¥#{number_with_delimiter(subtotal)}" : "—" %></td>
 
   <!-- Mobile: Card name only -->
   <td class="md:hidden px-4 py-3 text-sm text-stone-800 flex-1 truncate" title="<%= trade_card_offer.card_name %>"><%= trade_card_offer.card_name %></td>
 
   <!-- Actions -->
-  <td class="px-4 py-3 text-right">
+  <td class="px-4 md:px-2 lg:px-4 py-3 text-right">
     <div class="flex items-center justify-end gap-2">
       <button
         type="button"

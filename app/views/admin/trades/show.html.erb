@@ -1,4 +1,4 @@
-<div class="bg-stone-50 container mx-auto px-4 py-8 max-w-5xl">
+<div class="bg-stone-50 w-full px-4 md:px-0 py-8">
   <!-- Header -->
   <div class="mb-8">
     <%= link_to "← 戻る", admin_events_path, class: "text-indigo-700 hover:text-indigo-800 mb-4 inline-block font-medium" %>
@@ -98,19 +98,19 @@
       <table class="w-full" id="trade_card_offers">
         <thead class="bg-stone-100">
           <tr>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
-            <th class="px-4 py-3 text-left text-xs font-bold text-stone-500">数量</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">言語</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">状態</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">フォイル</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">フレーム</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">PWマーク</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">セット</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">備考</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">単価</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">小計</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
+            <th class="px-4 md:px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">数量</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">言語</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">状態</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">フォイル</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">フレーム</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">PWマーク</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">セット</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">備考</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">単価</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">小計</th>
             <th class="md:hidden px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
-            <th class="px-4 py-3 text-right text-xs font-bold text-stone-500">操作</th>
+            <th class="px-4 md:px-2 lg:px-4 py-3 text-right text-xs font-bold text-stone-500">操作</th>
           </tr>
         </thead>
         <% if @trade.trade_card_offers.any? %>
@@ -151,18 +151,18 @@
       <table class="w-full" id="trade_card_wants">
         <thead class="bg-stone-100">
           <tr>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
-            <th class="px-4 py-3 text-left text-xs font-bold text-stone-500">数量</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">言語</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">状態</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">フォイル</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">フレーム</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">セット</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">備考</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">単価</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500">小計</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
+            <th class="px-4 md:px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">数量</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">言語</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">状態</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">フォイル</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">フレーム</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">セット</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">備考</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">単価</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">小計</th>
             <th class="md:hidden px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
-            <th class="px-4 py-3 text-right text-xs font-bold text-stone-500">操作</th>
+            <th class="px-4 md:px-2 lg:px-4 py-3 text-right text-xs font-bold text-stone-500">操作</th>
           </tr>
         </thead>
         <% if @trade.trade_card_wants.any? %>
