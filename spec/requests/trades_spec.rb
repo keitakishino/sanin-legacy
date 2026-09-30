@@ -125,6 +125,33 @@ RSpec.describe "Trades", type: :request do
             expect(response.body).to include("¥3,000")
           end
         end
+
+        # Regression test: editing existing trade card details after adding a new one.
+        # The querySelectorAll('[id^="edit_form_"]') selector was matching turbo-frame and form
+        # elements inside the target tr, causing them to become hidden (display:none),
+        # which made the edit form appear empty even though the values were correctly filled.
+        # See https://github.com/Netlab/sanin-legacy/issues/XXX for details.
+        it "closes only tr[id^=\"edit_form_\"], not nested turbo-frame or form elements" do
+          offer = create(:trade_card_offer, trade: trade)
+          get "/trades/#{event.id}"
+          expect(response.body).to include('querySelectorAll(\'tr[id^="edit_form_"]\')')
+          expect(response.body).not_to include('querySelectorAll(\'[id^="edit_form_"]\')')
+          expect(response.body).to include("id=\"edit_form_frame_trade_card_offer_#{offer.id}\"")
+        end
+
+        # Regression test: expand/collapse buttons after Turbo Streams append a new trade card.
+        # The previous implementation used turbo:after-stream-render, which does not exist in Turbo.
+        # This meant the expand buttons lost their click handlers after a Stream update, then the
+        # handlers were never re-attached. Event delegation (registered once on document) fixes this.
+        # See https://github.com/Netlab/sanin-legacy/issues/XXX for details.
+        it "uses event delegation for expand buttons, not turbo:after-stream-render" do
+          offer = create(:trade_card_offer, trade: trade)
+          get "/trades/#{event.id}"
+          expect(response.body).to include('closest(\'[data-toggle-expand]\')')
+          expect(response.body).to include('window.tradeCardExpandDelegated')
+          expect(response.body).not_to include('turbo:after-stream-render')
+          expect(response.body).to include("data-toggle-expand=\"trade_card_offer_#{offer.id}\"")
+        end
       end
 
       context "when the current user is an admin viewing their own trade" do
