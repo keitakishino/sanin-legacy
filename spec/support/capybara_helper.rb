@@ -78,6 +78,9 @@ Capybara.configure do |config|
 
   if ENV["SELENIUM_REMOTE_URL"]
     config.server_host = "0.0.0.0"
+    # For remote Chrome to reach the app container, use the container hostname by default.
+    # Do NOT set CAPYBARA_APP_HOST to a hostname matching an HSTS preloaded TLD (like 'app' for .app),
+    # as Chrome rewrites http:// to https://, causing ERR_SSL_PROTOCOL_ERROR on the puma server.
     config.app_host = "http://#{ENV.fetch("CAPYBARA_APP_HOST") { Socket.gethostname }}:#{CAPYBARA_SERVER_PORT}"
   end
 end
