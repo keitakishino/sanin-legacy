@@ -88,6 +88,7 @@ module CapybaraAuthHelpers
     fill_in "email", with: user.email
     fill_in "password", with: user.password
     click_button "サインイン"
+    page.assert_current_path(root_path)
   end
 
   def resize_window_to(width, height)
@@ -102,10 +103,13 @@ RSpec.configure do |config|
   config.before(:each, type: :system) do
     driven_by :chrome_headless
     page.current_window.resize_to(*SYSTEM_SPEC_WINDOW_SIZE)
+    @original_default_locale = I18n.default_locale
+    I18n.default_locale = :ja
     I18n.locale = :ja
   end
 
   config.after(:each, type: :system) do
+    I18n.default_locale = @original_default_locale || :en
     I18n.locale = I18n.default_locale
   end
 end
