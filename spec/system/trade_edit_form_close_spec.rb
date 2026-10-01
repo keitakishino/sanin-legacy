@@ -1,5 +1,3 @@
-# NOTE: このテストはSelenium/ChromeDriver環境が整備されるまでCI実行対象から除外されています。
-# 開発環境で `rspec spec/system/trade_edit_form_close_spec.rb` で手動実行可能。
 # Issue #258: トレード編集フォームの『更新』を押した際にフォーム行が閉じない不具合
 
 require "rails_helper"

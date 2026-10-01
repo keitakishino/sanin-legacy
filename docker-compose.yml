@@ -18,6 +18,13 @@ services:
       timeout: 5s
       retries: 5
 
+  chrome:
+    image: selenium/standalone-chromium:latest
+    shm_size: 2gb
+    environment:
+      SE_NODE_MAX_SESSIONS: 1
+      SE_NODE_OVERRIDE_MAX_SESSIONS: "false"
+
   app:
     build:
       context: .
@@ -35,6 +42,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      chrome:
+        condition: service_started
     environment:
       DATABASE_URL: postgresql://sanin_legacy:development_password@db:5432/sanin_legacy_development
       DATABASE_HOST: db
@@ -43,6 +52,8 @@ services:
       DATABASE_PASSWORD: development_password
       RAILS_ENV: development
       SELENIUM_MANAGER_CACHE: /home/rails/.cache/selenium
+      SELENIUM_REMOTE_URL: http://chrome:4444
+      CAPYBARA_APP_HOST: app
     stdin_open: true
     tty: true
 

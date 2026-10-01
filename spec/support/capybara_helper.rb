@@ -1,20 +1,17 @@
-require 'capybara/rails'
-require 'capybara/rspec'
-require 'selenium-webdriver'
-require 'tmpdir'
+require "capybara/rails"
+require "capybara/rspec"
+require "selenium-webdriver"
+require "tmpdir"
+require "net/http"
+require "json"
+require "socket"
 
-Capybara.register_driver :selenium_chrome_headless do |app|
+SYSTEM_SPEC_WINDOW_SIZE = [ 1400, 1400 ].freeze
+CAPYBARA_SERVER_PORT = 3005
+
+def chrome_options
   options = Selenium::WebDriver::Chrome::Options.new
-  # Use the apt-installed chromium (present in both the CI runner and the dev
-  # container) instead of letting Selenium Manager download its own Chrome for
-  # Testing build, which doesn't always match what's available in these
-  # environments.
-  options.binary = "/usr/bin/chromium" if File.exist?("/usr/bin/chromium")
-  # $HOME isn't guaranteed to be writable for the app's non-root user (it isn't
-  # in the dev container), and Chrome fails outright ("Failed to create
-  # headless user data directory container") without a writable profile dir.
-  options.add_argument("--user-data-dir=#{Dir.mktmpdir('chromium-user-data')}")
-  options.add_argument("--headless")
+  options.add_argument("--headless=new")
   options.add_argument("--no-sandbox")
   options.add_argument("--disable-dev-shm-usage")
   options.add_argument("--disable-gpu")
@@ -31,22 +28,70 @@ Capybara.register_driver :selenium_chrome_headless do |app|
   options.add_argument("--enable-automation")
   options.add_argument("--password-store=basic")
   options.add_argument("--use-mock-keychain")
-  Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
+  options.add_argument("--window-size=1400,1400")
+  options
+end
+
+def wait_for_grid(url)
+  max_retries = 60
+  retry_interval = 1
+
+  max_retries.times do |attempt|
+    begin
+      uri = URI("#{url.chomp("/")}/status")
+      response = Net::HTTP.get(uri)
+      body = JSON.parse(response)
+      return if body.dig("value", "ready") == true
+    rescue Errno::ECONNREFUSED, SocketError, Net::OpenTimeout, EOFError
+      # Grid not ready yet, retry
+    end
+
+    sleep(retry_interval) if attempt < max_retries - 1
+  end
+
+  raise "Selenium Grid at #{url} did not become ready within #{max_retries} seconds"
+end
+
+Capybara.register_driver :chrome_headless do |app|
+  if ENV["SELENIUM_REMOTE_URL"]
+    wait_for_grid(ENV["SELENIUM_REMOTE_URL"])
+    Capybara::Selenium::Driver.new(
+      app,
+      browser: :remote,
+      url: ENV["SELENIUM_REMOTE_URL"],
+      options: chrome_options
+    )
+  else
+    options = chrome_options
+    options.binary = "/usr/bin/chromium" if File.exist?("/usr/bin/chromium")
+    options.add_argument("--user-data-dir=#{Dir.mktmpdir("chromium-user-data")}")
+    Capybara::Selenium::Driver.new(app, browser: :chrome, options: options)
+  end
 end
 
 Capybara.configure do |config|
-  config.default_driver = :selenium_chrome_headless
-  config.server_port = 3005
+  config.server = :puma, { Silent: true }
+  config.server_port = CAPYBARA_SERVER_PORT
+  config.default_max_wait_time = 5
+  config.default_driver = :chrome_headless
+  config.javascript_driver = :chrome_headless
+
+  if ENV["SELENIUM_REMOTE_URL"]
+    config.server_host = "0.0.0.0"
+    config.app_host = "http://#{ENV.fetch("CAPYBARA_APP_HOST") { Socket.gethostname }}:#{CAPYBARA_SERVER_PORT}"
+  end
 end
 
 module CapybaraAuthHelpers
   def sign_in(user)
-    # For system tests with Selenium: navigate to signin page and fill form
-    # Note: Requires Selenium ChromeDriver to be available
     visit signin_path
-    fill_in 'email', with: user.email
-    fill_in 'password', with: user.password
-    click_button 'サインイン'
+    fill_in "email", with: user.email
+    fill_in "password", with: user.password
+    click_button "サインイン"
+  end
+
+  def resize_window_to(width, height)
+    page.current_window.resize_to(width, height)
   end
 end
 
@@ -54,9 +99,9 @@ RSpec.configure do |config|
   config.include Capybara::DSL
   config.include CapybaraAuthHelpers, type: :system
 
-  # For system tests, use database_cleaner strategy
-  # since transactions don't work with Capybara's threaded driver
   config.before(:each, type: :system) do
+    driven_by :chrome_headless
+    page.current_window.resize_to(*SYSTEM_SPEC_WINDOW_SIZE)
     I18n.locale = :ja
   end
 

@@ -1,7 +1,3 @@
-# NOTE: このテストはSelenium/ChromeDriver環境が整備されるまでCI実行対象から除外されています。
-# 開発環境で `rspec spec/system/hamburger_menu_spec.rb` で手動実行可能。
-# TODO: CI環境にChrome/Selenium サービスを追加したら、.rspec から除外パターンを削除
-
 require "rails_helper"
 
 RSpec.describe "Hamburger Menu", type: :system do
@@ -10,9 +6,7 @@ RSpec.describe "Hamburger Menu", type: :system do
 
   describe "デスクトップ表示（md以上）" do
     before do
-      driven_by(:selenium_chrome) do |options|
-        options.add_argument("--window-size=1280,1024")
-      end
+      resize_window_to(1280, 1024)
       sign_in user
       visit root_path
     end
@@ -39,9 +33,7 @@ RSpec.describe "Hamburger Menu", type: :system do
 
   describe "モバイル表示（md未満）" do
     before do
-      driven_by(:selenium_chrome) do |options|
-        options.add_argument("--window-size=390,667")
-      end
+      resize_window_to(390, 667)
     end
 
     context "一般ユーザーがサインイン時" do
@@ -192,9 +184,7 @@ RSpec.describe "Hamburger Menu", type: :system do
 
   describe "Escapeキーでメニュー閉じる" do
     before do
-      driven_by(:selenium_chrome) do |options|
-        options.add_argument("--window-size=390,667")
-      end
+      resize_window_to(390, 667)
       sign_in user
       visit root_path
     end
@@ -219,9 +209,7 @@ RSpec.describe "Hamburger Menu", type: :system do
 
   describe "ページ遷移後のメニュー状態リセット" do
     before do
-      driven_by(:selenium_chrome) do |options|
-        options.add_argument("--window-size=390,667")
-      end
+      resize_window_to(390, 667)
       sign_in user
       visit root_path
     end

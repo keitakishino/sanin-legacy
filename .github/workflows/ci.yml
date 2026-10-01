@@ -108,6 +108,11 @@ jobs:
           DATABASE_PASSWORD: development_password
         run: bin/rails db:test:prepare
 
+      - name: Build Tailwind CSS
+        env:
+          RAILS_ENV: test
+        run: bin/rails tailwindcss:build
+
       - name: Run RSpec tests
         env:
           RAILS_ENV: test
@@ -115,10 +120,13 @@ jobs:
           DATABASE_PORT: 5432
           DATABASE_USER: sanin_legacy
           DATABASE_PASSWORD: development_password
-        # spec/system is excluded here: it needs a stable headless-Chrome setup in CI
-        # (see the note at the top of spec/system/trade_edit_form_close_spec.rb) that
-        # isn't ready yet. Request/model/other specs give full coverage in the
-        # meantime; run spec/system manually in a local environment with a working
-        # Chrome until that's set up.
-        run: bundle exec rspec --exclude-pattern "spec/system/**/*_spec.rb"
+        run: bundle exec rspec
+
+      - name: Upload Capybara screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capybara-screenshots
+          path: tmp/capybara
+          if-no-files-found: ignore
 
