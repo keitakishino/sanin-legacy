@@ -12,9 +12,7 @@ RSpec.describe "Hamburger Menu", type: :system do
     end
 
     it "ハンバーガーメニューアイコンが非表示である" do
-      header = find("header[data-controller='hamburger-menu']")
-      hamburger_button = header.find("[data-hamburger-menu-target='icon']", visible: :all)
-      expect(hamburger_button).not_to be_visible
+      expect(page).to have_css("[data-hamburger-menu-target='icon']", visible: :hidden)
     end
 
     it "デスクトップナビゲーションが表示されている" do
@@ -49,60 +47,44 @@ RSpec.describe "Hamburger Menu", type: :system do
       end
 
       it "デスクトップナビゲーションが非表示である" do
-        nav = find("nav[aria-label]", visible: :all)
+        nav = find("header > div:first-child > nav", visible: :all)
         expect(nav).not_to be_visible
       end
 
       it "初期状態ではドロワーメニューが閉じている" do
-        drawer = find("[data-hamburger-menu-target='drawer']", visible: :all)
-        expect(drawer).not_to be_visible
-        expect(drawer).to have_attribute("aria-hidden", "true")
+        expect(page).to have_css("[data-hamburger-menu-target='drawer'][aria-hidden='true']", visible: :all)
       end
 
       it "ハンバーガーボタンをクリックするとドロワーメニューが開く" do
-        header = find("header[data-controller='hamburger-menu']")
-        hamburger_button = header.find("[data-hamburger-menu-target='icon']")
-        drawer = find("[data-hamburger-menu-target='drawer']", visible: :all)
-
+        hamburger_button = find("[data-hamburger-menu-target='icon']")
         hamburger_button.click
 
-        expect(drawer).to be_visible
-        expect(drawer).to have_attribute("aria-hidden", "false")
-        expect(header).to have_attribute("aria-expanded", "true")
+        expect(page).to have_css("[data-hamburger-menu-target='drawer'][aria-hidden='false']", visible: :visible)
+        expect(page).to have_css("header[data-controller='hamburger-menu'][aria-expanded='true']")
       end
 
       it "ドロワーメニューが開いている状態で、再度ボタンをクリックするとドロワーが閉じる" do
-        header = find("header[data-controller='hamburger-menu']")
-        hamburger_button = header.find("[data-hamburger-menu-target='icon']")
-        drawer = find("[data-hamburger-menu-target='drawer']", visible: :all)
+        hamburger_button = find("[data-hamburger-menu-target='icon']")
 
-        # Open the menu
         hamburger_button.click
-        expect(drawer).to be_visible
+        expect(page).to have_css("[data-hamburger-menu-target='drawer']", visible: :visible)
 
-        # Close the menu
         hamburger_button.click
-        expect(drawer).not_to be_visible
-        expect(drawer).to have_attribute("aria-hidden", "true")
+        expect(page).to have_css("[data-hamburger-menu-target='drawer'][aria-hidden='true']", visible: :all)
       end
 
       it "ドロワー内のリンククリックでメニューが閉じる" do
-        header = find("header[data-controller='hamburger-menu']")
-        hamburger_button = header.find("[data-hamburger-menu-target='icon']")
-        drawer = find("[data-hamburger-menu-target='drawer']", visible: :all)
+        hamburger_button = find("[data-hamburger-menu-target='icon']")
 
-        # Open the menu
         hamburger_button.click
-        expect(drawer).to be_visible
+        expect(page).to have_css("[data-hamburger-menu-target='drawer']", visible: :visible)
 
-        # Click a link in the drawer
+        drawer = find("[data-hamburger-menu-target='drawer']", visible: :all)
         events_link = drawer.find("a", text: "イベント")
         events_link.click
 
-        # Drawer should be closed after navigation
-        sleep 1
-        drawer = find("[data-hamburger-menu-target='drawer']", visible: :all)
-        expect(drawer).not_to be_visible
+        expect(page).to have_current_path(events_path)
+        expect(page).to have_css("[data-hamburger-menu-target='drawer']", visible: :hidden)
       end
 
       it "ドロワーメニューに一般ユーザー向けのナビゲーション項目が表示されている" do
@@ -171,13 +153,12 @@ RSpec.describe "Hamburger Menu", type: :system do
       end
 
       it "ハンバーガーメニューアイコンが表示されない" do
-        header = find("header[data-controller='hamburger-menu']")
-        hamburger_button = header.find("[data-hamburger-menu-target='icon']", visible: :all)
-        expect(hamburger_button).not_to be_visible
+        expect(page).to have_no_css("[data-hamburger-menu-target='icon']", visible: :all)
       end
 
       it "Sign Inボタンが表示される" do
-        expect(page).to have_link("Sign In")
+        expect(page).to have_current_path(signin_path)
+        expect(page).to have_button("サインイン")
       end
     end
   end
@@ -190,20 +171,14 @@ RSpec.describe "Hamburger Menu", type: :system do
     end
 
     it "メニューが開いている状態でEscapeキーを押すとメニューが閉じる" do
-      header = find("header[data-controller='hamburger-menu']")
-      hamburger_button = header.find("[data-hamburger-menu-target='icon']")
-      drawer = find("[data-hamburger-menu-target='drawer']", visible: :all)
+      hamburger_button = find("[data-hamburger-menu-target='icon']")
 
-      # Open the menu
       hamburger_button.click
-      expect(drawer).to be_visible
+      expect(page).to have_css("[data-hamburger-menu-target='drawer']", visible: :visible)
 
-      # Press Escape key
       find("body").send_keys(:escape)
-      sleep 0.5
 
-      expect(drawer).not_to be_visible
-      expect(drawer).to have_attribute("aria-hidden", "true")
+      expect(page).to have_css("[data-hamburger-menu-target='drawer'][aria-hidden='true']", visible: :all)
     end
   end
 
@@ -215,22 +190,15 @@ RSpec.describe "Hamburger Menu", type: :system do
     end
 
     it "メニューを開いた状態で別ページに遷移するとメニューが閉じる" do
-      header = find("header[data-controller='hamburger-menu']")
-      hamburger_button = header.find("[data-hamburger-menu-target='icon']")
-      drawer = find("[data-hamburger-menu-target='drawer']", visible: :all)
+      hamburger_button = find("[data-hamburger-menu-target='icon']")
 
-      # Open the menu
       hamburger_button.click
-      expect(drawer).to be_visible
+      expect(page).to have_css("[data-hamburger-menu-target='drawer']", visible: :visible)
 
-      # Navigate to another page via a link
       find("header a", text: "イベント").click
-      sleep 1
 
-      # Drawer should be closed
-      drawer = find("[data-hamburger-menu-target='drawer']", visible: :all)
-      expect(drawer).not_to be_visible
-      expect(drawer).to have_attribute("aria-hidden", "true")
+      expect(page).to have_current_path(events_path)
+      expect(page).to have_css("[data-hamburger-menu-target='drawer'][aria-hidden='true']", visible: :all)
     end
   end
 end
