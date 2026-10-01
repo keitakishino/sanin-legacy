@@ -18,7 +18,7 @@ RSpec.describe "Trade Edit Form Close (Issue #258)", type: :system do
 
     click_button "編集", match: :first
 
-    form_id = "trade_card_offer_#{card_offer.id}_edit_form"
+    form_id = "edit_form_trade_card_offer_#{card_offer.id}"
     expect(page).to have_css("tr[id='#{form_id}']", visible: :visible)
 
     fill_in "カード名", with: "Updated"
@@ -38,7 +38,7 @@ RSpec.describe "Trade Edit Form Close (Issue #258)", type: :system do
 
     click_button "編集", match: :first
 
-    form_id = "trade_card_offer_#{card_offer.id}_edit_form"
+    form_id = "edit_form_trade_card_offer_#{card_offer.id}"
     expect(page).to have_css("tr[id='#{form_id}']", visible: :visible)
 
     click_button "キャンセル"
@@ -54,10 +54,9 @@ RSpec.describe "Trade Edit Form Close (Issue #258)", type: :system do
     card_want = create(:trade_card_want, trade: trade, expansion: expansion)
     visit trade_path(event)
 
-    all_buttons = all("button", text: "編集")
-    all_buttons[1].click if all_buttons.length > 1
+    click_button "編集", match: :first
 
-    form_id = "trade_card_want_#{card_want.id}_edit_form"
+    form_id = "edit_form_trade_card_want_#{card_want.id}"
     expect(page).to have_css("tr[id='#{form_id}']", visible: :visible)
 
     fill_in "カード名", with: "Updated Want"
@@ -110,7 +109,7 @@ RSpec.describe "Trade Edit Form Close (Issue #258)", type: :system do
 
     click_button "編集", match: :first
 
-    form_id = "trade_card_offer_#{card_offer.id}_edit_form"
+    form_id = "edit_form_trade_card_offer_#{card_offer.id}"
     expect(page).to have_css("tr[id='#{form_id}']", visible: :visible)
 
     find('[data-expansion-select-target="input"]').fill_in with: "VO"
@@ -126,7 +125,7 @@ RSpec.describe "Trade Edit Form Close (Issue #258)", type: :system do
     card_offer = create(:trade_card_offer, trade: trade, expansion: expansion, card_name: "Original")
     visit trade_path(event)
 
-    form_id = "trade_card_offer_#{card_offer.id}_edit_form"
+    form_id = "edit_form_trade_card_offer_#{card_offer.id}"
 
     click_button "編集", match: :first
     expect(page).to have_css("tr[id='#{form_id}']", visible: :visible)
@@ -166,7 +165,7 @@ RSpec.describe "Trade Edit Form Close (Issue #258)", type: :system do
 
     click_button "編集", match: :first
 
-    form_id = "trade_card_offer_#{card_offer.id}_edit_form"
+    form_id = "edit_form_trade_card_offer_#{card_offer.id}"
     expect(page).to have_css("tr[id='#{form_id}']", visible: :visible)
 
     card_name_before = evaluate_script(
@@ -207,7 +206,7 @@ RSpec.describe "Trade Edit Form Close (Issue #258)", type: :system do
 
     click_button "編集", match: :first
 
-    form_id = "trade_card_offer_#{card_offer.id}_edit_form"
+    form_id = "edit_form_trade_card_offer_#{card_offer.id}"
     expect(page).to have_css("tr[id='#{form_id}']", visible: :visible)
 
     fill_in "カード名", with: "RegressionTest"
@@ -226,7 +225,7 @@ RSpec.describe "Trade Edit Form Close (Issue #258)", type: :system do
 
     click_button "編集", match: :first
 
-    form_id = "trade_card_offer_#{card_offer.id}_edit_form"
+    form_id = "edit_form_trade_card_offer_#{card_offer.id}"
     expect(page).to have_css("tr[id='#{form_id}']", visible: :visible)
 
     fill_in "カード名", with: ""
