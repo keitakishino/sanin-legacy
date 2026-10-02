@@ -1,3 +1,4 @@
+<% can_modify = @trade.card_detail_operation_allowed?(current_user, :update) %>
 <tbody id="<%= dom_id(trade_card_want, :group) %>">
 <tr id="<%= dom_id(trade_card_want) %>" class="border-b border-stone-200 hover:bg-stone-50" style="border-left: 3px solid oklch(52% 0.1 150)">
   <!-- Desktop: Full columns -->
@@ -19,13 +20,15 @@
   <!-- Actions -->
   <td class="px-4 md:px-2 lg:px-4 py-3 text-right">
     <div class="flex items-center justify-end gap-2">
-      <button
-        type="button"
-        class="px-2 py-1 text-emerald-700 hover:bg-emerald-50 text-xs rounded hover:opacity-90 font-bold"
-        onclick="toggleEditForm('<%= dom_id(trade_card_want, :edit_form) %>', '<%= dom_id(trade_card_want, :expand) %>')">
-        編集
-      </button>
-      <%= button_to "削除", trade_card_want_path(@trade.event, trade_card_want), method: :delete, form: { local: true, data: { turbo: true } }, class: "px-2 py-1 text-red-700 hover:bg-red-50 text-xs rounded hover:opacity-90 font-bold" %>
+      <% if can_modify %>
+        <button
+          type="button"
+          class="px-2 py-1 text-emerald-700 hover:bg-emerald-50 text-xs rounded hover:opacity-90 font-bold"
+          onclick="toggleEditForm('<%= dom_id(trade_card_want, :edit_form) %>', '<%= dom_id(trade_card_want, :expand) %>')">
+          編集
+        </button>
+        <%= button_to "削除", trade_card_want_path(@trade.event, trade_card_want), method: :delete, form: { local: true, data: { turbo: true } }, class: "px-2 py-1 text-red-700 hover:bg-red-50 text-xs rounded hover:opacity-90 font-bold" %>
+      <% end %>
       <button
         type="button"
         class="px-2 py-1 text-stone-500 hover:bg-stone-100 text-xs expand-btn"
@@ -62,12 +65,14 @@
   </td>
 </tr>
 
-<!-- Edit form row (hidden by default) -->
-<tr id="<%= dom_id(trade_card_want, :edit_form) %>" class="border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.1 150); display: none;" data-controller="form-reset">
-  <td colspan="12" class="px-4 py-4 bg-stone-50">
-    <turbo-frame id="<%= dom_id(trade_card_want, :edit_form_frame) %>" class="">
-      <%= render 'trade_card_wants/form', trade_card_want: trade_card_want, frame_id: dom_id(trade_card_want, :edit_form_frame) %>
-    </turbo-frame>
-  </td>
-</tr>
+<% if can_modify %>
+  <!-- Edit form row (hidden by default) -->
+  <tr id="<%= dom_id(trade_card_want, :edit_form) %>" class="border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.1 150); display: none;" data-controller="form-reset">
+    <td colspan="12" class="px-4 py-4 bg-stone-50">
+      <turbo-frame id="<%= dom_id(trade_card_want, :edit_form_frame) %>" class="">
+        <%= render 'trade_card_wants/form', trade_card_want: trade_card_want, frame_id: dom_id(trade_card_want, :edit_form_frame) %>
+      </turbo-frame>
+    </td>
+  </tr>
+<% end %>
 </tbody>

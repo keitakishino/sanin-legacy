@@ -1,6 +1,7 @@
 <div class="w-full max-w-7xl mx-auto px-4 py-8">
   <!-- Admin context detection -->
   <% admin_context = current_user.role_admin? && params[:trade_id].present? %>
+  <% can_create = @trade.card_detail_operation_allowed?(current_user, :create) %>
 
   <!-- Header -->
   <div class="mb-8">
@@ -65,19 +66,23 @@
       </table>
     </div>
 
-    <div class="mt-4">
-      <button
-        type="button"
-        class="px-4 py-2 bg-offer text-white rounded-md hover:opacity-90 font-bold text-xs"
-        id="add_offer_btn">
-        カード明細を追加
-      </button>
-    </div>
+    <% if can_create %>
+      <div class="mt-4">
+        <button
+          type="button"
+          class="px-4 py-2 bg-offer text-white rounded-md hover:opacity-90 font-bold text-xs"
+          id="add_offer_btn">
+          カード明細を追加
+        </button>
+      </div>
 
-    <% offer_frame_id = admin_context ? 'new_trade_card_offer_admin' : 'new_trade_card_offer' %>
-    <turbo-frame id="<%= offer_frame_id %>" style="display: none;" class="mt-4 bg-stone-50 p-4 rounded-lg" data-controller="form-reset">
-      <%= render 'trade_card_offers/form', trade_card_offer: @trade.trade_card_offers.build, frame_id: offer_frame_id %>
-    </turbo-frame>
+      <% offer_frame_id = admin_context ? 'new_trade_card_offer_admin' : 'new_trade_card_offer' %>
+      <turbo-frame id="<%= offer_frame_id %>" style="display: none;" class="mt-4 bg-stone-50 p-4 rounded-lg" data-controller="form-reset">
+        <%= render 'trade_card_offers/form', trade_card_offer: @trade.trade_card_offers.build, frame_id: offer_frame_id %>
+      </turbo-frame>
+    <% else %>
+      <% offer_frame_id = admin_context ? 'new_trade_card_offer_admin' : 'new_trade_card_offer' %>
+    <% end %>
   </div>
 
   <!-- Card Wants Section -->
@@ -118,32 +123,42 @@
       </table>
     </div>
 
-    <div class="mt-4">
-      <button
-        type="button"
-        class="px-4 py-2 bg-want text-white rounded-md hover:opacity-90 font-bold text-xs"
-        id="add_want_btn">
-        カード明細を追加
-      </button>
-    </div>
+    <% if can_create %>
+      <div class="mt-4">
+        <button
+          type="button"
+          class="px-4 py-2 bg-want text-white rounded-md hover:opacity-90 font-bold text-xs"
+          id="add_want_btn">
+          カード明細を追加
+        </button>
+      </div>
 
-    <% want_frame_id = admin_context ? 'new_trade_card_want_admin' : 'new_trade_card_want' %>
-    <turbo-frame id="<%= want_frame_id %>" style="display: none;" class="mt-4 bg-stone-50 p-4 rounded-lg" data-controller="form-reset">
-      <%= render 'trade_card_wants/form', trade_card_want: @trade.trade_card_wants.build, frame_id: want_frame_id %>
-    </turbo-frame>
+      <% want_frame_id = admin_context ? 'new_trade_card_want_admin' : 'new_trade_card_want' %>
+      <turbo-frame id="<%= want_frame_id %>" style="display: none;" class="mt-4 bg-stone-50 p-4 rounded-lg" data-controller="form-reset">
+        <%= render 'trade_card_wants/form', trade_card_want: @trade.trade_card_wants.build, frame_id: want_frame_id %>
+      </turbo-frame>
+    <% else %>
+      <% want_frame_id = admin_context ? 'new_trade_card_want_admin' : 'new_trade_card_want' %>
+    <% end %>
   </div>
 
   <script>
     // Toggle add form buttons
-    document.getElementById('add_offer_btn').addEventListener('click', function() {
-      const frame = document.getElementById('<%= offer_frame_id %>');
-      frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
-    });
+    const addOfferBtn = document.getElementById('add_offer_btn');
+    if (addOfferBtn) {
+      addOfferBtn.addEventListener('click', function() {
+        const frame = document.getElementById('<%= offer_frame_id %>');
+        frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
+      });
+    }
 
-    document.getElementById('add_want_btn').addEventListener('click', function() {
-      const frame = document.getElementById('<%= want_frame_id %>');
-      frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
-    });
+    const addWantBtn = document.getElementById('add_want_btn');
+    if (addWantBtn) {
+      addWantBtn.addEventListener('click', function() {
+        const frame = document.getElementById('<%= want_frame_id %>');
+        frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
+      });
+    }
 
     // Mobile accordion expansion (delegated so rows appended/replaced by Turbo Streams work too).
     // Registered once: this inline script re-runs on every Turbo visit.
