@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_29_000800) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_02_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -20,7 +20,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_000800) do
     t.text "description", comment: "イベント説明"
     t.datetime "discarded_at", comment: "論理削除フラグ（null=有効、datetime=削除日時）"
     t.date "event_date", null: false, comment: "イベント開催日"
-    t.string "spreadsheet_id", comment: "Google SheetsファイルID（初回エクスポート時に生成）"
     t.string "title", null: false, comment: "イベント名"
     t.datetime "updated_at", null: false
     t.index ["created_by_id"], name: "index_events_on_created_by_id"
@@ -115,9 +114,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_000800) do
     t.bigint "event_id", null: false
     t.integer "net_amount", default: 0, null: false
     t.integer "offers_total_amount", default: 0, null: false
-    t.datetime "spreadsheet_exported_at"
-    t.bigint "spreadsheet_exported_by_id"
-    t.string "spreadsheet_tab_name"
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
@@ -126,7 +122,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_000800) do
     t.index ["discarded_at"], name: "index_trades_on_discarded_at"
     t.index ["event_id", "user_id"], name: "index_trades_on_event_id_and_user_id", unique: true
     t.index ["event_id"], name: "index_trades_on_event_id"
-    t.index ["spreadsheet_exported_by_id"], name: "index_trades_on_spreadsheet_exported_by_id"
     t.index ["user_id"], name: "index_trades_on_user_id"
   end
 
@@ -152,5 +147,4 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_000800) do
   add_foreign_key "trades", "events"
   add_foreign_key "trades", "users"
   add_foreign_key "trades", "users", column: "completed_by_id"
-  add_foreign_key "trades", "users", column: "spreadsheet_exported_by_id"
 end

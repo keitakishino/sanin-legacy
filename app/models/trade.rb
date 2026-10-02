@@ -2,7 +2,6 @@ class Trade < ApplicationRecord
   belongs_to :event
   belongs_to :user
   belongs_to :completed_by, class_name: "User", foreign_key: :completed_by_id, optional: true
-  belongs_to :spreadsheet_exported_by, class_name: "User", foreign_key: :spreadsheet_exported_by_id, optional: true
 
   has_many :trade_card_offers, dependent: :destroy
   has_many :trade_card_wants, dependent: :destroy
