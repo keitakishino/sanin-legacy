@@ -37,7 +37,7 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 # Pin json below 3.0: breaks session/param handling in request specs on Rails 8.1.3.1
 # (ArgumentError: wrong number of arguments) when pulled in transitively. Remove once
 # Rails is upgraded to a version compatible with json 3.x.
-gem "json", "~> 2.21"
+gem "json", "~> 3.0"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
