@@ -189,4 +189,159 @@ describe Trade, type: :model do
       end
     end
   end
+
+  describe '#card_detail_denial_reason / #card_detail_operation_allowed?' do
+    let(:user) { create(:user) }
+    let(:admin_user) { create(:admin_user) }
+
+    describe 'pending trade' do
+      let(:trade) { create(:trade, status: :pending) }
+
+      it 'allows general user create' do
+        expect(trade.card_detail_denial_reason(user, :create)).to be_nil
+        expect(trade.card_detail_operation_allowed?(user, :create)).to be true
+      end
+
+      it 'allows general user update' do
+        expect(trade.card_detail_denial_reason(user, :update)).to be_nil
+        expect(trade.card_detail_operation_allowed?(user, :update)).to be true
+      end
+
+      it 'allows general user destroy' do
+        expect(trade.card_detail_denial_reason(user, :destroy)).to be_nil
+        expect(trade.card_detail_operation_allowed?(user, :destroy)).to be true
+      end
+
+      it 'allows admin create' do
+        expect(trade.card_detail_denial_reason(admin_user, :create)).to be_nil
+        expect(trade.card_detail_operation_allowed?(admin_user, :create)).to be true
+      end
+
+      it 'allows admin update' do
+        expect(trade.card_detail_denial_reason(admin_user, :update)).to be_nil
+        expect(trade.card_detail_operation_allowed?(admin_user, :update)).to be true
+      end
+
+      it 'allows admin destroy' do
+        expect(trade.card_detail_denial_reason(admin_user, :destroy)).to be_nil
+        expect(trade.card_detail_operation_allowed?(admin_user, :destroy)).to be true
+      end
+    end
+
+    describe 'in_progress trade' do
+      let(:trade) { create(:trade, status: :in_progress) }
+
+      it 'allows general user create' do
+        expect(trade.card_detail_denial_reason(user, :create)).to be_nil
+        expect(trade.card_detail_operation_allowed?(user, :create)).to be true
+      end
+
+      it 'denies general user update' do
+        expect(trade.card_detail_denial_reason(user, :update)).to eq(:in_progress)
+        expect(trade.card_detail_operation_allowed?(user, :update)).to be false
+      end
+
+      it 'denies general user destroy' do
+        expect(trade.card_detail_denial_reason(user, :destroy)).to eq(:in_progress)
+        expect(trade.card_detail_operation_allowed?(user, :destroy)).to be false
+      end
+
+      it 'allows admin create' do
+        expect(trade.card_detail_denial_reason(admin_user, :create)).to be_nil
+        expect(trade.card_detail_operation_allowed?(admin_user, :create)).to be true
+      end
+
+      it 'allows admin update' do
+        expect(trade.card_detail_denial_reason(admin_user, :update)).to be_nil
+        expect(trade.card_detail_operation_allowed?(admin_user, :update)).to be true
+      end
+
+      it 'allows admin destroy' do
+        expect(trade.card_detail_denial_reason(admin_user, :destroy)).to be_nil
+        expect(trade.card_detail_operation_allowed?(admin_user, :destroy)).to be true
+      end
+    end
+
+    describe 'completed trade' do
+      let(:trade) { create(:trade, status: :completed) }
+
+      it 'denies general user create' do
+        expect(trade.card_detail_denial_reason(user, :create)).to eq(:completed)
+        expect(trade.card_detail_operation_allowed?(user, :create)).to be false
+      end
+
+      it 'denies general user update' do
+        expect(trade.card_detail_denial_reason(user, :update)).to eq(:completed)
+        expect(trade.card_detail_operation_allowed?(user, :update)).to be false
+      end
+
+      it 'denies general user destroy' do
+        expect(trade.card_detail_denial_reason(user, :destroy)).to eq(:completed)
+        expect(trade.card_detail_operation_allowed?(user, :destroy)).to be false
+      end
+
+      it 'denies admin create' do
+        expect(trade.card_detail_denial_reason(admin_user, :create)).to eq(:completed)
+        expect(trade.card_detail_operation_allowed?(admin_user, :create)).to be false
+      end
+
+      it 'denies admin update' do
+        expect(trade.card_detail_denial_reason(admin_user, :update)).to eq(:completed)
+        expect(trade.card_detail_operation_allowed?(admin_user, :update)).to be false
+      end
+
+      it 'denies admin destroy' do
+        expect(trade.card_detail_denial_reason(admin_user, :destroy)).to eq(:completed)
+        expect(trade.card_detail_operation_allowed?(admin_user, :destroy)).to be false
+      end
+    end
+
+    describe 'cancelled trade' do
+      let(:trade) { create(:trade, status: :cancelled) }
+
+      it 'allows general user create' do
+        expect(trade.card_detail_denial_reason(user, :create)).to be_nil
+        expect(trade.card_detail_operation_allowed?(user, :create)).to be true
+      end
+
+      it 'allows general user update' do
+        expect(trade.card_detail_denial_reason(user, :update)).to be_nil
+        expect(trade.card_detail_operation_allowed?(user, :update)).to be true
+      end
+
+      it 'allows general user destroy' do
+        expect(trade.card_detail_denial_reason(user, :destroy)).to be_nil
+        expect(trade.card_detail_operation_allowed?(user, :destroy)).to be true
+      end
+
+      it 'allows admin create' do
+        expect(trade.card_detail_denial_reason(admin_user, :create)).to be_nil
+        expect(trade.card_detail_operation_allowed?(admin_user, :create)).to be true
+      end
+
+      it 'allows admin update' do
+        expect(trade.card_detail_denial_reason(admin_user, :update)).to be_nil
+        expect(trade.card_detail_operation_allowed?(admin_user, :update)).to be true
+      end
+
+      it 'allows admin destroy' do
+        expect(trade.card_detail_denial_reason(admin_user, :destroy)).to be_nil
+        expect(trade.card_detail_operation_allowed?(admin_user, :destroy)).to be true
+      end
+    end
+
+    describe 'action parameter as string' do
+      let(:trade) { create(:trade, status: :in_progress) }
+
+      it 'accepts string action and converts to symbol' do
+        expect(trade.card_detail_denial_reason(user, 'update')).to eq(:in_progress)
+        expect(trade.card_detail_operation_allowed?(user, 'update')).to be false
+      end
+
+      it 'accepts string action for allowed operations' do
+        expect(trade.card_detail_denial_reason(user, 'create')).to be_nil
+        expect(trade.card_detail_operation_allowed?(user, 'create')).to be true
+      end
+    end
+  end
 end
