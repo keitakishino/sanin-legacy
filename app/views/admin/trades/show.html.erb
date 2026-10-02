@@ -57,6 +57,8 @@
   <!-- Aggregated Amounts Section -->
   <%= render "aggregates_section", trade: @trade %>
 
+  <% can_create = @trade.card_detail_operation_allowed?(current_user, :create) %>
+
   <!-- Card Offers Section -->
   <div class="mb-8">
     <div class="flex items-center justify-between mb-4">
@@ -96,18 +98,20 @@
       </table>
     </div>
 
-    <div class="mt-4">
-      <button
-        type="button"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
-        id="add_offer_btn_admin">
-        カード明細を追加
-      </button>
-    </div>
+    <% if can_create %>
+      <div class="mt-4">
+        <button
+          type="button"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
+          id="add_offer_btn_admin">
+          カード明細を追加
+        </button>
+      </div>
 
-    <turbo-frame id="new_trade_card_offer_admin" style="display: none;" class="mt-4 bg-gray-50 p-4 rounded-lg" data-controller="form-reset">
-      <%= render 'trade_card_offers/form', trade_card_offer: @trade.trade_card_offers.build, frame_id: 'new_trade_card_offer_admin' %>
-    </turbo-frame>
+      <turbo-frame id="new_trade_card_offer_admin" style="display: none;" class="mt-4 bg-gray-50 p-4 rounded-lg" data-controller="form-reset">
+        <%= render 'trade_card_offers/form', trade_card_offer: @trade.trade_card_offers.build, frame_id: 'new_trade_card_offer_admin' %>
+      </turbo-frame>
+    <% end %>
   </div>
 
   <!-- Card Wants Section -->
@@ -148,18 +152,20 @@
       </table>
     </div>
 
-    <div class="mt-4">
-      <button
-        type="button"
-        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
-        id="add_want_btn_admin">
-        カード明細を追加
-      </button>
-    </div>
+    <% if can_create %>
+      <div class="mt-4">
+        <button
+          type="button"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold"
+          id="add_want_btn_admin">
+          カード明細を追加
+        </button>
+      </div>
 
-    <turbo-frame id="new_trade_card_want_admin" style="display: none;" class="mt-4 bg-gray-50 p-4 rounded-lg" data-controller="form-reset">
-      <%= render 'trade_card_wants/form', trade_card_want: @trade.trade_card_wants.build, frame_id: 'new_trade_card_want_admin' %>
-    </turbo-frame>
+      <turbo-frame id="new_trade_card_want_admin" style="display: none;" class="mt-4 bg-gray-50 p-4 rounded-lg" data-controller="form-reset">
+        <%= render 'trade_card_wants/form', trade_card_want: @trade.trade_card_wants.build, frame_id: 'new_trade_card_want_admin' %>
+      </turbo-frame>
+    <% end %>
   </div>
 </div>
 
@@ -181,15 +187,21 @@
   document.addEventListener('DOMContentLoaded', toggleCancelledReasonSection);
 
   // Toggle forms for admin line item operations
-  document.getElementById('add_offer_btn_admin').addEventListener('click', function() {
-    const frame = document.getElementById('new_trade_card_offer_admin');
-    frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
-  });
+  const addOfferBtnAdmin = document.getElementById('add_offer_btn_admin');
+  if (addOfferBtnAdmin) {
+    addOfferBtnAdmin.addEventListener('click', function() {
+      const frame = document.getElementById('new_trade_card_offer_admin');
+      frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
+    });
+  }
 
-  document.getElementById('add_want_btn_admin').addEventListener('click', function() {
-    const frame = document.getElementById('new_trade_card_want_admin');
-    frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
-  });
+  const addWantBtnAdmin = document.getElementById('add_want_btn_admin');
+  if (addWantBtnAdmin) {
+    addWantBtnAdmin.addEventListener('click', function() {
+      const frame = document.getElementById('new_trade_card_want_admin');
+      frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
+    });
+  }
 
   // Mobile accordion expansion (delegated so rows appended/replaced by Turbo Streams work too).
   // Registered once: this inline script re-runs on every Turbo visit.
