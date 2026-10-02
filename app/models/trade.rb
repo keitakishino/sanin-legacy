@@ -31,6 +31,22 @@ class Trade < ApplicationRecord
     discarded_at.present?
   end
 
+  # Card detail operation permission matrix (from design doc):
+  # - pending: all operations (create/update/destroy) allowed for all users
+  # - in_progress: create/admin ops allowed; update/destroy denied for general users
+  # - completed: all operations denied for all users
+  # - cancelled: all operations allowed for all users
+  def card_detail_denial_reason(user, action)
+    action = action.to_sym
+    return :completed if completed?
+    return :in_progress if in_progress? && !user&.role_admin? && %i[update destroy].include?(action)
+    nil
+  end
+
+  def card_detail_operation_allowed?(user, action)
+    card_detail_denial_reason(user, action).nil?
+  end
+
   def recalculate_totals!
     new_offers_total = trade_card_offers.sum("amount * quantity") || 0
     new_wants_total = trade_card_wants.sum("amount * quantity") || 0

@@ -3,13 +3,22 @@ module CompletedTradeProtector
 
   private
 
-  def check_trade_not_completed
-    return if !@trade&.completed?
+  def check_card_detail_operation_permitted
+    reason = @trade&.card_detail_denial_reason(current_user, action_name)
+    return if reason.nil?
+
+    message = case reason
+    when :completed
+      "完了状態のトレード内容は変更できません"
+    when :in_progress
+      "進行中のトレードのカード明細は編集・削除できません"
+    end
 
     if request.format.symbol == :turbo_stream
-      render :trade_completed_error, status: :unprocessable_entity
+      template = "trade_#{reason}_error"
+      render template, status: :unprocessable_entity
     else
-      redirect_to trade_path(@trade.event), alert: "完了状態のトレード内容は変更できません"
+      redirect_to trade_path(@trade.event), alert: message
     end
   end
 end

@@ -1180,6 +1180,198 @@ RSpec.describe "TradeCardOffers", type: :request do
       end
     end
 
+    describe "in_progress trade permissions" do
+      let(:in_progress_trade) { create(:trade, event: event, user: user, status: :in_progress) }
+      let(:offer) { create(:trade_card_offer, trade: in_progress_trade, amount: 1000) }
+      let(:valid_params) do
+        {
+          trade_card_offer: {
+            card_name: "Updated Card",
+            quantity: 2,
+            language: :en,
+            condition: :sp,
+            foil: :non_foil,
+            frame: :extended,
+            pw_mark: true
+          }
+        }
+      end
+
+      context "general user update/destroy denied, create allowed" do
+        describe "PATCH /trades/:event_id/card_offers/:id (update)" do
+          it "rejects update with 422 status for turbo_stream" do
+            offer
+            patch "/trades/#{event.id}/card_offers/#{offer.id}", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+            expect(response).to have_http_status(:unprocessable_entity)
+          end
+
+          it "does not update the card offer" do
+            offer
+            original_name = offer.card_name
+            patch "/trades/#{event.id}/card_offers/#{offer.id}", params: valid_params
+            offer.reload
+            expect(offer.card_name).to eq(original_name)
+          end
+
+          it "returns redirect with alert for HTML request" do
+            offer
+            patch "/trades/#{event.id}/card_offers/#{offer.id}", params: valid_params
+            expect(response).to redirect_to(trade_path(event))
+            expect(flash[:alert]).to include("進行中のトレードのカード明細は編集・削除できません")
+          end
+
+          it "includes error toast in turbo_stream response" do
+            offer
+            patch "/trades/#{event.id}/card_offers/#{offer.id}", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+            expect(response).to have_http_status(:unprocessable_entity)
+            expect(response.body).to include('action="append" target="toast-container"')
+            expect(response.body).to include("進行中のトレードのカード明細は編集・削除できません")
+            expect(response.body).to include('border-danger')
+          end
+
+          it "does not change trade offers_total_amount" do
+            offer
+            in_progress_trade.reload
+            original_total = in_progress_trade.offers_total_amount
+            patch "/trades/#{event.id}/card_offers/#{offer.id}", params: valid_params
+            in_progress_trade.reload
+            expect(in_progress_trade.offers_total_amount).to eq(original_total)
+          end
+        end
+
+        describe "DELETE /trades/:event_id/card_offers/:id (destroy)" do
+          it "rejects deletion with 422 status for turbo_stream" do
+            offer
+            delete "/trades/#{event.id}/card_offers/#{offer.id}", headers: { "Accept" => "text/vnd.turbo-stream.html" }
+            expect(response).to have_http_status(:unprocessable_entity)
+          end
+
+          it "does not delete the card offer" do
+            offer
+            expect {
+              delete "/trades/#{event.id}/card_offers/#{offer.id}"
+            }.not_to change { TradeCardOffer.count }
+          end
+
+          it "returns redirect with alert for HTML request" do
+            offer
+            delete "/trades/#{event.id}/card_offers/#{offer.id}"
+            expect(response).to redirect_to(trade_path(event))
+            expect(flash[:alert]).to include("進行中のトレードのカード明細は編集・削除できません")
+          end
+
+          it "includes error toast in turbo_stream response" do
+            offer
+            delete "/trades/#{event.id}/card_offers/#{offer.id}", headers: { "Accept" => "text/vnd.turbo-stream.html" }
+            expect(response).to have_http_status(:unprocessable_entity)
+            expect(response.body).to include('action="append" target="toast-container"')
+            expect(response.body).to include("進行中のトレードのカード明細は編集・削除できません")
+          end
+
+          it "does not change trade offers_total_amount" do
+            offer
+            in_progress_trade.reload
+            original_total = in_progress_trade.offers_total_amount
+            delete "/trades/#{event.id}/card_offers/#{offer.id}"
+            in_progress_trade.reload
+            expect(in_progress_trade.offers_total_amount).to eq(original_total)
+          end
+        end
+
+        describe "POST /trades/:event_id/card_offers (create)" do
+          let(:create_params) do
+            {
+              trade_card_offer: {
+                card_name: "New Card",
+                quantity: 1,
+                language: :ja,
+                condition: :nm,
+                foil: :foil,
+                frame: :normal,
+                pw_mark: false,
+                expansion_id: expansion.id,
+                note: "Test note"
+              }
+            }
+          end
+
+          it "allows general user create" do
+            in_progress_trade
+            expect {
+              post "/trades/#{event.id}/card_offers", params: create_params
+            }.to change { TradeCardOffer.count }.by(1)
+            expect(response).to redirect_to(trade_path(event))
+          end
+        end
+      end
+
+      context "admin user can update/destroy" do
+        before do
+          delete "/signout"
+          post signin_path, params: { email: admin_user.email, password: "password123" }
+        end
+
+        describe "PATCH /trades/:event_id/card_offers/:id (update)" do
+          it "allows admin to update" do
+            offer
+            patch "/trades/#{event.id}/card_offers/#{offer.id}", params: valid_params.merge(trade_id: in_progress_trade.id)
+            offer.reload
+            expect(offer.card_name).to eq("Updated Card")
+            expect(response).to redirect_to(trade_path(event))
+          end
+
+          it "allows admin to update via turbo_stream" do
+            offer
+            patch "/trades/#{event.id}/card_offers/#{offer.id}", params: valid_params.merge(trade_id: in_progress_trade.id), headers: { "Accept" => "text/vnd.turbo-stream.html" }
+            expect(response).to have_http_status(:ok)
+            offer.reload
+            expect(offer.card_name).to eq("Updated Card")
+          end
+        end
+
+        describe "DELETE /trades/:event_id/card_offers/:id (destroy)" do
+          it "allows admin to delete" do
+            offer
+            expect {
+              delete "/trades/#{event.id}/card_offers/#{offer.id}", params: { trade_id: in_progress_trade.id }
+            }.to change { TradeCardOffer.count }.by(-1)
+            expect(response).to redirect_to(trade_path(event))
+          end
+
+          it "allows admin to delete via turbo_stream" do
+            offer
+            expect {
+              delete "/trades/#{event.id}/card_offers/#{offer.id}", params: { trade_id: in_progress_trade.id }, headers: { "Accept" => "text/vnd.turbo-stream.html" }
+            }.to change { TradeCardOffer.count }.by(-1)
+            expect(response).to have_http_status(:ok)
+          end
+        end
+      end
+
+      context "pending trade allows general user update/destroy" do
+        let(:pending_trade) { create(:trade, event: event, user: user, status: :pending) }
+        let(:pending_offer) { create(:trade_card_offer, trade: pending_trade) }
+
+        describe "PATCH /trades/:event_id/card_offers/:id (update)" do
+          it "allows general user to update pending trade offer" do
+            pending_offer
+            patch "/trades/#{event.id}/card_offers/#{pending_offer.id}", params: valid_params
+            pending_offer.reload
+            expect(pending_offer.card_name).to eq("Updated Card")
+          end
+        end
+
+        describe "DELETE /trades/:event_id/card_offers/:id (destroy)" do
+          it "allows general user to delete pending trade offer" do
+            pending_offer
+            expect {
+              delete "/trades/#{event.id}/card_offers/#{pending_offer.id}"
+            }.to change { TradeCardOffer.count }.by(-1)
+          end
+        end
+      end
+    end
+
     describe "other trade statuses should allow operations" do
       let(:valid_params) do
         {

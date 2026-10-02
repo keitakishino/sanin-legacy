@@ -5,7 +5,7 @@ class TradeCardOffersController < ApplicationController
   before_action :set_event
   before_action :set_trade
   before_action :authorize_user_or_admin!
-  before_action :check_trade_not_completed, only: [ :create, :update, :destroy ]
+  before_action :check_card_detail_operation_permitted, only: [ :create, :update, :destroy ]
   before_action :set_trade_card_offer, only: [ :update, :destroy ]
   before_action :validate_trade_id_param, only: [ :update, :destroy ]
 
