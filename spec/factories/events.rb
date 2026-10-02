@@ -4,7 +4,6 @@ FactoryBot.define do
     description { "サンプルイベント説明" }
     event_date { Date.today + 7.days }
     association :created_by, factory: :user
-    spreadsheet_id { nil }
     discarded_at { nil }
   end
 end

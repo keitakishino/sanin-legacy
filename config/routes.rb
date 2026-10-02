@@ -55,8 +55,6 @@ Rails.application.routes.draw do
     resources :events, only: [ :index, :new, :create, :edit, :update, :destroy ] do
       resources :trades, only: [ :show, :update ]
     end
-    post "/events/:event_id/trades/:user_id/spreadsheet_export", to: "trade_spreadsheet_exports#create",
-         as: :event_trade_spreadsheet_export
   end
 
   # Error pages

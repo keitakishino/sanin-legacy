@@ -6,7 +6,7 @@ RSpec.describe 'CreateEvents' do
       expect(ActiveRecord::Base.connection.table_exists?(:events)).to be true
 
       columns = ActiveRecord::Base.connection.columns(:events).map(&:name)
-      expect(columns).to include('id', 'title', 'description', 'event_date', 'created_by_id', 'spreadsheet_id', 'discarded_at', 'created_at', 'updated_at')
+      expect(columns).to include('id', 'title', 'description', 'event_date', 'created_by_id', 'discarded_at', 'created_at', 'updated_at')
     end
 
     it 'has correct column types' do
@@ -16,7 +16,6 @@ RSpec.describe 'CreateEvents' do
       expect(columns_hash['description'].type).to eq :text
       expect(columns_hash['event_date'].type).to eq :date
       expect(columns_hash['created_by_id'].type).to eq :integer
-      expect(columns_hash['spreadsheet_id'].type).to eq :string
       expect(columns_hash['discarded_at'].type).to eq :datetime
     end
 
