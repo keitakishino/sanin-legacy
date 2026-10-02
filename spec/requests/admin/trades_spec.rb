@@ -51,6 +51,12 @@ RSpec.describe "Admin::Trades", type: :request do
         expect(response.body).to include(I18n.t("activerecord.enums.trade.status.pending"))
       end
 
+      it "does not display spreadsheet export section" do
+        get admin_event_trade_path(event, trade)
+        expect(response.body).not_to include('id="trade_spreadsheet_info"')
+        expect(response.body).not_to include("スプレッドシート連携")
+      end
+
       it "displays status select with correct initial value for pending status" do
         get admin_event_trade_path(event, trade)
         expect(response.body).to include(%(<option selected="selected" value="pending">))
@@ -527,6 +533,20 @@ RSpec.describe "Admin::Trades", type: :request do
       want = create(:trade_card_want, trade: trade)
       patch trade_card_want_path(trade.event, want), params: { trade_card_want: { amount: 3000 }, trade_id: trade.id }
       expect(want.reload.amount).to eq(3000)
+    end
+  end
+
+  describe "POST /admin/events/:event_id/trades/:user_id/spreadsheet_export (removed)" do
+    context "when user is an admin" do
+      before do
+        post signin_path, params: { email: admin_user.email, password: "password123" }
+      end
+
+      it "returns 404 not found" do
+        post "/admin/events/#{event.id}/trades/#{general_user.id}/spreadsheet_export",
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+        expect(response).to have_http_status(:not_found)
+      end
     end
   end
 end
