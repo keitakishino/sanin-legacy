@@ -42,25 +42,18 @@
 
 <!-- Mobile expansion row -->
 <tr id="expand_<%= dom_id(trade_card_want) %>" class="border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.1 150); display: none;">
-  <td colspan="3" class="px-4 py-3 bg-stone-50">
-    <div class="space-y-2 text-sm">
+  <td colspan="3" class="w-full max-w-0 px-4 py-3 bg-stone-50">
+    <div class="space-y-2 text-sm min-w-0 wrap-anywhere">
+      <p data-testid="expand-card-name" class="font-bold text-stone-800 whitespace-normal wrap-anywhere"><%= trade_card_want.card_name %></p>
       <p><strong>言語:</strong> <%= trade_card_want.language.present? ? I18n.t("activerecord.enums.trade_card_want.language.#{trade_card_want.language}") : "不問" %></p>
       <p><strong>状態:</strong> <%= trade_card_want.conditions.present? && trade_card_want.conditions.any? ? trade_card_want.conditions.map { |c| I18n.t("activerecord.enums.trade_card_want_condition.#{c}") }.join(", ") : "不問" %></p>
       <p><strong>フォイル:</strong> <%= trade_card_want.foil.present? ? I18n.t("activerecord.enums.trade_card_want.foil.#{trade_card_want.foil}") : "不問" %></p>
       <p><strong>フレーム:</strong> <%= trade_card_want.frame.present? ? I18n.t("activerecord.enums.trade_card_want.frame.#{trade_card_want.frame}") : "不問" %></p>
-      <% if trade_card_want.expansion %>
-        <p><strong>セット:</strong> <%= trade_card_want.expansion.scryfall_set_code.upcase %></p>
-      <% end %>
-      <% if trade_card_want.note.present? %>
-        <p><strong>備考:</strong> <%= trade_card_want.note %></p>
-      <% end %>
-      <% if trade_card_want.amount.present? %>
-        <p><strong>単価:</strong> ¥<%= number_with_delimiter(trade_card_want.amount) %></p>
-      <% end %>
+      <p><strong>セット:</strong> <%= trade_card_want.expansion&.scryfall_set_code&.upcase || "—" %></p>
+      <p><strong>備考:</strong> <%= trade_card_want.note.present? ? trade_card_want.note : "—" %></p>
+      <p><strong>単価:</strong> <%= trade_card_want.amount.present? ? "¥#{number_with_delimiter(trade_card_want.amount)}" : "—" %></p>
       <% subtotal = (trade_card_want.amount.present? && trade_card_want.quantity.present?) ? (trade_card_want.amount * trade_card_want.quantity) : nil %>
-      <% if subtotal.present? %>
-        <p><strong>小計:</strong> ¥<%= number_with_delimiter(subtotal) %></p>
-      <% end %>
+      <p><strong>小計:</strong> <%= subtotal.present? ? "¥#{number_with_delimiter(subtotal)}" : "—" %></p>
     </div>
   </td>
 </tr>
