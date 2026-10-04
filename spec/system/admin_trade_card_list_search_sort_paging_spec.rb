@@ -395,6 +395,9 @@ RSpec.describe "Admin trade card list search, sort, and paging", type: :system d
 
       # Sort
       click_link(id: "offers_sort_card_name")
+      expect(page).to have_current_path(%r{offers_sort=card_name_asc})
+      expect(page).to have_css("#offers_sort_card_name", text: "▲")
+      expect(page).to have_css("#edit_form_trade_card_offer_#{offer.id}", visible: :hidden)
 
       # Toggle should still work
       within("#trade_card_offer_#{offer.id}") do
@@ -425,6 +428,9 @@ RSpec.describe "Admin trade card list search, sort, and paging", type: :system d
 
       # Sort via dropdown
       select "数量 昇順", from: "offers_sort"
+      expect(page).to have_current_path(%r{offers_sort=quantity_asc})
+      expect(page).to have_css("#offers_sort_quantity", text: "▲", visible: :all)
+      expect(page).to have_css("#expand_trade_card_offer_#{offer.id}", visible: :hidden)
 
       # Toggle should still work
       find("button[data-toggle-expand='trade_card_offer_#{offer.id}']").click
@@ -561,6 +567,9 @@ RSpec.describe "Admin trade card list search, sort, and paging", type: :system d
       visit admin_event_trade_path(event, trade)
 
       find("#offers_sort_card_name").click
+      expect(page).to have_current_path(%r{offers_sort=card_name_asc})
+      expect(page).to have_css("#offers_sort_card_name", text: "▲")
+
       find("#add_offer_btn_admin").click
 
       expect(find("#new_trade_card_offer_admin")).to be_visible
