@@ -3,7 +3,7 @@
 <tr id="<%= dom_id(trade_card_offer) %>" class="border-b border-stone-200 hover:bg-stone-50" style="border-left: 3px solid oklch(52% 0.12 231)">
   <!-- Desktop: Full columns -->
   <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800 wrap-anywhere" title="<%= trade_card_offer.card_name %>"><%= trade_card_offer.card_name %></td>
-  <td class="px-4 md:px-2 lg:px-4 py-3 text-sm text-stone-800"><%= trade_card_offer.quantity %></td>
+  <td class="px-2 lg:px-4 py-3 text-sm text-stone-800 max-md:whitespace-nowrap"><%= trade_card_offer.quantity %></td>
   <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.language.#{trade_card_offer.language}") %></td>
   <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.condition.#{trade_card_offer.condition}") %></td>
   <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= I18n.t("activerecord.enums.trade_card_offer.foil.#{trade_card_offer.foil}") %></td>
@@ -16,23 +16,23 @@
   <td class="hidden md:table-cell px-2 lg:px-4 py-3 text-sm text-stone-800"><%= subtotal.present? ? "¥#{number_with_delimiter(subtotal)}" : "—" %></td>
 
   <!-- Mobile: Card name only -->
-  <td class="md:hidden px-4 py-3 text-sm text-stone-800 flex-1 truncate" title="<%= trade_card_offer.card_name %>"><%= trade_card_offer.card_name %></td>
+  <td class="md:hidden w-full max-w-0 px-2 py-3 text-sm text-stone-800" title="<%= trade_card_offer.card_name %>"><div class="truncate"><%= trade_card_offer.card_name %></div></td>
 
   <!-- Actions -->
-  <td class="px-4 md:px-2 lg:px-4 py-3 text-right">
-    <div class="flex items-center justify-end gap-2">
+  <td class="px-2 lg:px-4 py-3 text-right max-md:whitespace-nowrap">
+    <div class="flex items-center justify-end gap-1 md:gap-2">
       <% if can_modify %>
         <button
           type="button"
-          class="px-2 py-1 text-sky-700 hover:bg-sky-50 text-xs rounded hover:opacity-90 font-bold"
-          onclick="toggleEditForm('<%= dom_id(trade_card_offer, :edit_form) %>', '<%= dom_id(trade_card_offer, :expand) %>')">
+          class="px-2 py-1 text-sky-700 hover:bg-sky-50 text-xs rounded hover:opacity-90 font-bold max-md:whitespace-nowrap"
+          onclick="toggleEditForm('edit_form_<%= dom_id(trade_card_offer) %>', 'expand_<%= dom_id(trade_card_offer) %>')">
           編集
         </button>
-        <%= button_to "削除", trade_card_offer_path(@trade.event, trade_card_offer), method: :delete, form: { local: true, data: { turbo: true } }, class: "px-2 py-1 text-red-700 hover:bg-red-50 text-xs rounded hover:opacity-90 font-bold" %>
+        <%= button_to "削除", trade_card_offer_path(@trade.event, trade_card_offer), method: :delete, form: { local: true, data: { turbo: true } }, class: "px-2 py-1 text-red-700 hover:bg-red-50 text-xs rounded hover:opacity-90 font-bold max-md:whitespace-nowrap" %>
       <% end %>
       <button
         type="button"
-        class="px-2 py-1 text-stone-500 hover:bg-stone-100 text-xs expand-btn"
+        class="px-2 py-1 text-stone-500 hover:bg-stone-100 text-xs expand-btn max-md:whitespace-nowrap"
         data-toggle-expand="<%= dom_id(trade_card_offer) %>"
         aria-expanded="false">
         ▼
@@ -42,7 +42,7 @@
 </tr>
 
 <!-- Mobile expansion row -->
-<tr id="<%= dom_id(trade_card_offer, :expand) %>" class="border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.12 231); display: none;">
+<tr id="expand_<%= dom_id(trade_card_offer) %>" class="border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.12 231); display: none;">
   <td colspan="3" class="px-4 py-3 bg-stone-50">
     <div class="space-y-2 text-sm">
       <p><strong>言語:</strong> <%= I18n.t("activerecord.enums.trade_card_offer.language.#{trade_card_offer.language}") %></p>
@@ -69,10 +69,10 @@
 
 <% if can_modify %>
   <!-- Edit form row (hidden by default) -->
-  <tr id="<%= dom_id(trade_card_offer, :edit_form) %>" class="border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.12 231); display: none;" data-controller="form-reset">
+  <tr id="edit_form_<%= dom_id(trade_card_offer) %>" class="border-b border-stone-200" style="border-left: 3px solid oklch(52% 0.12 231); display: none;" data-controller="form-reset">
     <td colspan="13" class="px-4 py-4 bg-stone-50">
-      <turbo-frame id="<%= dom_id(trade_card_offer, :edit_form_frame) %>" class="">
-        <%= render 'trade_card_offers/form', trade_card_offer: trade_card_offer, frame_id: dom_id(trade_card_offer, :edit_form_frame) %>
+      <turbo-frame id="edit_form_frame_<%= dom_id(trade_card_offer) %>" class="">
+        <%= render 'trade_card_offers/form', trade_card_offer: trade_card_offer, frame_id: "edit_form_frame_#{dom_id(trade_card_offer)}" %>
       </turbo-frame>
     </td>
   </tr>
