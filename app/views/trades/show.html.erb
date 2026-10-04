@@ -29,16 +29,17 @@
 
   <!-- Card Offers Section -->
   <div class="mb-8">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
       <h2 class="text-2xl font-bold text-stone-800">出すカード一覧</h2>
+      <%= render "card_detail_list_controls", list: @offers_list %>
     </div>
 
     <div class="overflow-x-auto border border-stone-200 rounded-lg">
       <table class="w-full" id="trade_card_offers">
         <thead class="bg-stone-100">
           <tr>
-            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
-            <th class="px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500 max-md:whitespace-nowrap">数量</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500"><%= card_detail_sort_header(@offers_list, :card_name, "カード名") %></th>
+            <th class="px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500 max-md:whitespace-nowrap"><span class="hidden md:inline"><%= card_detail_sort_header(@offers_list, :quantity, "数量") %></span><span class="md:hidden">数量</span></th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">言語</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">状態</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">フォイル</th>
@@ -46,25 +47,27 @@
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">PWマーク</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">セット</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">備考</th>
-            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">単価</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500"><%= card_detail_sort_header(@offers_list, :amount, "単価") %></th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">小計</th>
             <th class="md:hidden px-2 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
             <th class="px-2 lg:px-4 py-3 text-right text-xs font-bold text-stone-500 max-md:whitespace-nowrap">操作</th>
           </tr>
         </thead>
-        <% if @trade.trade_card_offers.any? %>
-          <% @trade.trade_card_offers.each do |offer| %>
+        <% if @offers_list.records.any? %>
+          <% @offers_list.records.each do |offer| %>
             <%= render offer %>
           <% end %>
         <% else %>
           <tbody id="trade_card_offers_empty">
             <tr>
-              <td colspan="13" class="px-4 py-8 text-center text-stone-400 text-xs">カード明細はまだありません</td>
+              <td colspan="13" class="px-4 py-8 text-center text-stone-400 text-xs"><%= @offers_list.all_count.zero? ? "カード明細はまだありません" : "該当するカード明細はありません" %></td>
             </tr>
           </tbody>
         <% end %>
       </table>
     </div>
+
+    <%= render "card_detail_pager", list: @offers_list %>
 
     <% if can_create %>
       <div class="mt-4">
@@ -87,41 +90,44 @@
 
   <!-- Card Wants Section -->
   <div>
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
       <h2 class="text-2xl font-bold text-stone-800">欲しいカード一覧</h2>
+      <%= render "card_detail_list_controls", list: @wants_list %>
     </div>
 
     <div class="overflow-x-auto border border-stone-200 rounded-lg">
       <table class="w-full" id="trade_card_wants">
         <thead class="bg-stone-100">
           <tr>
-            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
-            <th class="px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500 max-md:whitespace-nowrap">数量</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500"><%= card_detail_sort_header(@wants_list, :card_name, "カード名") %></th>
+            <th class="px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500 max-md:whitespace-nowrap"><span class="hidden md:inline"><%= card_detail_sort_header(@wants_list, :quantity, "数量") %></span><span class="md:hidden">数量</span></th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">言語</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">状態</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">フォイル</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">フレーム</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">セット</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">備考</th>
-            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">単価</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500"><%= card_detail_sort_header(@wants_list, :amount, "単価") %></th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">小計</th>
             <th class="md:hidden px-2 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
             <th class="px-2 lg:px-4 py-3 text-right text-xs font-bold text-stone-500 max-md:whitespace-nowrap">操作</th>
           </tr>
         </thead>
-        <% if @trade.trade_card_wants.any? %>
-          <% @trade.trade_card_wants.each do |want| %>
+        <% if @wants_list.records.any? %>
+          <% @wants_list.records.each do |want| %>
             <%= render want %>
           <% end %>
         <% else %>
           <tbody id="trade_card_wants_empty">
             <tr>
-              <td colspan="12" class="px-4 py-8 text-center text-stone-400 text-xs">カード明細はまだありません</td>
+              <td colspan="12" class="px-4 py-8 text-center text-stone-400 text-xs"><%= @wants_list.all_count.zero? ? "カード明細はまだありません" : "該当するカード明細はありません" %></td>
             </tr>
           </tbody>
         <% end %>
       </table>
     </div>
+
+    <%= render "card_detail_pager", list: @wants_list %>
 
     <% if can_create %>
       <div class="mt-4">

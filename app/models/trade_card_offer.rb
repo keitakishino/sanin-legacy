@@ -1,4 +1,6 @@
 class TradeCardOffer < ApplicationRecord
+  include CardDetailListing
+
   belongs_to :trade
   belongs_to :expansion, optional: true
 
