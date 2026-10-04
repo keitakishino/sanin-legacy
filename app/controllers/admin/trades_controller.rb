@@ -1,6 +1,9 @@
 class Admin::TradesController < Admin::BaseController
+  include CardDetailListAssignment
+
   before_action :set_event
   before_action :set_trade, only: [ :show, :update ]
+  before_action :assign_card_detail_lists, only: [ :show, :update ]
 
   def show
   end

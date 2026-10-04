@@ -1,4 +1,4 @@
-<form id="<%= list.prefix %>_search_form" action="<%= trade_path(@trade.event_id) %>" method="get">
+<form id="<%= list.prefix %>_search_form" action="<%= card_detail_list_path %>" method="get">
   <% other_prefix = list.prefix == "offers" ? "wants" : "offers" %>
   <% CardDetailList.state_keys(other_prefix).each do |key| %>
     <% if @list_params[key].present? %>
