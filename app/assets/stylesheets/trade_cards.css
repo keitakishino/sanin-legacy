@@ -1,0 +1,23 @@
+/* Responsive table layout for trade cards */
+@media (max-width: 767px) {
+  table#trade_card_offers,
+  table#trade_card_wants {
+    table-layout: fixed;
+  }
+
+  /* Completely remove space consumed by hidden columns on mobile */
+  table#trade_card_offers th.hidden,
+  table#trade_card_offers td.hidden,
+  table#trade_card_wants th.hidden,
+  table#trade_card_wants td.hidden {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    overflow: hidden !important;
+  }
+}

@@ -89,4 +89,58 @@
       display: none !important;
     }
   }
+
+  /* Mobile table layout */
+  @media (max-width: 47.9375rem) {
+    /* Hide desktop columns completely */
+    .hidden.md\:table-cell,
+    .hidden {
+      display: none !important;
+      width: 0 !important;
+      min-width: 0 !important;
+      max-width: 0 !important;
+      height: 0 !important;
+      padding: 0 !important;
+      border: none !important;
+      margin: 0 !important;
+      visibility: hidden !important;
+      overflow: hidden !important;
+    }
+
+    /* Constrain table width */
+    #trade_card_offers,
+    #trade_card_wants {
+      width: 100% !important;
+      table-layout: fixed;
+    }
+
+    /* Ensure forms don't overflow */
+    turbo-frame,
+    form {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    #new_trade_card_offer_form input,
+    #new_trade_card_offer_form select,
+    #new_trade_card_offer_form textarea,
+    #new_trade_card_offer_form button,
+    #new_trade_card_offer_admin_form input,
+    #new_trade_card_offer_admin_form select,
+    #new_trade_card_offer_admin_form textarea,
+    #new_trade_card_offer_admin_form button,
+    #new_trade_card_want_form input,
+    #new_trade_card_want_form select,
+    #new_trade_card_want_form textarea,
+    #new_trade_card_want_form button,
+    #new_trade_card_want_admin_form input,
+    #new_trade_card_want_admin_form select,
+    #new_trade_card_want_admin_form textarea,
+    #new_trade_card_want_admin_form button {
+      width: 100% !important;
+      box-sizing: border-box !important;
+      max-width: 100% !important;
+    }
+  }
 }
