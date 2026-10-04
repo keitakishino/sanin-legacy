@@ -1,0 +1,38 @@
+<form id="<%= list.prefix %>_search_form" action="<%= trade_path(@trade.event_id) %>" method="get">
+  <% other_prefix = list.prefix == "offers" ? "wants" : "offers" %>
+  <% CardDetailList.state_keys(other_prefix).each do |key| %>
+    <% if @list_params[key].present? %>
+      <%= hidden_field_tag key, @list_params[key] %>
+    <% end %>
+  <% end %>
+
+  <div class="flex flex-col gap-2">
+    <div class="flex gap-2">
+      <%= search_field_tag "#{list.prefix}_q", list.q, id: "#{list.prefix}_q", placeholder: "カード名で検索", class: "px-2 py-1 text-xs border border-stone-200 rounded" %>
+      <%= submit_tag "検索", id: "#{list.prefix}_search_submit", class: "px-2 py-1 text-xs bg-stone-200 rounded hover:bg-stone-300" %>
+      <% if list.searching? %>
+        <%= link_to "クリア", card_detail_list_url(list, q: nil, page: nil), id: "#{list.prefix}_clear", class: "px-2 py-1 text-xs text-stone-600 hover:text-stone-800" %>
+      <% end %>
+    </div>
+
+    <div class="flex gap-2 items-center">
+      <%= select_tag "#{list.prefix}_sort", options_for_select([["ソートなし", ""], ["カード名 昇順", "card_name_asc"], ["カード名 降順", "card_name_desc"], ["数量 昇順", "quantity_asc"], ["数量 降順", "quantity_desc"], ["単価 昇順", "amount_asc"], ["単価 降順", "amount_desc"]], list.sort.to_s), id: "#{list.prefix}_sort", onchange: "this.form.requestSubmit()", class: "px-2 py-1 text-xs border border-stone-200 rounded md:hidden" %>
+    </div>
+
+    <% if list.all_count > 0 %>
+      <p id="<%= list.prefix %>_count" class="text-xs text-stone-600">
+        <% if list.searching? %>
+          <% if list.total_count > 0 %>
+            「<%= list.q %>」の検索結果 <%= list.total_count %>件中 <%= list.from %>–<%= list.to %>件
+          <% else %>
+            「<%= list.q %>」の検索結果 0件
+          <% end %>
+        <% else %>
+          <% if list.total_count > 0 %>
+            <%= list.total_count %>件中 <%= list.from %>–<%= list.to %>件
+          <% end %>
+        <% end %>
+      </p>
+    <% end %>
+  </div>
+</form>
