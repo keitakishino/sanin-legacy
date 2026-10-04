@@ -61,16 +61,17 @@
 
   <!-- Card Offers Section -->
   <div class="mb-8">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
       <h2 class="text-2xl font-bold text-stone-800">出すカード一覧</h2>
+      <%= render "trades/card_detail_list_controls", list: @offers_list %>
     </div>
 
     <div class="overflow-x-auto border border-stone-200 rounded-lg">
       <table class="w-full" id="trade_card_offers">
         <thead class="bg-stone-100">
           <tr>
-            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
-            <th class="px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500 max-md:whitespace-nowrap">数量</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500"><%= card_detail_sort_header(@offers_list, :card_name, "カード名") %></th>
+            <th class="px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500 max-md:whitespace-nowrap"><span class="hidden md:inline"><%= card_detail_sort_header(@offers_list, :quantity, "数量") %></span><span class="md:hidden">数量</span></th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">言語</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">状態</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">フォイル</th>
@@ -78,25 +79,27 @@
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">PWマーク</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">セット</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">備考</th>
-            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">単価</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500"><%= card_detail_sort_header(@offers_list, :amount, "単価") %></th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">小計</th>
             <th class="md:hidden px-2 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
             <th class="px-2 lg:px-4 py-3 text-right text-xs font-bold text-stone-500 max-md:whitespace-nowrap">操作</th>
           </tr>
         </thead>
-        <% if @trade.trade_card_offers.any? %>
-          <% @trade.trade_card_offers.each do |offer| %>
+        <% if @offers_list.records.any? %>
+          <% @offers_list.records.each do |offer| %>
             <%= render "trade_card_offers/trade_card_offer", trade_card_offer: offer %>
           <% end %>
         <% else %>
           <tbody id="trade_card_offers_empty">
             <tr>
-              <td colspan="13" class="px-4 py-8 text-center text-stone-500">カード明細はまだありません</td>
+              <td colspan="13" class="px-4 py-8 text-center text-stone-500"><%= @offers_list.all_count.zero? ? "カード明細はまだありません" : "該当するカード明細はありません" %></td>
             </tr>
           </tbody>
         <% end %>
       </table>
     </div>
+
+    <%= render "trades/card_detail_pager", list: @offers_list %>
 
     <% if can_create %>
       <div class="mt-4">
@@ -116,41 +119,44 @@
 
   <!-- Card Wants Section -->
   <div>
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
       <h2 class="text-2xl font-bold text-stone-800">欲しいカード一覧</h2>
+      <%= render "trades/card_detail_list_controls", list: @wants_list %>
     </div>
 
     <div class="overflow-x-auto border border-stone-200 rounded-lg">
       <table class="w-full" id="trade_card_wants">
         <thead class="bg-stone-100">
           <tr>
-            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
-            <th class="px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500 max-md:whitespace-nowrap">数量</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500"><%= card_detail_sort_header(@wants_list, :card_name, "カード名") %></th>
+            <th class="px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500 max-md:whitespace-nowrap"><span class="hidden md:inline"><%= card_detail_sort_header(@wants_list, :quantity, "数量") %></span><span class="md:hidden">数量</span></th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">言語</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">状態</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">フォイル</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">フレーム</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">セット</th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">備考</th>
-            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">単価</th>
+            <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500"><%= card_detail_sort_header(@wants_list, :amount, "単価") %></th>
             <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">小計</th>
             <th class="md:hidden px-2 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
             <th class="px-2 lg:px-4 py-3 text-right text-xs font-bold text-stone-500 max-md:whitespace-nowrap">操作</th>
           </tr>
         </thead>
-        <% if @trade.trade_card_wants.any? %>
-          <% @trade.trade_card_wants.each do |want| %>
+        <% if @wants_list.records.any? %>
+          <% @wants_list.records.each do |want| %>
             <%= render "trade_card_wants/trade_card_want", trade_card_want: want %>
           <% end %>
         <% else %>
           <tbody id="trade_card_wants_empty">
             <tr>
-              <td colspan="12" class="px-4 py-8 text-center text-stone-500">カード明細はまだありません</td>
+              <td colspan="12" class="px-4 py-8 text-center text-stone-500"><%= @wants_list.all_count.zero? ? "カード明細はまだありません" : "該当するカード明細はありません" %></td>
             </tr>
           </tbody>
         <% end %>
       </table>
     </div>
+
+    <%= render "trades/card_detail_pager", list: @wants_list %>
 
     <% if can_create %>
       <div class="mt-4">
@@ -170,81 +176,88 @@
 </div>
 
 <script>
-  const statusSelect = document.getElementById('trade_status');
-  const cancelledReasonSection = document.getElementById('cancelled_reason_section');
+  (() => {
+    const statusSelect = document.getElementById('trade_status');
+    const cancelledReasonSection = document.getElementById('cancelled_reason_section');
 
-  function toggleCancelledReasonSection() {
-    if (statusSelect.value === 'cancelled') {
-      cancelledReasonSection.style.display = 'block';
-    } else {
-      cancelledReasonSection.style.display = 'none';
-    }
-  }
-
-  statusSelect.addEventListener('change', toggleCancelledReasonSection);
-
-  // Initialize on page load
-  document.addEventListener('DOMContentLoaded', toggleCancelledReasonSection);
-
-  // Toggle forms for admin line item operations
-  const addOfferBtnAdmin = document.getElementById('add_offer_btn_admin');
-  if (addOfferBtnAdmin) {
-    addOfferBtnAdmin.addEventListener('click', function() {
-      const frame = document.getElementById('new_trade_card_offer_admin');
-      frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
-    });
-  }
-
-  const addWantBtnAdmin = document.getElementById('add_want_btn_admin');
-  if (addWantBtnAdmin) {
-    addWantBtnAdmin.addEventListener('click', function() {
-      const frame = document.getElementById('new_trade_card_want_admin');
-      frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
-    });
-  }
-
-  // Mobile accordion expansion (delegated so rows appended/replaced by Turbo Streams work too).
-  // Registered once: this inline script re-runs on every Turbo visit.
-  if (!window.tradeCardExpandDelegated) {
-    window.tradeCardExpandDelegated = true;
-    document.addEventListener('click', function(e) {
-      const button = e.target.closest('[data-toggle-expand]');
-      if (!button) return;
-      const table = button.closest('#trade_card_offers') || button.closest('#trade_card_wants');
-      if (!table) return;
-      e.preventDefault();
-      const rowId = button.getAttribute('data-toggle-expand');
-      const expandRow = document.getElementById('expand_' + rowId);
-      if (!expandRow) return;
-      const isHidden = expandRow.style.display === 'none';
-      table.querySelectorAll('tr[id^="expand_"]').forEach(row => { row.style.display = 'none'; });
-      table.querySelectorAll('tr[id^="edit_form_"]').forEach(row => { row.style.display = 'none'; });
-      table.querySelectorAll('[data-toggle-expand]').forEach(btn => { btn.setAttribute('aria-expanded', 'false'); });
-      if (isHidden) {
-        expandRow.style.display = 'table-row';
-        button.setAttribute('aria-expanded', 'true');
+    function toggleCancelledReasonSection() {
+      if (statusSelect) {
+        if (statusSelect.value === 'cancelled') {
+          cancelledReasonSection.style.display = 'block';
+        } else {
+          cancelledReasonSection.style.display = 'none';
+        }
       }
-    });
-  }
+    }
 
-  // Also listen for turbo:load for full page navigation
-  document.addEventListener('turbo:load', function() {
-    document.querySelectorAll('tr[id^="expand_"]').forEach(row => {
-      row.style.display = 'none';
-    });
-    document.querySelectorAll('tr[id^="edit_form_"]').forEach(row => {
-      row.style.display = 'none';
-    });
-  });
+    if (statusSelect) {
+      statusSelect.addEventListener('change', toggleCancelledReasonSection);
+    }
 
-  // Hide expand buttons on desktop
-  function updateExpandButtonVisibility() {
-    const buttons = document.querySelectorAll('[data-toggle-expand]');
-    const isDesktop = window.innerWidth >= 768;
-    buttons.forEach(btn => {
-      btn.style.display = isDesktop ? 'none' : 'inline-block';
+    // Initialize immediately and on page load
+    toggleCancelledReasonSection();
+    document.addEventListener('DOMContentLoaded', toggleCancelledReasonSection);
+
+    // Toggle forms for admin line item operations
+    const addOfferBtnAdmin = document.getElementById('add_offer_btn_admin');
+    if (addOfferBtnAdmin) {
+      addOfferBtnAdmin.addEventListener('click', function() {
+        const frame = document.getElementById('new_trade_card_offer_admin');
+        frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+
+    const addWantBtnAdmin = document.getElementById('add_want_btn_admin');
+    if (addWantBtnAdmin) {
+      addWantBtnAdmin.addEventListener('click', function() {
+        const frame = document.getElementById('new_trade_card_want_admin');
+        frame.style.display = frame.style.display === 'none' ? 'block' : 'none';
+      });
+    }
+
+    // Mobile accordion expansion (delegated so rows appended/replaced by Turbo Streams work too).
+    // Registered once: this inline script re-runs on every Turbo visit.
+    if (!window.tradeCardExpandDelegated) {
+      window.tradeCardExpandDelegated = true;
+      document.addEventListener('click', function(e) {
+        const button = e.target.closest('[data-toggle-expand]');
+        if (!button) return;
+        const table = button.closest('#trade_card_offers') || button.closest('#trade_card_wants');
+        if (!table) return;
+        e.preventDefault();
+        const rowId = button.getAttribute('data-toggle-expand');
+        const expandRow = document.getElementById('expand_' + rowId);
+        if (!expandRow) return;
+        const isHidden = expandRow.style.display === 'none';
+        table.querySelectorAll('tr[id^="expand_"]').forEach(row => { row.style.display = 'none'; });
+        table.querySelectorAll('tr[id^="edit_form_"]').forEach(row => { row.style.display = 'none'; });
+        table.querySelectorAll('[data-toggle-expand]').forEach(btn => { btn.setAttribute('aria-expanded', 'false'); });
+        if (isHidden) {
+          expandRow.style.display = 'table-row';
+          button.setAttribute('aria-expanded', 'true');
+        }
+      });
+    }
+
+    // Also listen for turbo:load for full page navigation
+    document.addEventListener('turbo:load', function() {
+      document.querySelectorAll('tr[id^="expand_"]').forEach(row => {
+        row.style.display = 'none';
+      });
+      document.querySelectorAll('tr[id^="edit_form_"]').forEach(row => {
+        row.style.display = 'none';
+      });
     });
-  }
-  updateExpandButtonVisibility();
-  window.addEventListener('resize', updateExpandButtonVisibility);
+
+    // Hide expand buttons on desktop
+    function updateExpandButtonVisibility() {
+      const buttons = document.querySelectorAll('[data-toggle-expand]');
+      const isDesktop = window.innerWidth >= 768;
+      buttons.forEach(btn => {
+        btn.style.display = isDesktop ? 'none' : 'inline-block';
+      });
+    }
+    updateExpandButtonVisibility();
+    window.addEventListener('resize', updateExpandButtonVisibility);
+  })();
 </script>

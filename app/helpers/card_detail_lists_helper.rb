@@ -1,6 +1,14 @@
 module CardDetailListsHelper
+  def card_detail_list_path(query = {})
+    if controller_path.start_with?("admin/")
+      admin_event_trade_path(@trade.event_id, @trade, query)
+    else
+      trade_path(@trade.event_id, query)
+    end
+  end
+
   def card_detail_list_url(list, overrides)
-    trade_path(@trade.event_id, @list_params.merge(overrides.transform_keys { |k| list.param_key(k) }).compact_blank)
+    card_detail_list_path(@list_params.merge(overrides.transform_keys { |k| list.param_key(k) }).compact_blank)
   end
 
   def card_detail_sort_header(list, column, label)

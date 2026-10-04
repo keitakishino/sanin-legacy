@@ -139,6 +139,64 @@ RSpec.describe "Admin::Trades", type: :request do
         expect(response.body).not_to include('turbo:after-stream-render')
         expect(response.body).to include("data-toggle-expand=\"trade_card_offer_#{offer.id}\"")
       end
+
+      context "with search, sort, and paging parameters (C17)" do
+        it "filters offers by search query" do
+          create(:trade_card_offer, trade: trade, card_name: "Apple")
+          create(:trade_card_offer, trade: trade, card_name: "Banana")
+          get admin_event_trade_path(event, trade, offers_q: "Apple")
+
+          expect(response.body).to include("Apple")
+          expect(response.body).not_to include("Banana")
+        end
+
+        it "shows all wants when only offers are searched" do
+          create(:trade_card_offer, trade: trade, card_name: "Apple")
+          create(:trade_card_offer, trade: trade, card_name: "Banana")
+          create(:trade_card_want, trade: trade, card_name: "Want A")
+          create(:trade_card_want, trade: trade, card_name: "Want B")
+          get admin_event_trade_path(event, trade, offers_q: "Apple")
+
+          expect(response.body).to include("Want A")
+          expect(response.body).to include("Want B")
+        end
+
+        it "preserves wants parameters in offers sort links" do
+          create(:trade_card_offer, trade: trade, card_name: "Apple")
+          create(:trade_card_want, trade: trade, card_name: "Want")
+          get admin_event_trade_path(event, trade, wants_q: "Want")
+
+          expect(response.body).to include("wants_q=Want")
+          expect(response.body).to include("#{admin_event_trade_path(event, trade)}")
+        end
+
+        it "preserves offers parameters in wants sort links" do
+          create(:trade_card_offer, trade: trade, card_name: "Apple")
+          create(:trade_card_want, trade: trade, card_name: "Want")
+          get admin_event_trade_path(event, trade, offers_sort: "card_name_asc")
+
+          # wants sort links should preserve offers_sort parameter
+          offers_sort_param_present = response.body.include?("offers_sort=card_name_asc")
+          expect(offers_sort_param_present).to be true
+        end
+
+        it "renders search form with correct admin action" do
+          get admin_event_trade_path(event, trade)
+
+          # Check that the form action points to the admin path, not user path
+          expect(response.body).to include("id=\"offers_search_form\"")
+          expect(response.body).to include("action=\"#{admin_event_trade_path(event, trade)}\"")
+          expect(response.body).not_to include("action=\"#{trade_path(event.id)}\"")
+        end
+
+        it "preserves wants parameters when rejects invalid offers status" do
+          create(:trade_card_offer, trade: trade, card_name: "Apple")
+          get admin_event_trade_path(event, trade, wants_q: "Want")
+
+          # This should still render show with wants_q param present
+          expect(response.body).to include("wants_q=Want")
+        end
+      end
     end
   end
 

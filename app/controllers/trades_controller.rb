@@ -1,12 +1,12 @@
 class TradesController < ApplicationController
+  include CardDetailListAssignment
+
   before_action :authenticate_user!
   before_action :set_or_create_trade, only: [ :show ]
+  before_action :assign_card_detail_lists, only: [ :show ]
 
   def show
-    # @trade is set by set_or_create_trade
-    @offers_list = CardDetailList.new(@trade.trade_card_offers.includes(:expansion), prefix: "offers", params: params)
-    @wants_list = CardDetailList.new(@trade.trade_card_wants.includes(:expansion), prefix: "wants", params: params)
-    @list_params = request.query_parameters.slice(*CardDetailList.state_keys("offers"), *CardDetailList.state_keys("wants")).compact_blank
+    # @trade, @offers_list, @wants_list, @list_params are set by callbacks
   end
 
   private
