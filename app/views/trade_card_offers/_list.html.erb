@@ -1,0 +1,45 @@
+<div id="offers_list">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
+    <h2 class="text-2xl font-bold text-stone-800">出すカード一覧</h2>
+    <%= render "trades/card_detail_list_controls", list: list %>
+  </div>
+
+  <div class="overflow-x-auto border border-stone-200 rounded-lg">
+    <table class="w-full" id="trade_card_offers">
+      <thead class="bg-stone-100">
+        <tr>
+          <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500"><%= card_detail_sort_header(list, :card_name, "カード名") %></th>
+          <th class="px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500 max-md:whitespace-nowrap"><span class="hidden md:inline"><%= card_detail_sort_header(list, :quantity, "数量") %></span><span class="md:hidden">数量</span></th>
+          <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">言語</th>
+          <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">状態</th>
+          <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">フォイル</th>
+          <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">フレーム</th>
+          <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">PWマーク</th>
+          <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">セット</th>
+          <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">備考</th>
+          <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500"><%= card_detail_sort_header(list, :amount, "単価") %></th>
+          <th class="hidden md:table-cell px-2 lg:px-4 py-3 text-left text-xs font-bold text-stone-500">小計</th>
+          <th class="md:hidden px-2 py-3 text-left text-xs font-bold text-stone-500">カード名</th>
+          <th class="px-2 lg:px-4 py-3 text-right text-xs font-bold text-stone-500 max-md:whitespace-nowrap">操作</th>
+        </tr>
+      </thead>
+      <% if list.records.any? %>
+        <% list.records.each do |offer| %>
+          <%= render "trade_card_offers/trade_card_offer", trade_card_offer: offer %>
+        <% end %>
+      <% else %>
+        <tbody id="trade_card_offers_empty">
+          <tr>
+            <td colspan="13" class="px-4 py-8 text-center text-stone-400 text-xs"><%= list.all_count.zero? ? "カード明細はまだありません" : "該当するカード明細はありません" %></td>
+          </tr>
+        </tbody>
+      <% end %>
+    </table>
+  </div>
+
+  <%= render "trades/card_detail_pager", list: list %>
+
+  <% if sync_url %>
+    <div hidden data-controller="list-url-sync" data-list-url-sync-url-value="<%= card_detail_list_path(@list_params) %>"></div>
+  <% end %>
+</div>

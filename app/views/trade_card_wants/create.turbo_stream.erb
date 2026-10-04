@@ -1,20 +1,24 @@
 <% admin_context = @trade_id.present? %>
 <% frame_id = admin_context ? 'new_trade_card_want_admin' : 'new_trade_card_want' %>
 
-<%= turbo_stream.append "trade_card_wants" do %>
-  <%= render(partial: 'trade_card_want', locals: { trade_card_want: @trade_card_want }, formats: [:html]) %>
+<%= turbo_stream.replace "offers_list" do %>
+  <%= render(partial: "trade_card_offers/list", locals: { list: @offers_list, sync_url: false }, formats: [:html]) %>
 <% end %>
 
-<% if @trade.trade_card_wants.count == 1 %>
-  <%= turbo_stream.remove "trade_card_wants_empty" %>
+<%= turbo_stream.replace "wants_list" do %>
+  <%= render(partial: "trade_card_wants/list", locals: { list: @wants_list, sync_url: true }, formats: [:html]) %>
 <% end %>
 
 <%= turbo_stream.replace frame_id do %>
   <turbo-frame id="<%= frame_id %>" style="display: none;" class="mt-4 bg-stone-50 p-4 rounded-lg" data-controller="form-reset">
-    <%= render(partial: 'form', locals: { trade_card_want: @trade.trade_card_wants.build, frame_id: frame_id }, formats: [:html]) %>
+    <%= render(partial: 'trade_card_wants/form', locals: { trade_card_want: @trade.trade_card_wants.build, frame_id: frame_id, trade: @trade }, formats: [:html]) %>
   </turbo-frame>
 <% end %>
 
 <%= turbo_stream.append "toast-container" do %>
-  <%= render(partial: "shared/toast", locals: { message: t("toasts.trade_card_want.create", card_name: @trade_card_want.card_name) }, formats: [:html]) %>
+  <% if @created_visible %>
+    <%= render(partial: "shared/toast", locals: { message: t("toasts.trade_card_want.create", card_name: @trade_card_want.card_name) }, formats: [:html]) %>
+  <% else %>
+    <%= render(partial: "shared/toast", locals: { message: t("toasts.trade_card_want.create_filtered", card_name: @trade_card_want.card_name) }, formats: [:html]) %>
+  <% end %>
 <% end %>

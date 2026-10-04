@@ -1,8 +1,10 @@
+<% trade ||= @trade %>
+
 <% if trade_card_want.persisted? %>
-  <% form_url = trade_card_want_path(@trade.event, trade_card_want) %>
+  <% form_url = trade_card_want_path(trade.event, trade_card_want) %>
   <% form_method = :patch %>
 <% else %>
-  <% form_url = trade_card_wants_path(@trade.event) %>
+  <% form_url = trade_card_wants_path(trade.event) %>
   <% form_method = :post %>
 <% end %>
 
@@ -11,7 +13,7 @@
 <%= form_with url: form_url, method: form_method, model: trade_card_want, local: true, data: { turbo: true, "turbo-frame": "_top" }, id: "#{frame_id}_form" do |f| %>
   <!-- Hidden trade_id only in admin frames, so an admin viewing their own trade via /trades/:event_id doesn't submit a stray trade_id that breaks frame_id matching on turbo_stream replace -->
   <% if frame_id.to_s.end_with?("_admin") %>
-    <%= hidden_field_tag :trade_id, @trade.id %>
+    <%= hidden_field_tag :trade_id, trade.id %>
   <% end %>
 
   <% if trade_card_want.errors.any? %>

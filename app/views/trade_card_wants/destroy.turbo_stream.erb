@@ -1,13 +1,11 @@
 <%= turbo_stream.remove dom_id(@trade_card_want, :group) %>
 
-<% if @trade_card_want.trade.trade_card_wants.count == 0 %>
-  <%= turbo_stream.append "trade_card_wants" do %>
-    <tbody id="trade_card_wants_empty">
-      <tr>
-        <td colspan="11" class="px-4 py-8 text-center text-stone-400 text-xs">カード明細はまだありません</td>
-      </tr>
-    </tbody>
-  <% end %>
+<%= turbo_stream.replace "offers_list" do %>
+  <%= render(partial: "trade_card_offers/list", locals: { list: @offers_list, sync_url: false }, formats: [:html]) %>
+<% end %>
+
+<%= turbo_stream.replace "wants_list" do %>
+  <%= render(partial: "trade_card_wants/list", locals: { list: @wants_list, sync_url: true }, formats: [:html]) %>
 <% end %>
 
 <%= turbo_stream.replace "trade_aggregates" do %>
