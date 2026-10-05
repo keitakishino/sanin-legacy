@@ -1,10 +1,6 @@
 module CardDetailListsHelper
   def card_detail_list_path(query = {})
-    if controller_path.start_with?("admin/")
-      admin_event_trade_path(@trade.event_id, @trade, query)
-    else
-      trade_path(@trade.event_id, query)
-    end
+    query.present? ? "#{@list_base_path}?#{query.to_query}" : @list_base_path
   end
 
   def card_detail_list_url(list, overrides)

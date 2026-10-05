@@ -69,6 +69,12 @@ class CardDetailList
     end
   end
 
+  def page_of(record)
+    ids = @scope.search_card_name(q).sorted_by(sort).pluck(:id)
+    index = ids.index(record.id)
+    index.nil? ? nil : index / CardDetailListing::PER_PAGE + 1
+  end
+
   def self.state_keys(prefix)
     %W[#{prefix}_q #{prefix}_sort #{prefix}_page]
   end

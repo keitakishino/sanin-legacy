@@ -109,7 +109,8 @@ RSpec.describe "TradeCardOffers", type: :request do
       expect(trade.trade_card_offers.count).to eq(0)
       post "/trades/#{event.id}/card_offers", params: valid_params, headers: { "Accept" => "text/vnd.turbo-stream.html" }
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('action="remove" target="trade_card_offers_empty"')
+      expect(response.body).to include('action="replace" target="offers_list"')
+      expect(response.body).to include("Black Lotus")
     end
 
     context "with invalid params" do
@@ -646,8 +647,9 @@ RSpec.describe "TradeCardOffers", type: :request do
       expect(trade.trade_card_offers.count).to eq(1)
       delete "/trades/#{event.id}/card_offers/#{offer.id}", headers: { "Accept" => "text/vnd.turbo-stream.html" }
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include('action="append" target="trade_card_offers"')
+      expect(response.body).to include('action="replace" target="offers_list"')
       expect(response.body).to include('id="trade_card_offers_empty"')
+      expect(response.body).to include('colspan="13"')
       expect(response.body).to include('カード明細はまだありません')
     end
 
@@ -676,12 +678,12 @@ RSpec.describe "TradeCardOffers", type: :request do
         # Admin context deletion with trade_id param
         delete "/trades/#{event.id}/card_offers/#{admin_offer.id}", params: { trade_id: admin_trade.id }, headers: { "Accept" => "text/vnd.turbo-stream.html" }
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include('action="append" target="trade_card_offers"')
+        expect(response.body).to include('action="replace" target="offers_list"')
         expect(response.body).to include('id="trade_card_offers_empty"')
         # Verify empty state is rendered as its own <tbody> (so it can sit as a sibling
         # of the per-offer row groups directly under the <table>)
         expect(response.body).to include('<tbody id="trade_card_offers_empty">')
-        expect(response.body).to include('colspan="12"')
+        expect(response.body).to include('colspan="13"')
         expect(response.body).to include('カード明細はまだありません')
       end
 

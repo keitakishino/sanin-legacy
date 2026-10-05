@@ -432,7 +432,7 @@ RSpec.describe "Admin::Trades", type: :request do
           },
           headers: { "Accept" => "text/vnd.turbo-stream.html" }
 
-        expect(response.body).to include('<turbo-stream action="append" target="trade_card_offers">')
+        expect(response.body).to include('<turbo-stream action="replace" target="offers_list">')
         expect(response.body).to include("Test Card")
       end
 
@@ -529,7 +529,7 @@ RSpec.describe "Admin::Trades", type: :request do
           },
           headers: { "Accept" => "text/vnd.turbo-stream.html" }
 
-        expect(response.body).to include('<turbo-stream action="append" target="trade_card_wants">')
+        expect(response.body).to include('<turbo-stream action="replace" target="wants_list">')
         expect(response.body).to include("Desired Card")
       end
 

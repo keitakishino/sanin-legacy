@@ -313,4 +313,62 @@ RSpec.describe CardDetailList do
       expect(keys).to eq([ "wants_q", "wants_sort", "wants_page" ])
     end
   end
+
+  describe "#page_of with TradeCardOffer" do
+    let(:offers) { trade.trade_card_offers }
+    let(:scope) { offers.includes(:expansion) }
+
+    context "with 21 records" do
+      before do
+        21.times { |i| create(:trade_card_offer, trade:, card_name: "Card #{format('%02d', i)}") }
+      end
+
+      it "returns page 1 for the first 20 records" do
+        record = offers.order(id: :asc).first
+        list = CardDetailList.new(scope, prefix: "offers", params: {})
+        expect(list.page_of(record)).to eq 1
+      end
+
+      it "returns page 2 for the 21st record without sort" do
+        record = offers.order(id: :asc).last
+        list = CardDetailList.new(scope, prefix: "offers", params: {})
+        expect(list.page_of(record)).to eq 2
+      end
+
+      it "returns page 1 for the first record when sorted by card_name ascending" do
+        record = offers.find_by(card_name: "Card 00")
+        list = CardDetailList.new(scope, prefix: "offers", params: { "offers_sort" => "card_name_asc" })
+        expect(list.page_of(record)).to eq 1
+      end
+
+      it "returns nil for records that don't match the search query" do
+        record = offers.find_by(card_name: "Card 00")
+        list = CardDetailList.new(scope, prefix: "offers", params: { "offers_q" => "Lotus" })
+        expect(list.page_of(record)).to be_nil
+      end
+    end
+  end
+
+  describe "#page_of with TradeCardWant" do
+    let(:wants) { trade.trade_card_wants }
+    let(:scope) { wants.includes(:expansion) }
+
+    context "with 21 records" do
+      before do
+        21.times { |i| create(:trade_card_want, trade:, card_name: "Card #{format('%02d', i)}") }
+      end
+
+      it "returns page 2 for the 21st record" do
+        record = wants.order(id: :asc).last
+        list = CardDetailList.new(scope, prefix: "wants", params: {})
+        expect(list.page_of(record)).to eq 2
+      end
+
+      it "returns nil for records that don't match the search query" do
+        record = wants.find_by(card_name: "Card 00")
+        list = CardDetailList.new(scope, prefix: "wants", params: { "wants_q" => "Nonexistent" })
+        expect(list.page_of(record)).to be_nil
+      end
+    end
+  end
 end

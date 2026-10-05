@@ -1,5 +1,6 @@
 class TradeCardOffersController < ApplicationController
   include CompletedTradeProtector
+  include CardDetailListAssignment
 
   before_action :authenticate_user!
   before_action :set_event
@@ -16,6 +17,11 @@ class TradeCardOffersController < ApplicationController
     # This prevents general users (even if they manually send trade_id param) from being treated as admin context
     @trade_id = current_user.role_admin? && params[:trade_id].present? ? params[:trade_id].to_i : nil
     if @trade_card_offer.save
+      assign_card_detail_lists_from_referer
+      page = CardDetailList.new(@trade.trade_card_offers.includes(:expansion), prefix: "offers", params: @list_params).page_of(@trade_card_offer)
+      @created_visible = page.present?
+      set_list_page("offers", page) if page
+      build_card_detail_lists
       respond_to do |format|
         format.turbo_stream { render :create }
         format.html { redirect_to trade_path(@trade.event), notice: "カード明細を追加しました" }
@@ -47,6 +53,10 @@ class TradeCardOffersController < ApplicationController
     # Store trade_id for turbo_stream template context awareness
     # Only set @trade_id if current user is admin AND trade_id param is present
     @trade_id = current_user.role_admin? && params[:trade_id].present? ? params[:trade_id].to_i : nil
+    assign_card_detail_lists_from_referer
+    build_card_detail_lists
+    set_list_page("offers", @offers_list.records.current_page)
+    build_card_detail_lists
     respond_to do |format|
       format.turbo_stream { render :destroy }
       format.html { redirect_to trade_path(@trade.event), notice: "カード明細を削除しました" }
