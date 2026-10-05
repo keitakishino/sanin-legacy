@@ -62,4 +62,7 @@ Rails.application.configure do
   # The application uses Japanese as default in other environments,
   # but tests expect English error messages from Rails validations.
   config.i18n.default_locale = :en
+
+  # Disable Discord error notifications in test environment to prevent accidental HTTP requests
+  config.x.discord_error_webhook_url = nil
 end

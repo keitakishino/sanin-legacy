@@ -190,4 +190,32 @@ RSpec.describe "Errors", type: :request do
       expect(response.body).to include("アクセスが拒否されました")
     end
   end
+
+  describe "Unhandled exception (standard Rails handling)" do
+    let(:user) { create(:user) }
+
+    around do |example|
+      Rails.application.env_config["action_dispatch.show_exceptions"] = :all
+      Rails.application.env_config["action_dispatch.show_detailed_exceptions"] = false
+
+      example.run
+
+      Rails.application.env_config["action_dispatch.show_exceptions"] = :rescuable
+      Rails.application.env_config["action_dispatch.show_detailed_exceptions"] = true
+    end
+
+    before do
+      post "/signin", params: { email: user.email, password: user.password }
+    end
+
+    it "returns 500 when unhandled exception occurs" do
+      allow_any_instance_of(EventsController).to receive(:index).and_raise(RuntimeError, "unexpected error")
+
+      get "/events"
+
+      expect(response).to have_http_status(:internal_server_error)
+      expect(response.content_type).to include("text/html")
+      expect(response.body).to include("エラーが発生しました")
+    end
+  end
 end
