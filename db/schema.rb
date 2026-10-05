@@ -10,9 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_02_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "audit_logs", force: :cascade do |t|
+    t.string "action", null: false, comment: "操作の種類。例: event.discard"
+    t.datetime "created_at", null: false
+    t.jsonb "details", default: {}, null: false, comment: "変更内容・失敗理由"
+    t.string "request_id", comment: "リクエスト ID"
+    t.integer "result", null: false, comment: "0=成功, 1=失敗"
+    t.bigint "target_id", comment: "対象リソースの ID"
+    t.string "target_type", comment: "対象リソースのクラス名"
+    t.bigint "user_id", comment: "操作者の user_id（ユーザー削除後も履歴を残すため FK は張らない）"
+    t.index ["created_at"], name: "index_audit_logs_on_created_at"
+    t.index ["target_type", "target_id"], name: "index_audit_logs_on_target_type_and_target_id"
+  end
 
   create_table "events", force: :cascade do |t|
     t.datetime "created_at", null: false
