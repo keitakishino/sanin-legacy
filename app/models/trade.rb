@@ -18,9 +18,15 @@ class Trade < ApplicationRecord
 
   # Logical deletion methods
   def discard!
-    update(discarded_at: Time.current)
-    trade_card_offers.each { |offer| offer.discard! }
-    trade_card_wants.each { |want| want.discard! }
+    @discard_failures = []
+    @discard_failures << self unless update(discarded_at: Time.current)
+    trade_card_offers.each { |offer| @discard_failures << offer unless offer.discard! }
+    trade_card_wants.each { |want| @discard_failures << want unless want.discard! }
+    @discard_failures.empty?
+  end
+
+  def discard_failures
+    @discard_failures || []
   end
 
   def restore!

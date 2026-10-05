@@ -19,8 +19,16 @@ class Event < ApplicationRecord
 
   # Logical deletion methods
   def discard!
-    update(discarded_at: Time.current)
-    trades.each { |trade| trade.discard! }
+    @discard_failures = []
+    @discard_failures << self unless update(discarded_at: Time.current)
+    trades.each do |trade|
+      @discard_failures.concat(trade.discard_failures) unless trade.discard!
+    end
+    @discard_failures.empty?
+  end
+
+  def discard_failures
+    @discard_failures || []
   end
 
   def restore!

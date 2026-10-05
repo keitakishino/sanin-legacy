@@ -60,7 +60,7 @@ class TradeCardWantsController < ApplicationController
     if @trade_card_want.destroyed?
       record_audit("trade_card_want.destroy", target: @trade_card_want, details: { trade_id: @trade.id, card_name: @trade_card_want.card_name, quantity: @trade_card_want.quantity })
     else
-      record_audit("trade_card_want.destroy", target: @trade_card_want, result: :failure, details: audit_failure_details(@trade_card_want).merge(trade_id: @trade.id, card_name: @trade_card_want.card_name, quantity: @trade_card_want.quantity))
+      report_operation_failure("trade_card_want.destroy", @trade_card_want, details: { trade_id: @trade.id, card_name: @trade_card_want.card_name, quantity: @trade_card_want.quantity })
     end
     assign_card_detail_lists_from_referer
     build_card_detail_lists
