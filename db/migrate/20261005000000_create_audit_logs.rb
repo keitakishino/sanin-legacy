@@ -11,7 +11,7 @@ class CreateAuditLogs < ActiveRecord::Migration[8.1]
       t.datetime :created_at, null: false
 
       t.index :created_at
-      t.index [:target_type, :target_id]
+      t.index [ :target_type, :target_id ]
     end
   end
 end

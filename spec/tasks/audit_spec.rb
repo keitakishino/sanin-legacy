@@ -5,7 +5,7 @@ describe 'audit tasks', type: :task do
   let(:rake_app) { Rake::Application.new }
 
   def create_rake_task(task_name)
-    rake_app.rake_require('tasks/audit', [Rails.root.join('lib').to_s], ['lib/tasks/audit.rake'])
+    rake_app.rake_require('tasks/audit', [ Rails.root.join('lib').to_s ], [ 'lib/tasks/audit.rake' ])
     Rake::Task.define_task(:environment)
     Rake::Task[task_name]
   end

@@ -1,6 +1,6 @@
 namespace :audit do
   desc "対象1件の監査ログ履歴を表示 (例: rake audit:show[Event,17])"
-  task :show, [:target_type, :target_id] => :environment do |_t, args|
+  task :show, [ :target_type, :target_id ] => :environment do |_t, args|
     if args[:target_type].blank? || args[:target_id].blank?
       warn "Usage: rake audit:show[TargetType,ID]"
       exit(1)
@@ -18,7 +18,7 @@ namespace :audit do
   end
 
   desc "直近N時間の監査ログを表示 (例: rake audit:recent[24])"
-  task :recent, [:hours] => :environment do |_t, args|
+  task :recent, [ :hours ] => :environment do |_t, args|
     hours = (args[:hours].presence || 24).to_i
     logs = AuditLog.where(created_at: hours.hours.ago..)
                    .includes(:user)
