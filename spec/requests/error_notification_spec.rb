@@ -34,6 +34,12 @@ RSpec.describe "Error Notification", type: :request do
       # Restore original config values
       Rails.configuration.x.discord_error_webhook_url = @original_webhook_url
       Rails.configuration.x.release = @original_release
+
+      # Unsubscribe the test subscriber to avoid affecting other tests
+      Rails.error.unsubscribe(@subscriber) if defined?(@subscriber)
+
+      # Clear the mock to prevent carry-over to other specs
+      allow(ErrorNotification::DiscordSender).to receive(:deliver_later).and_call_original
     end
   end
 

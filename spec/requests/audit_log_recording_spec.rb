@@ -83,6 +83,8 @@ RSpec.describe "Audit Log Recording", type: :request do
       # Mock discard! to set errors without actually updating
       allow_any_instance_of(Event).to receive(:discard!) do |event_inst|
         event_inst.errors.add(:base, "Discard failed")
+        event_inst.instance_variable_set(:@discard_failures, [ event_inst ])
+        false
       end
 
       expect {
