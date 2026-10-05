@@ -27,6 +27,24 @@ RSpec.describe "Hamburger Menu", type: :system do
       drawer = find("[data-hamburger-menu-target='drawer']", visible: :all)
       expect(drawer).not_to be_visible
     end
+
+    context "管理者がサインインしたとき" do
+      before do
+        sign_in admin
+        visit root_path
+      end
+
+      it "PC ナビに「イベント管理」「ユーザー管理」「招待コード管理」のリンクがあり、「イベント管理」をクリックすると admin_events_path に移る" do
+        nav = find("nav:not([data-hamburger-menu-target])")
+        expect(nav).to have_link("イベント管理")
+        expect(nav).to have_link("ユーザー管理")
+        expect(nav).to have_link("招待コード管理")
+
+        click_link("イベント管理")
+
+        expect(page).to have_current_path(admin_events_path)
+      end
+    end
   end
 
   describe "モバイル表示（md未満）" do
