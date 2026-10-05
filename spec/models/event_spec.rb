@@ -14,14 +14,14 @@ RSpec.describe Event, type: :model do
   describe 'validations' do
     describe 'presence validations' do
       it 'validates presence of created_by' do
-        event = Event.new(title: 'Test Event', event_date: Date.today)
+        event = Event.new(title: 'Test Event', event_date: Event.current_date)
         expect(event.valid?).to be false
         expect(event.errors[:created_by]).to be_present
       end
 
       it 'validates presence of title' do
         user = create(:user)
-        event = Event.new(event_date: Date.today, created_by: user)
+        event = Event.new(event_date: Event.current_date, created_by: user)
         expect(event.valid?).to be false
         expect(event.errors[:title]).to be_present
       end
@@ -36,7 +36,7 @@ RSpec.describe Event, type: :model do
 
     describe 'length validations' do
       it 'validates title length is at most 255 characters' do
-        event = Event.new(title: 'a' * 256, event_date: Date.today)
+        event = Event.new(title: 'a' * 256, event_date: Event.current_date)
         expect(event.valid?).to be false
         expect(event.errors[:title]).to be_present
       end
@@ -46,19 +46,19 @@ RSpec.describe Event, type: :model do
       let(:user) { create(:user) }
 
       it 'rejects past date for event_date' do
-        event = Event.new(title: 'Test Event', event_date: Date.today - 1.day, created_by: user)
+        event = Event.new(title: 'Test Event', event_date: Event.current_date - 1.day, created_by: user)
         expect(event.valid?).to be false
         expect(event.errors[:event_date]).to be_present
       end
 
       it 'accepts today as event_date' do
-        event = Event.new(title: 'Test Event', event_date: Date.today, created_by: user)
+        event = Event.new(title: 'Test Event', event_date: Event.current_date, created_by: user)
         expect(event.valid?).to be true
         expect(event.errors[:event_date]).to be_empty
       end
 
       it 'accepts future date for event_date' do
-        event = Event.new(title: 'Test Event', event_date: Date.today + 1.day, created_by: user)
+        event = Event.new(title: 'Test Event', event_date: Event.current_date + 1.day, created_by: user)
         expect(event.valid?).to be true
         expect(event.errors[:event_date]).to be_empty
       end
@@ -70,7 +70,7 @@ RSpec.describe Event, type: :model do
       context 'when title is blank' do
         it 'displays Japanese error message' do
           with_locale(:ja) do
-            event = Event.new(title: '', event_date: Date.today, created_by: user)
+            event = Event.new(title: '', event_date: Event.current_date, created_by: user)
             event.valid?
             expect(event.errors.full_messages).to include("イベント名 を入力してください")
           end
@@ -80,7 +80,7 @@ RSpec.describe Event, type: :model do
       context 'when title exceeds max length' do
         it 'displays Japanese error message for too_long' do
           with_locale(:ja) do
-            event = Event.new(title: 'a' * 256, event_date: Date.today, created_by: user)
+            event = Event.new(title: 'a' * 256, event_date: Event.current_date, created_by: user)
             event.valid?
             expect(event.errors.full_messages).to include("イベント名 は長すぎます（最大255文字）")
           end
@@ -100,7 +100,7 @@ RSpec.describe Event, type: :model do
       context 'when event_date is in the past' do
         it 'displays Japanese error message for past date' do
           with_locale(:ja) do
-            event = Event.new(title: 'Test Event', event_date: Date.today - 1.day, created_by: user)
+            event = Event.new(title: 'Test Event', event_date: Event.current_date - 1.day, created_by: user)
             event.valid?
             expect(event.errors.full_messages).to include("イベント日時 は過去の日付に設定することはできません")
           end
@@ -189,6 +189,32 @@ RSpec.describe Event, type: :model do
     describe '.only_discarded' do
       it 'returns only discarded events' do
         expect(Event.only_discarded.all).to contain_exactly(discarded_event)
+      end
+    end
+  end
+
+  describe 'JST 基準の日付判定' do
+    let(:user) { create(:user) }
+
+    it 'treats past dates in JST as invalid' do
+      travel_to Time.utc(2026, 10, 5, 16, 0) do
+        event = Event.new(title: 'Test Event', event_date: Date.new(2026, 10, 5), created_by: user)
+        expect(event.valid?).to be false
+        expect(event.errors[:event_date]).to be_present
+      end
+    end
+
+    it 'treats today in JST as valid' do
+      travel_to Time.utc(2026, 10, 5, 16, 0) do
+        event = Event.new(title: 'Test Event', event_date: Date.new(2026, 10, 6), created_by: user)
+        expect(event.valid?).to be true
+        expect(event.errors[:event_date]).to be_empty
+      end
+    end
+
+    it 'returns JST date for Event.current_date' do
+      travel_to Time.utc(2026, 10, 5, 16, 0) do
+        expect(Event.current_date).to eq(Date.new(2026, 10, 6))
       end
     end
   end
