@@ -14,6 +14,7 @@ class Admin::TradesController < Admin::BaseController
     # Validate status value
     if status_param.present? && !Trade.statuses.keys.include?(status_param)
       @trade.errors.add(:status, "は無効な値です")
+      record_audit("trade.update", target: @trade, result: :failure, details: audit_failure_details(@trade))
       render :show, status: :unprocessable_entity
       return
     end
@@ -25,11 +26,13 @@ class Admin::TradesController < Admin::BaseController
     end
 
     if @trade.update(trade_params)
+      record_audit("trade.update", target: @trade, details: @trade.saved_changes.except("updated_at"))
       respond_to do |format|
         format.turbo_stream
         format.html { redirect_to admin_event_trade_path(@event, @trade), notice: "トレード情報を更新しました" }
       end
     else
+      record_audit("trade.update", target: @trade, result: :failure, details: audit_failure_details(@trade))
       respond_to do |format|
         format.turbo_stream { render :show, status: :unprocessable_entity }
         format.html { render :show, status: :unprocessable_entity }

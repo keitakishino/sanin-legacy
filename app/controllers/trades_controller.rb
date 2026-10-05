@@ -16,6 +16,7 @@ class TradesController < ApplicationController
     @trade = Trade.find_or_create_by(event: @event, user: current_user) do |trade|
       trade.status = :pending
     end
+    record_audit("trade.create", target: @trade, details: { event_id: @event.id }) if @trade.previously_new_record?
     authorize_user!
   end
 
