@@ -37,10 +37,14 @@ class Admin::EventsController < Admin::BaseController
 
   def destroy
     @event.discard!
-    if @event.errors.empty?
-      record_audit("event.discard", target: @event)
+    failures = @event.discard_failures
+    if failures.include?(@event)
+      report_operation_failure("event.discard", @event)
     else
-      record_audit("event.discard", target: @event, result: :failure, details: audit_failure_details(@event))
+      record_audit("event.discard", target: @event)
+    end
+    (failures - [ @event ]).each do |record|
+      report_operation_failure("#{record.class.name.underscore}.discard", record, details: { event_id: @event.id })
     end
     redirect_to admin_events_path, notice: t("admin.events.deleted")
   end

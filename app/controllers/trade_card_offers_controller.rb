@@ -60,7 +60,7 @@ class TradeCardOffersController < ApplicationController
     if @trade_card_offer.destroyed?
       record_audit("trade_card_offer.destroy", target: @trade_card_offer, details: { trade_id: @trade.id, card_name: @trade_card_offer.card_name, quantity: @trade_card_offer.quantity })
     else
-      record_audit("trade_card_offer.destroy", target: @trade_card_offer, result: :failure, details: audit_failure_details(@trade_card_offer).merge(trade_id: @trade.id, card_name: @trade_card_offer.card_name, quantity: @trade_card_offer.quantity))
+      report_operation_failure("trade_card_offer.destroy", @trade_card_offer, details: { trade_id: @trade.id, card_name: @trade_card_offer.card_name, quantity: @trade_card_offer.quantity })
     end
     assign_card_detail_lists_from_referer
     build_card_detail_lists
