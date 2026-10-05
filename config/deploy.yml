@@ -58,6 +58,7 @@ env:
     - TWITTER_OAUTH_API_KEY
     - TWITTER_OAUTH_API_SECRET
     - KAMAL_REGISTRY_PASSWORD
+    - DISCORD_ERROR_WEBHOOK_URL
   # Note: DATABASE_HOST, DATABASE_USER, DATABASE_PASSWORD, and DATABASE_PORT are injected into the Rails app container.
   # These correspond to values defined in .kamal/secrets (see Issue #279) and are required by config/database.yml in production.
   # POSTGRES_PASSWORD for the PostgreSQL accessory is mapped from DATABASE_PASSWORD using Kamal's secret aliasing syntax.

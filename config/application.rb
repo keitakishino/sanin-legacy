@@ -33,6 +33,12 @@ module SaninLegacy
     # this app and would otherwise render as "Translation missing").
     config.i18n.fallbacks = [ :en ]
 
+    # Discord error notification webhook URL (from Kamal secrets or environment)
+    config.x.discord_error_webhook_url = ENV["DISCORD_ERROR_WEBHOOK_URL"].presence
+
+    # Release identifier for error notifications (git SHA or KAMAL_VERSION)
+    config.x.release = ENV["KAMAL_VERSION"].presence || ENV["GIT_SHA"].presence || "unknown"
+
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
   end
