@@ -1,4 +1,6 @@
 ja:
+  trades:
+    event_ended: "このイベントは終了しています"
   toasts:
     trade_card_offer:
       create: "「%{card_name}」を出すカードに追加しました"
@@ -199,6 +201,7 @@ ja:
       created: "イベントを作成しました"
       updated: "イベントを更新しました"
       deleted: "イベントを削除しました"
+      delete_failed: "イベントを削除できませんでした"
       confirm_delete: "本当に削除してもよろしいですか？"
     users:
       title: "ユーザー管理"

@@ -40,8 +40,8 @@ RSpec.describe "Admin::Events", type: :request do
       end
 
       it "displays events in reverse chronological order by event_date" do
-        event1 = create(:event, created_by: admin_user, event_date: Date.today)
-        event2 = create(:event, created_by: admin_user, event_date: Date.today + 7.days)
+        event1 = create(:event, created_by: admin_user, event_date: Event.current_date)
+        event2 = create(:event, created_by: admin_user, event_date: Event.current_date + 7.days)
 
         get admin_events_path
         body = response.body
@@ -147,7 +147,7 @@ RSpec.describe "Admin::Events", type: :request do
             event: {
               title: "New Event",
               description: "Event Description",
-              event_date: Date.today + 7.days
+              event_date: Event.current_date + 7.days
             }
           }
         end
@@ -182,7 +182,7 @@ RSpec.describe "Admin::Events", type: :request do
             event: {
               title: "",
               description: "Event Description",
-              event_date: Date.today + 7.days
+              event_date: Event.current_date + 7.days
             }
           }
         end
@@ -209,7 +209,7 @@ RSpec.describe "Admin::Events", type: :request do
               event: {
                 title: "Past Event",
                 description: "Event Description",
-                event_date: Date.today - 1.day
+                event_date: Event.current_date - 1.day
               }
             }
           end
@@ -361,14 +361,14 @@ RSpec.describe "Admin::Events", type: :request do
             {
               event: {
                 title: "Updated Title",
-                event_date: Date.today - 1.day
+                event_date: Event.current_date - 1.day
               }
             }
           end
 
           it "does not update the event" do
             patch admin_event_path(event), params: past_params
-            expect(event.reload.event_date).not_to eq(Date.today - 1.day)
+            expect(event.reload.event_date).not_to eq(Event.current_date - 1.day)
           end
 
           it "returns unprocessable_entity status" do
@@ -456,6 +456,100 @@ RSpec.describe "Admin::Events", type: :request do
         expect(Trade.find_by(id: trade_id)).to be_nil
         expect(Trade.with_discarded.find_by(id: trade_id)).not_to be_nil
         expect(Trade.with_discarded.find_by(id: trade_id).discarded?).to be true
+      end
+
+      context "with past event_date" do
+        let(:past_event) do
+          create(:event, created_by: admin_user).tap do |e|
+            e.update_column(:event_date, Event.current_date - 1)
+          end
+        end
+
+        it "deletes a past event successfully" do
+          delete admin_event_path(past_event)
+          follow_redirect!
+          expect(response.body).to include(I18n.t("admin.events.deleted"))
+        end
+
+        it "sets discarded_at for past event" do
+          delete admin_event_path(past_event)
+          expect(Event.with_discarded.find(past_event.id).discarded?).to be true
+        end
+
+        it "removes past event from index list" do
+          event_title = past_event.title
+          delete admin_event_path(past_event)
+          get admin_events_path
+          expect(response.body).not_to include(event_title)
+        end
+
+        it "displays past events in admin index" do
+          active_event = create(:event, created_by: admin_user)
+          past_event_2 = create(:event, created_by: admin_user).tap do |e|
+            e.update_column(:event_date, Event.current_date - 2)
+          end
+
+          get admin_events_path
+          expect(response.body).to include(active_event.title)
+          expect(response.body).to include(past_event_2.title)
+        end
+
+        it "cascades logical deletion to related trades of past event" do
+          trade = create(:trade, event: past_event, user: general_user)
+          trade_id = trade.id
+
+          delete admin_event_path(past_event)
+
+          expect(Event.with_discarded.find(past_event.id).discarded?).to be true
+          expect(Trade.find_by(id: trade_id)).to be_nil
+          expect(Trade.with_discarded.find_by(id: trade_id).discarded?).to be true
+        end
+      end
+
+      context "when discard fails" do
+        context "when trade discard fails" do
+          it "does not discard the event and trade" do
+            trade = create(:trade, event: event, user: general_user)
+            allow_any_instance_of(Trade).to receive(:update).and_wrap_original do |m, *args, **kw|
+              if kw.key?(:discarded_at) || (args.first.is_a?(Hash) && args.first.key?(:discarded_at))
+                m.receiver.errors.add(:base, "論理削除に失敗しました")
+                false
+              else
+                m.call(*args, **kw)
+              end
+            end
+
+            delete admin_event_path(event)
+            follow_redirect!
+
+            expect(response.body).not_to include(I18n.t("admin.events.deleted"))
+            expect(response.body).to include(I18n.t("admin.events.delete_failed"))
+            expect(event.reload.discarded?).to be false
+            expect(trade.reload.discarded?).to be false
+          end
+        end
+
+        context "when event discard fails" do
+          it "does not discard the event and does not discard trades" do
+            trade = create(:trade, event: event, user: general_user)
+            allow_any_instance_of(Event).to receive(:save).and_wrap_original do |m, *args, **kw|
+              if kw[:context] == :discard
+                m.receiver.errors.add(:base, "論理削除に失敗しました")
+                false
+              else
+                m.call(*args, **kw)
+              end
+            end
+
+            delete admin_event_path(event)
+            follow_redirect!
+
+            expect(response.body).not_to include(I18n.t("admin.events.deleted"))
+            expect(response.body).to include(I18n.t("admin.events.delete_failed"))
+            expect(event.reload.discarded?).to be false
+            expect(trade.reload.discarded?).to be false
+          end
+        end
       end
     end
   end

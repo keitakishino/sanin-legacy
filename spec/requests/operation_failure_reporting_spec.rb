@@ -29,9 +29,17 @@ RSpec.describe "Operation Failure Reporting", type: :request do
       post signin_path, params: { email: admin_user.email, password: "password123" }
     end
 
-    it "reports OperationFailed error when discarding past-date event" do
+    it "reports OperationFailed error when event discard fails" do
       event = create(:event)
-      event.update_column(:event_date, Date.today - 3)
+
+      allow_any_instance_of(Event).to receive(:save).and_wrap_original do |m, *args, **kw|
+        if kw[:context] == :discard
+          m.receiver.errors.add(:base, "論理削除に失敗しました")
+          false
+        else
+          m.call(*args, **kw)
+        end
+      end
 
       allow(Rails.error).to receive(:report).and_call_original
 
@@ -46,7 +54,15 @@ RSpec.describe "Operation Failure Reporting", type: :request do
 
     it "sends Discord notification with error details" do
       event = create(:event)
-      event.update_column(:event_date, Date.today - 3)
+
+      allow_any_instance_of(Event).to receive(:save).and_wrap_original do |m, *args, **kw|
+        if kw[:context] == :discard
+          m.receiver.errors.add(:base, "論理削除に失敗しました")
+          false
+        else
+          m.call(*args, **kw)
+        end
+      end
 
       allow(ErrorNotification::DiscordSender).to receive(:deliver_later).and_call_original
 
@@ -68,7 +84,15 @@ RSpec.describe "Operation Failure Reporting", type: :request do
 
     it "records failure in audit_logs with action=event.discard" do
       event = create(:event)
-      event.update_column(:event_date, Date.today - 3)
+
+      allow_any_instance_of(Event).to receive(:save).and_wrap_original do |m, *args, **kw|
+        if kw[:context] == :discard
+          m.receiver.errors.add(:base, "論理削除に失敗しました")
+          false
+        else
+          m.call(*args, **kw)
+        end
+      end
 
       expect {
         delete admin_event_path(event)
@@ -79,12 +103,20 @@ RSpec.describe "Operation Failure Reporting", type: :request do
 
     it "includes failure reason in audit_logs details" do
       event = create(:event)
-      event.update_column(:event_date, Date.today - 3)
+
+      allow_any_instance_of(Event).to receive(:save).and_wrap_original do |m, *args, **kw|
+        if kw[:context] == :discard
+          m.receiver.errors.add(:base, "論理削除に失敗しました")
+          false
+        else
+          m.call(*args, **kw)
+        end
+      end
 
       delete admin_event_path(event)
 
       audit_log = AuditLog.where(action: "event.discard", result: :failure, target_type: "Event", target_id: event.id).last
-      expect(audit_log.details["reason"]).to include("過去の日付")
+      expect(audit_log.details["reason"]).to include("論理削除に失敗しました")
     end
   end
 
@@ -255,12 +287,13 @@ RSpec.describe "Operation Failure Reporting", type: :request do
 
     it "redirects and shows success message when deleting past-date event" do
       event = create(:event)
-      event.update_column(:event_date, Date.today - 3)
+      event.update_column(:event_date, Event.current_date - 1)
 
       delete admin_event_path(event)
       follow_redirect!
 
       expect(response.body).to include("イベントを削除しました")
+      expect(Event.with_discarded.find(event.id).discarded?).to be true
     end
   end
 
