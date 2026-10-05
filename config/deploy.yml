@@ -1,6 +1,13 @@
 # Name of your application. Used to uniquely configure containers.
 service: sanin_legacy
 
+# Rotate Docker logs: 10MB x 5 files (max 50MB).
+logging:
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: 5
+
 # Name of the container image (use your-user/app-name on external registries).
 # Placeholder: Replace <Docker Hub ユーザー名> with your actual Docker Hub username
 image: "keitakishino/sanin_legacy"
