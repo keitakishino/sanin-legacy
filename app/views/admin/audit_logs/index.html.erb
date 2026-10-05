@@ -1,0 +1,111 @@
+<div class="bg-stone-50 py-8">
+  <h2 class="text-3xl font-bold mb-6 text-stone-800"><%= t("admin.audit_logs.title") %></h2>
+
+  <div class="bg-white border border-stone-200 rounded-lg p-6 mb-8">
+    <h3 class="text-xl font-semibold mb-4 text-stone-800"><%= t("admin.audit_logs.filter_title") %></h3>
+
+    <%= form_with url: admin_audit_logs_path, method: :get, local: true, class: "space-y-4" do |f| %>
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1">
+          <%= f.label :result, t("admin.audit_logs.result") %>
+          <%= f.select :result, options_for_select(
+            [
+              [t("admin.audit_logs.filter_all"), ""],
+              [t("admin.audit_logs.success"), "success"],
+              [t("admin.audit_logs.failure"), "failure"]
+            ],
+            params[:result]
+          ), {}, { id: "result", class: "w-full px-4 py-2 border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" } %>
+        </div>
+        <div class="flex-1">
+          <%= f.label :target_type, t("admin.audit_logs.target_type") %>
+          <%= f.select :target_type, options_for_select(
+            [[t("admin.audit_logs.filter_all"), ""]] + @target_types.map { |type| [type, type] },
+            params[:target_type]
+          ), {}, { id: "target_type", class: "w-full px-4 py-2 border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" } %>
+        </div>
+        <div class="flex-1">
+          <%= f.label :target_id, t("admin.audit_logs.target_id") %>
+          <%= f.text_field :target_id, placeholder: t("admin.audit_logs.target_id"), value: params[:target_id], id: "target_id", class: "w-full px-4 py-2 border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" %>
+        </div>
+      </div>
+      <div>
+        <%= f.submit t("admin.audit_logs.filter_button"), class: "bg-indigo-700 text-white px-4 py-2 rounded hover:bg-indigo-800 font-medium" %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @audit_logs.empty? %>
+    <div class="bg-white border border-stone-200 rounded-lg p-6">
+      <p class="text-stone-500"><%= t("admin.audit_logs.no_logs") %></p>
+    </div>
+  <% else %>
+    <div class="bg-white border border-stone-200 rounded-lg overflow-hidden">
+      <table id="audit_logs" class="w-full">
+        <thead class="bg-stone-100 border-b border-stone-200">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.audit_logs.occurred_at") %></th>
+            <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.audit_logs.actor") %></th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.audit_logs.action") %></th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.audit_logs.target") %></th>
+            <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.audit_logs.result") %></th>
+            <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.audit_logs.details") %></th>
+            <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("admin.audit_logs.request_id") %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @audit_logs.each do |log| %>
+            <tr class="border-b border-stone-200 hover:bg-stone-50" data-audit-log-id="<%= log.id %>">
+              <td class="px-6 py-4 text-sm"><%= log.created_at.in_time_zone("Asia/Tokyo").strftime("%m/%d %H:%M") %></td>
+              <td class="hidden md:table-cell px-6 py-4 text-sm">
+                <% if log.user_id %>
+                  <% if log.user %>
+                    <%= log.user.email.presence || log.user.username %>
+                  <% else %>
+                    <%= t("admin.audit_logs.deleted_user", user_id: log.user_id) %>
+                  <% end %>
+                <% else %>
+                  －
+                <% end %>
+              </td>
+              <td class="px-6 py-4 text-sm"><%= t("admin.audit_logs.actions.#{log.action.tr('.', '_')}", default: log.action) %></td>
+              <td class="px-6 py-4 text-sm">
+                <% if log.target_type %>
+                  <%= "#{log.target_type}##{log.target_id || '-'}" %>
+                <% else %>
+                  －
+                <% end %>
+              </td>
+              <td class="px-6 py-4 text-sm">
+                <% if log.result_success? %>
+                  <span class="text-sm text-stone-800"><%= t("admin.audit_logs.success") %></span>
+                <% else %>
+                  <span class="audit-log-failure-badge bg-red-50 text-red-700 px-3 py-1 rounded text-xs font-semibold"><%= t("admin.audit_logs.failure") %></span>
+                <% end %>
+              </td>
+              <% details_text = if log.details.present? && log.details.is_a?(Hash)
+                log.details['reason'].presence || log.details.to_json
+              end %>
+              <td class="hidden md:table-cell px-6 py-4 text-sm" title="<%= h(details_text) %>">
+                <% if log.details.present? && log.details.is_a?(Hash) %>
+                  <% if log.details['reason'] %>
+                    <%= truncate(log.details['reason'], length: 60) %>
+                  <% else %>
+                    <%= truncate(log.details.to_json, length: 60) %>
+                  <% end %>
+                <% else %>
+                  －
+                <% end %>
+              </td>
+              <td class="hidden md:table-cell px-6 py-4 text-sm font-mono text-xs"><%= log.request_id || "－" %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-8">
+      <%= paginate @audit_logs %>
+    </div>
+  <% end %>
+</div>

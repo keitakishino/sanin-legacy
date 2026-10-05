@@ -85,6 +85,8 @@
                   class: "text-sm font-semibold #{current_page?(admin_users_path) ? 'text-accent' : 'text-stone-800 hover:text-accent'}" %>
               <%= link_to "招待コード管理", admin_invitations_path,
                   class: "text-sm font-semibold #{current_page?(admin_invitations_path) ? 'text-accent' : 'text-stone-800 hover:text-accent'}" %>
+              <%= link_to t("admin.audit_logs.nav_label"), admin_audit_logs_path,
+                  class: "text-sm font-semibold #{current_page?(admin_audit_logs_path) ? 'text-accent' : 'text-stone-800 hover:text-accent'}" %>
             </div>
             <div class="flex items-center gap-4 ml-4 pl-4 border-l border-stone-200">
               <div class="flex items-center gap-2">
@@ -146,6 +148,9 @@
                 class: "text-sm font-semibold text-stone-800 hover:text-accent py-2",
                 data: { action: "click->hamburger-menu#close" } %>
             <%= link_to "招待コード管理", admin_invitations_path,
+                class: "text-sm font-semibold text-stone-800 hover:text-accent py-2",
+                data: { action: "click->hamburger-menu#close" } %>
+            <%= link_to t("admin.audit_logs.nav_label"), admin_audit_logs_path,
                 class: "text-sm font-semibold text-stone-800 hover:text-accent py-2",
                 data: { action: "click->hamburger-menu#close" } %>
           </nav>

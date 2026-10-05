@@ -50,6 +50,7 @@ Rails.application.routes.draw do
   get "/histories", to: "histories#index", as: :histories
 
   namespace :admin do
+    resources :audit_logs, only: [ :index ]
     resources :invitations, only: [ :index, :create ]
     resources :users, only: %i[ index show ]
     resources :events, only: [ :index, :new, :create, :edit, :update, :destroy ] do
