@@ -41,6 +41,11 @@ class ApplicationController < ActionController::Base
     @current_user = nil
   end
 
+  def append_info_to_payload(payload)
+    super
+    payload[:user_id] = @current_user&.id || session[:user_id]
+  end
+
   private
 
   def generate_unique_username(email)
