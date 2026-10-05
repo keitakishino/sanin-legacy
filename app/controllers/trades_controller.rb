@@ -13,6 +13,10 @@ class TradesController < ApplicationController
 
   def set_or_create_trade
     @event = Event.find(params[:event_id])
+    if @event.past? && !Trade.exists?(event: @event, user: current_user)
+      redirect_to events_path, alert: t("trades.event_ended")
+      return
+    end
     @trade = Trade.find_or_create_by(event: @event, user: current_user) do |trade|
       trade.status = :pending
     end
