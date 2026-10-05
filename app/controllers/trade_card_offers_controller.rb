@@ -17,6 +17,7 @@ class TradeCardOffersController < ApplicationController
     # This prevents general users (even if they manually send trade_id param) from being treated as admin context
     @trade_id = current_user.role_admin? && params[:trade_id].present? ? params[:trade_id].to_i : nil
     if @trade_card_offer.save
+      record_audit("trade_card_offer.create", target: @trade_card_offer, details: { trade_id: @trade.id, card_name: @trade_card_offer.card_name, quantity: @trade_card_offer.quantity })
       assign_card_detail_lists_from_referer
       page = CardDetailList.new(@trade.trade_card_offers.includes(:expansion), prefix: "offers", params: @list_params).page_of(@trade_card_offer)
       @created_visible = page.present?
@@ -27,6 +28,7 @@ class TradeCardOffersController < ApplicationController
         format.html { redirect_to trade_path(@trade.event), notice: "カード明細を追加しました" }
       end
     else
+      record_audit("trade_card_offer.create", target: nil, result: :failure, details: audit_failure_details(@trade_card_offer).merge(trade_id: @trade.id))
       respond_to do |format|
         format.turbo_stream { render :form_error, status: :unprocessable_entity }
         format.html { redirect_to trade_path(@trade.event), alert: @trade_card_offer.errors.full_messages.join(", ") }
@@ -36,11 +38,13 @@ class TradeCardOffersController < ApplicationController
 
   def update
     if @trade_card_offer.update(trade_card_offer_params)
+      record_audit("trade_card_offer.update", target: @trade_card_offer, details: @trade_card_offer.saved_changes.except("updated_at").merge("trade_id" => @trade.id))
       respond_to do |format|
         format.turbo_stream { render :update }
         format.html { redirect_to trade_path(@trade.event), notice: "カード明細を更新しました" }
       end
     else
+      record_audit("trade_card_offer.update", target: @trade_card_offer, result: :failure, details: audit_failure_details(@trade_card_offer).merge("trade_id" => @trade.id))
       respond_to do |format|
         format.turbo_stream { render :form_error, status: :unprocessable_entity }
         format.html { redirect_to trade_path(@trade.event), alert: @trade_card_offer.errors.full_messages.join(", ") }
@@ -53,6 +57,11 @@ class TradeCardOffersController < ApplicationController
     # Store trade_id for turbo_stream template context awareness
     # Only set @trade_id if current user is admin AND trade_id param is present
     @trade_id = current_user.role_admin? && params[:trade_id].present? ? params[:trade_id].to_i : nil
+    if @trade_card_offer.destroyed?
+      record_audit("trade_card_offer.destroy", target: @trade_card_offer, details: { trade_id: @trade.id, card_name: @trade_card_offer.card_name, quantity: @trade_card_offer.quantity })
+    else
+      record_audit("trade_card_offer.destroy", target: @trade_card_offer, result: :failure, details: audit_failure_details(@trade_card_offer).merge(trade_id: @trade.id, card_name: @trade_card_offer.card_name, quantity: @trade_card_offer.quantity))
+    end
     assign_card_detail_lists_from_referer
     build_card_detail_lists
     set_list_page("offers", @offers_list.records.current_page)

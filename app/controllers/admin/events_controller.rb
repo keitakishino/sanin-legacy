@@ -14,8 +14,10 @@ class Admin::EventsController < Admin::BaseController
     @event.created_by = current_user
 
     if @event.save
+      record_audit("event.create", target: @event, details: { title: @event.title, event_date: @event.event_date })
       redirect_to admin_events_path, notice: t("admin.events.created")
     else
+      record_audit("event.create", target: nil, result: :failure, details: audit_failure_details(@event))
       render :new, status: :unprocessable_entity
     end
   end
@@ -25,14 +27,21 @@ class Admin::EventsController < Admin::BaseController
 
   def update
     if @event.update(event_params)
+      record_audit("event.update", target: @event, details: @event.saved_changes.except("updated_at"))
       redirect_to admin_events_path, notice: t("admin.events.updated")
     else
+      record_audit("event.update", target: @event, result: :failure, details: audit_failure_details(@event))
       render :edit, status: :unprocessable_entity
     end
   end
 
   def destroy
     @event.discard!
+    if @event.errors.empty?
+      record_audit("event.discard", target: @event)
+    else
+      record_audit("event.discard", target: @event, result: :failure, details: audit_failure_details(@event))
+    end
     redirect_to admin_events_path, notice: t("admin.events.deleted")
   end
 

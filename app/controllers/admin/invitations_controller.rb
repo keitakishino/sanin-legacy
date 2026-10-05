@@ -13,6 +13,7 @@ class Admin::InvitationsController < Admin::BaseController
     begin
       @invitation = build_invitation
       @invitation.save!
+      record_audit("invitation.issue", target: @invitation, details: { expires_at: @invitation.expires_at })
       respond_to do |format|
         format.turbo_stream
         format.html { redirect_to admin_invitations_path, notice: t("admin.invitations.created") }
@@ -39,6 +40,7 @@ class Admin::InvitationsController < Admin::BaseController
   end
 
   def handle_creation_error
+    record_audit("invitation.issue", target: nil, result: :failure, details: audit_failure_details(@invitation))
     @invitation.errors.add(:base, t("admin.invitations.creation_failed"))
     respond_to do |format|
       format.turbo_stream { render :create, status: :unprocessable_entity }

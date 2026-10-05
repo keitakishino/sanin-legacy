@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::Base
+  include AuditRecordable
+
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   # Disabled in test environment to allow RSpec request specs to run without User-Agent issues
   allow_browser versions: :modern unless Rails.env.test?
