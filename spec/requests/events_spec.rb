@@ -3,9 +3,9 @@ require "nokogiri"
 
 RSpec.describe "Events", type: :request do
   let(:user) { create(:user, username: "testuser", email: "test@example.com", password: "password123") }
-  let(:event1) { create(:event, title: "Event 1", event_date: Date.today + 5.days) }
-  let(:event2) { create(:event, title: "Event 2", event_date: Date.today + 3.days) }
-  let(:event3) { create(:event, title: "Event 3", event_date: Date.today + 10.days) }
+  let(:event1) { create(:event, title: "Event 1", event_date: Event.current_date + 5.days) }
+  let(:event2) { create(:event, title: "Event 2", event_date: Event.current_date + 3.days) }
+  let(:event3) { create(:event, title: "Event 3", event_date: Event.current_date + 10.days) }
 
   describe "GET /events (index)" do
     context "when user is not logged in" do
@@ -78,7 +78,7 @@ RSpec.describe "Events", type: :request do
 
       it "does not display discarded events" do
         event1
-        discarded_event = create(:event, title: "Discarded Event", event_date: Date.today + 1.day)
+        discarded_event = create(:event, title: "Discarded Event", event_date: Event.current_date + 1.day)
         discarded_event.discard!
 
         get "/events"
@@ -122,6 +122,32 @@ RSpec.describe "Events", type: :request do
         # Verify the links don't contain the incorrect format
         # /events.90 would be created by events_path(event)
         expect(response.body).not_to match(%r{/events\.\d+})
+      end
+
+      context "when event_date is in the past" do
+        it "does not display past events" do
+          past_event = create(:event, title: "Past Event").tap do |e|
+            e.update_column(:event_date, Event.current_date - 1)
+          end
+          future_event = create(:event, title: "Future Event", event_date: Event.current_date + 5.days)
+
+          get "/events"
+          expect(response.body).to include(future_event.title)
+          expect(response.body).not_to include("Past Event")
+        end
+      end
+
+      context "when event_date is today" do
+        it "displays events on today's date" do
+          today_event = create(:event, title: "Today Event", event_date: Event.current_date)
+          past_event = create(:event, title: "Past Event").tap do |e|
+            e.update_column(:event_date, Event.current_date - 1)
+          end
+
+          get "/events"
+          expect(response.body).to include("Today Event")
+          expect(response.body).not_to include("Past Event")
+        end
       end
     end
   end

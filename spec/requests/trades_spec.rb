@@ -196,6 +196,71 @@ RSpec.describe "Trades", type: :request do
           expect(new_trade).to be_present
         end
       end
+
+      context "when event_date is in the past" do
+        context "without existing trade" do
+          it "redirects to events_path" do
+            past_event = create(:event).tap do |e|
+              e.update_column(:event_date, Event.current_date - 1)
+            end
+
+            get "/trades/#{past_event.id}"
+            expect(response).to redirect_to(events_path)
+          end
+
+          it "displays alert message" do
+            past_event = create(:event).tap do |e|
+              e.update_column(:event_date, Event.current_date - 1)
+            end
+
+            get "/trades/#{past_event.id}"
+            follow_redirect!
+            expect(response.body).to include(I18n.t("trades.event_ended"))
+          end
+
+          it "does not create a new trade" do
+            past_event = create(:event).tap do |e|
+              e.update_column(:event_date, Event.current_date - 1)
+            end
+
+            expect {
+              get "/trades/#{past_event.id}"
+            }.not_to change { Trade.count }
+          end
+        end
+
+        context "with existing trade" do
+          it "returns 200 OK" do
+            past_event = create(:event).tap do |e|
+              e.update_column(:event_date, Event.current_date - 1)
+            end
+            existing_trade = create(:trade, event: past_event, user: user)
+
+            get "/trades/#{past_event.id}"
+            expect(response).to have_http_status(:ok)
+          end
+
+          it "displays event title" do
+            past_event = create(:event, title: "Past Event with Trade").tap do |e|
+              e.update_column(:event_date, Event.current_date - 1)
+            end
+            existing_trade = create(:trade, event: past_event, user: user)
+
+            get "/trades/#{past_event.id}"
+            expect(response.body).to include("Past Event with Trade")
+          end
+        end
+      end
+
+      context "when event_date is today" do
+        it "creates a new trade" do
+          today_event = create(:event, event_date: Event.current_date)
+
+          expect {
+            get "/trades/#{today_event.id}"
+          }.to change { Trade.count }.by(1)
+        end
+      end
     end
   end
 end

@@ -3,7 +3,7 @@ class EventsController < ApplicationController
 
   def index
     # default_scope により論理削除済みイベント (discarded_at is not null) は自動的に除外される
-    @events = Event.all.order(event_date: :desc)
+    @events = Event.not_past.order(event_date: :desc)
   end
 
   def show
