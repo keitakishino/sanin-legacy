@@ -22,8 +22,11 @@ FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 WORKDIR /rails
 
 # Install base packages
+# ca-certificates は明示的に導入し、常にリポジトリ最新版へ更新する
+# （eMudhra/emSign CA 鍵侵害 2026-10 への対応。ベースイメージ同梱の古い
+#   トラストストアに失効済み root が残るのを防ぐ）
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips postgresql-client && \
+    apt-get install --no-install-recommends -y ca-certificates curl libjemalloc2 libvips postgresql-client && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
