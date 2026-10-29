@@ -28,9 +28,6 @@ Rails.application.configure do
   # Host authorization needs to be disabled in test environment.
   # This is needed because test requests use generic hosts like "www.example.com"
   # and we want tests to focus on application logic, not host validation.
-  # Note: allow_forgery_protection is false by default in test environment (Rails standard),
-  # but CSRF verification still occurs in request specs for POST/PATCH/DELETE requests.
-  # We disable it via before(:each) hook in spec/rails_helper.rb instead.
   if defined?(ActionDispatch::HostAuthorization)
     config.hosts = Set.new
   end
@@ -65,9 +62,4 @@ Rails.application.configure do
 
   # Disable Discord error notifications in test environment to prevent accidental HTTP requests
   config.x.discord_error_webhook_url = nil
-
-  # Disable CSRF protection in test environment
-  # In test mode, OmniAuth uses mock auth and doesn't follow normal OAuth flow,
-  # so CSRF protection would incorrectly reject requests
-  config.allow_forgery_protection = false
 end
