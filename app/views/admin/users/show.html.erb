@@ -39,7 +39,7 @@
   </div>
 
   <!-- Section 2: External Accounts -->
-  <div class="bg-white border border-stone-200 rounded-lg p-6 mb-8">
+  <div id="external-accounts" class="bg-white border border-stone-200 rounded-lg p-6 mb-8">
     <h3 class="text-xl font-semibold mb-4 border-b border-stone-200 pb-2 text-stone-800"><%= t("admin.users.external_accounts") %></h3>
 
     <% if @user.identities.empty? %>
@@ -49,7 +49,9 @@
         <% @user.identities.each do |identity| %>
           <div class="flex justify-between items-center py-2 border-b border-stone-200">
             <span class="font-semibold text-stone-800"><%= identity.provider_display_name %>:</span>
-            <span class="text-stone-600"><%= h(identity.uid) %></span>
+            <% if identity.username.present? %>
+              <span class="text-stone-600"><%= identity.username %></span>
+            <% end %>
           </div>
         <% end %>
       </div>

@@ -70,7 +70,7 @@ RSpec.describe "OAuth Buttons and Integrations", type: :system do
 
   describe "User profile page (/mypage)" do
     let(:user) { create(:user, username: "testuser") }
-    let(:discord_identity) { create(:discord_identity, user: user) }
+    let(:discord_identity) { create(:discord_identity, user: user, username: "discord_name") }
 
     context "when user has Discord identity" do
       before do
@@ -105,7 +105,7 @@ RSpec.describe "OAuth Buttons and Integrations", type: :system do
   describe "Admin user details page (/admin/users/:id)" do
     let(:admin) { create(:user, :admin, username: "admin") }
     let(:user) { create(:user, username: "testuser") }
-    let(:discord_identity) { create(:discord_identity, user: user) }
+    let(:discord_identity) { create(:discord_identity, user: user, username: "discord_name") }
 
     before do
       discord_identity
@@ -115,7 +115,8 @@ RSpec.describe "OAuth Buttons and Integrations", type: :system do
 
     it "displays discord identity without twitter link" do
       expect(page).to have_text("Discord")
-      expect(page).to have_text(discord_identity.uid)
+      expect(page).to have_text("discord_name")
+      expect(page).not_to have_text(discord_identity.uid)
       expect(page).not_to have_link(href: /twitter\.com/)
       expect(page).not_to have_text("アカウントを表示")
     end
