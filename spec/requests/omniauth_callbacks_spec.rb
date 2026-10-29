@@ -4,6 +4,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
   describe "GET /auth/google/callback" do
     context "when creating a new OAuth user" do
       before do
+        start_signup_with_invitation
         mock_google_auth(uid: "google_123", email: "newuser@example.com")
       end
 
@@ -74,6 +75,107 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
         get "/auth/google/callback"
         expect(response).to redirect_to(root_path)
       end
+
+      context "with an invitation in session" do
+        before do
+          start_signup_with_invitation
+        end
+
+        it "does not create a new user" do
+          expect {
+            get "/auth/google/callback"
+          }.not_to change(User, :count)
+        end
+
+        it "logs in the existing user" do
+          get "/auth/google/callback"
+          expect(session[:user_id]).to eq(user.id)
+        end
+
+        it "redirects to root_path" do
+          get "/auth/google/callback"
+          expect(response).to redirect_to(root_path)
+        end
+      end
+    end
+
+    context "when the account is not linked and no invitation is in session" do
+      before do
+        mock_google_auth(uid: "google_no_invite", email: "noinvite@example.com")
+      end
+
+      it "does not create a new user" do
+        expect {
+          get "/auth/google/callback"
+        }.not_to change(User, :count)
+      end
+
+      it "does not create a new identity" do
+        expect {
+          get "/auth/google/callback"
+        }.not_to change(Identity, :count)
+      end
+
+      it "redirects to signin_path" do
+        get "/auth/google/callback"
+        expect(response).to redirect_to(signin_path)
+      end
+
+      it "displays the correct alert message" do
+        get "/auth/google/callback"
+        expect(flash[:alert]).to eq("未登録の外部アカウントです。招待コードを入力して登録してください。")
+      end
+
+      it "clears the signup_token from session" do
+        get "/auth/google/callback"
+        expect(session[:signup_token]).to be_nil
+      end
+
+      it "does not set session user_id" do
+        get "/auth/google/callback"
+        expect(session[:user_id]).to be_nil
+      end
+
+      it "shows the error message on the signin page" do
+        get "/auth/google/callback"
+        follow_redirect!
+        expect(response.body).to include("未登録の外部アカウントです。招待コードを入力して登録してください。")
+      end
+    end
+
+    context "when the invitation in session is no longer available" do
+      before do
+        @invitation = start_signup_with_invitation
+        @invitation.update_columns(status: "revoked")
+        mock_google_auth(uid: "google_revoked", email: "revoked@example.com")
+      end
+
+      it "does not create a new user" do
+        expect {
+          get "/auth/google/callback"
+        }.not_to change(User, :count)
+      end
+
+      it "does not create a new identity" do
+        expect {
+          get "/auth/google/callback"
+        }.not_to change(Identity, :count)
+      end
+
+      it "redirects to signin_path" do
+        get "/auth/google/callback"
+        expect(response).to redirect_to(signin_path)
+      end
+
+      it "displays the alert message" do
+        get "/auth/google/callback"
+        expect(flash[:alert]).to eq("未登録の外部アカウントです。招待コードを入力して登録してください。")
+      end
+
+      it "clears the signup_token from session" do
+        get "/auth/google/callback"
+        expect(session[:signup_token]).to be_nil
+      end
     end
 
     context "when OAuth auth_hash is missing" do
@@ -94,6 +196,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
 
     context "when email is nil" do
       before do
+        @invitation = start_signup_with_invitation
         mock_google_auth_with_nil_email(uid: "google_789")
       end
 
@@ -119,12 +222,20 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
         get "/auth/google/callback"
         expect(session[:user_id]).to eq(User.last.id)
       end
+
+      it "marks the invitation as used" do
+        get "/auth/google/callback"
+        @invitation.reload
+        expect(@invitation.status).to eq("used")
+        expect(@invitation.used_by).to eq(User.last)
+      end
     end
 
     context "when email local part conflicts with existing username" do
       let!(:existing_user) { create(:user, username: "conflict") }
 
       before do
+        start_signup_with_invitation
         mock_google_auth(uid: "google_999", email: "conflict@example.com")
       end
 
@@ -153,6 +264,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
       let!(:user3) { create(:user, username: "testuser2") }
 
       before do
+        start_signup_with_invitation
         mock_google_auth(uid: "google_multi", email: "testuser@example.com")
       end
 
@@ -208,6 +320,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
       end
 
       before do
+        start_signup_with_invitation
         mock_google_auth(uid: "google_timestamp", email: "conflict@example.com")
       end
 
@@ -242,6 +355,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
       let!(:existing_identity) { create(:google_identity, user: existing_user, uid: "google_race") }
 
       before do
+        start_signup_with_invitation
         mock_google_auth(uid: "google_race", email: "newemail@example.com")
 
         # Simulate TOCTOU race: first check returns nil, but identity already exists in DB
@@ -297,6 +411,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
       let!(:existing_identity) { create(:google_identity, user: existing_user, uid: "google_toctou_orphan") }
 
       before do
+        start_signup_with_invitation
         mock_google_auth(uid: "google_toctou_orphan", email: "newemail@example.com")
 
         # Simulate TOCTOU race: first check returns nil (in google action), but by the time
@@ -337,6 +452,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
   describe "GET /auth/discord/callback" do
     context "when creating a new OAuth user" do
       before do
+        start_signup_with_invitation
         mock_discord_auth(uid: "123456789012", email: "newuser@example.com")
       end
 
@@ -413,6 +529,72 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
         get "/auth/discord/callback"
         expect(response).to redirect_to(root_path)
       end
+
+      context "with an invitation in session" do
+        before do
+          start_signup_with_invitation
+        end
+
+        it "does not create a new user" do
+          expect {
+            get "/auth/discord/callback"
+          }.not_to change(User, :count)
+        end
+
+        it "logs in the existing user" do
+          get "/auth/discord/callback"
+          expect(session[:user_id]).to eq(user.id)
+        end
+
+        it "redirects to root_path" do
+          get "/auth/discord/callback"
+          expect(response).to redirect_to(root_path)
+        end
+      end
+    end
+
+    context "when the account is not linked and no invitation is in session" do
+      before do
+        mock_discord_auth(uid: "discord_no_invite", email: "noinvite@example.com")
+      end
+
+      it "does not create a new user" do
+        expect {
+          get "/auth/discord/callback"
+        }.not_to change(User, :count)
+      end
+
+      it "does not create a new identity" do
+        expect {
+          get "/auth/discord/callback"
+        }.not_to change(Identity, :count)
+      end
+
+      it "redirects to signin_path" do
+        get "/auth/discord/callback"
+        expect(response).to redirect_to(signin_path)
+      end
+
+      it "displays the correct alert message" do
+        get "/auth/discord/callback"
+        expect(flash[:alert]).to eq("未登録の外部アカウントです。招待コードを入力して登録してください。")
+      end
+
+      it "clears the signup_token from session" do
+        get "/auth/discord/callback"
+        expect(session[:signup_token]).to be_nil
+      end
+
+      it "does not set session user_id" do
+        get "/auth/discord/callback"
+        expect(session[:user_id]).to be_nil
+      end
+
+      it "shows the error message on the signin page" do
+        get "/auth/discord/callback"
+        follow_redirect!
+        expect(response.body).to include("未登録の外部アカウントです。招待コードを入力して登録してください。")
+      end
     end
 
     context "when OAuth auth_hash is missing" do
@@ -433,6 +615,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
 
     context "when email is nil" do
       before do
+        @invitation = start_signup_with_invitation
         mock_discord_auth_with_nil_email(uid: "555666777888")
       end
 
@@ -458,12 +641,20 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
         get "/auth/discord/callback"
         expect(session[:user_id]).to eq(User.last.id)
       end
+
+      it "marks the invitation as used" do
+        get "/auth/discord/callback"
+        @invitation.reload
+        expect(@invitation.status).to eq("used")
+        expect(@invitation.used_by).to eq(User.last)
+      end
     end
 
     context "when email local part conflicts with existing username" do
       let!(:existing_user) { create(:user, username: "conflict") }
 
       before do
+        start_signup_with_invitation
         mock_discord_auth(uid: "444333222111", email: "conflict@example.com")
       end
 
@@ -520,6 +711,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
       let!(:existing_identity) { create(:discord_identity, user: existing_user, uid: "111222333444") }
 
       before do
+        start_signup_with_invitation
         mock_discord_auth(uid: "111222333444", email: "newemail@example.com")
 
         find_by_call_count = 0
@@ -560,6 +752,13 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
     it "redirects to signin_path" do
       get "/auth/failure"
       expect(response).to redirect_to(signin_path)
+    end
+
+    it "shows the error on the signin page" do
+      get "/auth/failure"
+      follow_redirect!
+      expect(request.path).to eq(signin_path)
+      expect(response.body).to include("OAuth認可がキャンセルされました")
     end
   end
 end

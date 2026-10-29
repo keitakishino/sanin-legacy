@@ -894,10 +894,14 @@ RSpec.describe "Registrations", type: :request do
         end.not_to change { invitation.reload.status }
       end
 
-      it "should create user and login normally" do
-        post "/auth/google/callback"
+      it "does not create a user and redirects to signin" do
+        expect do
+          post "/auth/google/callback"
+        end.not_to change { User.count }
 
-        expect(session[:user_id]).to be_present
+        expect(response).to redirect_to(signin_path)
+        expect(flash[:alert]).to include("招待コードを入力して登録してください")
+        expect(session[:user_id]).to be_nil
       end
     end
 
@@ -914,10 +918,10 @@ RSpec.describe "Registrations", type: :request do
         mock_google_auth(uid: uid, email: email)
       end
 
-      it "creates a user" do
+      it "does not create a user" do
         expect do
           post "/auth/google/callback"
-        end.to change { User.count }.by(1)
+        end.not_to change { User.count }
       end
 
       it "does not mark the expired invitation as used" do
@@ -933,16 +937,16 @@ RSpec.describe "Registrations", type: :request do
         expect(session[:signup_token]).to be_nil
       end
 
-      it "logs in the user" do
+      it "does not log in the user" do
         post "/auth/google/callback"
 
-        expect(session[:user_id]).to eq(User.last.id)
+        expect(session[:user_id]).to be_nil
       end
 
-      it "redirects to root_path" do
+      it "redirects to signin_path" do
         post "/auth/google/callback"
 
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(signin_path)
       end
     end
 
@@ -955,10 +959,10 @@ RSpec.describe "Registrations", type: :request do
         mock_google_auth(uid: uid, email: email)
       end
 
-      it "creates a user" do
+      it "does not create a user" do
         expect do
           post "/auth/google/callback"
-        end.to change { User.count }.by(1)
+        end.not_to change { User.count }
       end
 
       it "does not mark the revoked invitation as used" do
@@ -974,16 +978,16 @@ RSpec.describe "Registrations", type: :request do
         expect(session[:signup_token]).to be_nil
       end
 
-      it "logs in the user" do
+      it "does not log in the user" do
         post "/auth/google/callback"
 
-        expect(session[:user_id]).to eq(User.last.id)
+        expect(session[:user_id]).to be_nil
       end
 
-      it "redirects to root_path" do
+      it "redirects to signin_path" do
         post "/auth/google/callback"
 
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(signin_path)
       end
     end
 
@@ -1085,10 +1089,10 @@ RSpec.describe "Registrations", type: :request do
         mock_discord_auth(uid: uid, email: email)
       end
 
-      it "creates a user" do
+      it "does not create a user" do
         expect do
           post "/auth/discord/callback"
-        end.to change { User.count }.by(1)
+        end.not_to change { User.count }
       end
 
       it "does not mark the expired invitation as used" do
@@ -1104,16 +1108,16 @@ RSpec.describe "Registrations", type: :request do
         expect(session[:signup_token]).to be_nil
       end
 
-      it "logs in the user" do
+      it "does not log in the user" do
         post "/auth/discord/callback"
 
-        expect(session[:user_id]).to eq(User.last.id)
+        expect(session[:user_id]).to be_nil
       end
 
-      it "redirects to root_path" do
+      it "redirects to signin_path" do
         post "/auth/discord/callback"
 
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(signin_path)
       end
     end
 
@@ -1126,10 +1130,10 @@ RSpec.describe "Registrations", type: :request do
         mock_discord_auth(uid: uid, email: email)
       end
 
-      it "creates a user" do
+      it "does not create a user" do
         expect do
           post "/auth/discord/callback"
-        end.to change { User.count }.by(1)
+        end.not_to change { User.count }
       end
 
       it "does not mark the revoked invitation as used" do
@@ -1145,16 +1149,16 @@ RSpec.describe "Registrations", type: :request do
         expect(session[:signup_token]).to be_nil
       end
 
-      it "logs in the user" do
+      it "does not log in the user" do
         post "/auth/discord/callback"
 
-        expect(session[:user_id]).to eq(User.last.id)
+        expect(session[:user_id]).to be_nil
       end
 
-      it "redirects to root_path" do
+      it "redirects to signin_path" do
         post "/auth/discord/callback"
 
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(signin_path)
       end
     end
   end
