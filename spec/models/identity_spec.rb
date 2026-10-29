@@ -16,7 +16,7 @@ RSpec.describe Identity, type: :model do
       let!(:identity) { create(:identity, provider: :google, uid: 'unique_uid') }
 
       it 'allows same uid for different providers' do
-        new_identity = build(:twitter_identity, uid: '123456789')
+        new_identity = build(:discord_identity, uid: '123456789')
         expect(new_identity).to be_valid
       end
 
@@ -27,18 +27,18 @@ RSpec.describe Identity, type: :model do
       end
     end
 
-    describe 'twitter_uid_must_be_numeric' do
-      context 'when provider is twitter and uid is not numeric' do
-        let(:identity) { build(:twitter_identity, uid: 'invalid_uid') }
+    describe 'discord_uid_must_be_numeric' do
+      context 'when provider is discord and uid is not numeric' do
+        let(:identity) { build(:discord_identity, uid: 'invalid_uid') }
 
-        it 'is invalid' do
+        it 'validates discord uid must be numeric' do
           expect(identity).not_to be_valid
-          expect(identity.errors[:uid]).to include('must be numeric for Twitter identities')
+          expect(identity.errors[:uid]).to include('must be numeric for Discord identities')
         end
       end
 
-      context 'when provider is twitter and uid is numeric' do
-        let(:identity) { build(:twitter_identity, uid: '987654321012345678') }
+      context 'when provider is discord and uid is numeric' do
+        let(:identity) { build(:discord_identity, uid: '987654321012345678') }
 
         it 'is valid' do
           expect(identity).to be_valid
@@ -56,12 +56,16 @@ RSpec.describe Identity, type: :model do
   end
 
   describe 'enums' do
-    it { is_expected.to define_enum_for(:provider).with_values(google: 0, twitter: 1).with_prefix(true) }
+    it { is_expected.to define_enum_for(:provider).with_values(google: 0, discord: 2).with_prefix(true) }
+
+    it 'has providers google=0 and discord=2 only' do
+      expect(Identity.providers).to eq('google' => 0, 'discord' => 2)
+    end
   end
 
   describe 'scopes' do
     let!(:google_identity) { create(:google_identity) }
-    let!(:twitter_identity) { create(:twitter_identity) }
+    let!(:discord_identity) { create(:discord_identity) }
 
     describe '.by_provider' do
       it 'returns identities by specified provider' do
@@ -75,9 +79,9 @@ RSpec.describe Identity, type: :model do
       end
     end
 
-    describe '.twitter_identities' do
-      it 'returns only twitter identities' do
-        expect(Identity.twitter_identities).to contain_exactly(twitter_identity)
+    describe '.discord_identities' do
+      it 'returns only discord identities' do
+        expect(Identity.discord_identities).to contain_exactly(discord_identity)
       end
     end
   end
@@ -91,47 +95,18 @@ RSpec.describe Identity, type: :model do
       end
     end
 
-    context 'when provider is twitter' do
-      let(:identity) { build(:twitter_identity) }
+    context 'when provider is discord' do
+      let(:identity) { build(:discord_identity) }
 
-      it 'returns "Twitter(X)"' do
-        expect(identity.provider_display_name).to eq('Twitter(X)')
+      it 'returns "Discord"' do
+        expect(identity.provider_display_name).to eq('Discord')
       end
     end
   end
 
   describe '#twitter_profile_url' do
-    context 'when provider is twitter and uid is valid numeric ID' do
-      let(:identity) { build(:twitter_identity, uid: '987654321012345678') }
-
-      it 'returns Twitter profile intent URL with user_id' do
-        expected_url = 'https://twitter.com/intent/user?user_id=987654321012345678'
-        expect(identity.twitter_profile_url).to eq(expected_url)
-      end
-    end
-
-    context 'when provider is twitter and uid is invalid (not numeric)' do
-      let(:identity) { build(:twitter_identity, uid: 'invalid_uid_with_letters') }
-
-      it 'returns nil' do
-        expect(identity.twitter_profile_url).to be_nil
-      end
-    end
-
-    context 'when provider is twitter and uid contains special characters' do
-      let(:identity) { build(:twitter_identity, uid: '123456789@invalid') }
-
-      it 'returns nil' do
-        expect(identity.twitter_profile_url).to be_nil
-      end
-    end
-
-    context 'when provider is google' do
-      let(:identity) { build(:google_identity) }
-
-      it 'returns nil' do
-        expect(identity.twitter_profile_url).to be_nil
-      end
+    it 'does not respond to twitter_profile_url' do
+      expect(build(:discord_identity)).not_to respond_to(:twitter_profile_url)
     end
   end
 end

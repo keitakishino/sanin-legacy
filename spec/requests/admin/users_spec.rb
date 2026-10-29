@@ -222,11 +222,12 @@ RSpec.describe "Admin::Users", type: :request do
           expect(response.body).to include("google123")
         end
 
-        it "displays twitter identity with link" do
-          twitter_identity = create(:identity, user: user, provider: :twitter, uid: "123456")
+        it "does not show twitter account link on admin user page" do
+          discord_identity = create(:identity, user: user, provider: :discord, uid: "123456")
           get admin_user_path(user)
-          expect(response.body).to include("Twitter(X)")
-          expect(response.body).to include(twitter_identity.twitter_profile_url)
+          expect(response.body).to include("Discord")
+          expect(response.body).to include("123456")
+          expect(response.body).not_to include("twitter.com")
         end
 
         it "displays no external accounts message when empty" do

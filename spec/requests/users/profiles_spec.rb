@@ -111,21 +111,22 @@ RSpec.describe "Users::Profiles", type: :request do
         end
       end
 
-      context "when user has Twitter identity" do
-        let(:twitter_identity) { create(:twitter_identity, user: user, uid: "123456789") }
+      context "when user has Discord identity" do
+        let(:discord_identity) { create(:discord_identity, user: user, uid: "123456789") }
 
         before do
-          twitter_identity
+          discord_identity
         end
 
-        it "displays Twitter(X) account link" do
+        it "displays Discord" do
           get "/mypage"
-          expect(response.body).to include("https://twitter.com/intent/user?user_id=123456789")
+          expect(response.body).to include("Discord")
         end
 
-        it "displays 'アカウントを表示' link text" do
+        it "does not show twitter account link on profile page" do
           get "/mypage"
-          expect(response.body).to include("アカウントを表示")
+          expect(response.body).not_to include("twitter.com")
+          expect(response.body).not_to include("アカウントを表示")
         end
       end
 
@@ -143,18 +144,18 @@ RSpec.describe "Users::Profiles", type: :request do
       end
 
       context "when user has multiple identities" do
-        let(:twitter_identity) { create(:twitter_identity, user: user, uid: "123456789") }
+        let(:discord_identity) { create(:discord_identity, user: user, uid: "123456789") }
         let(:google_identity) { create(:google_identity, user: user) }
 
         before do
-          twitter_identity
+          discord_identity
           google_identity
         end
 
         it "displays both identities" do
           get "/mypage"
           expect(response.body).to include("Google")
-          expect(response.body).to include("Twitter(X)")
+          expect(response.body).to include("Discord")
         end
       end
     end

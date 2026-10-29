@@ -334,15 +334,15 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
     end
   end
 
-  describe "GET /auth/twitter/callback" do
+  describe "GET /auth/discord/callback" do
     context "when creating a new OAuth user" do
       before do
-        mock_twitter_auth(uid: "123456789012", email: "newuser@example.com")
-end
+        mock_discord_auth(uid: "123456789012", email: "newuser@example.com")
+      end
 
       it "creates a new user with the OAuth email" do
         expect {
-          get "/auth/twitter/callback"
+          get "/auth/discord/callback"
         }.to change(User, :count).by(1)
 
         user = User.last
@@ -351,60 +351,66 @@ end
       end
 
       it "creates an OAuth user without password_digest" do
-        get "/auth/twitter/callback"
+        get "/auth/discord/callback"
         user = User.last
         expect(user.password_digest).to be_nil
       end
 
       it "creates a new identity linked to the user" do
         expect {
-          get "/auth/twitter/callback"
+          get "/auth/discord/callback"
         }.to change(Identity, :count).by(1)
 
         identity = Identity.last
-        expect(identity.provider).to eq("twitter")
+        expect(identity.provider).to eq("discord")
         expect(identity.uid).to eq("123456789012")
         expect(identity.user_id).to eq(User.last.id)
       end
 
       it "sets the session user_id" do
-        get "/auth/twitter/callback"
+        get "/auth/discord/callback"
         expect(session[:user_id]).to eq(User.last.id)
       end
 
       it "redirects to root_path" do
-        get "/auth/twitter/callback"
+        get "/auth/discord/callback"
         expect(response).to redirect_to(root_path)
+      end
+
+      it "creates new user when oauth identity does not exist" do
+        expect {
+          get "/auth/discord/callback"
+        }.to change(User, :count).by(1).and change(Identity, :count).by(1)
       end
     end
 
     context "when logging in with existing identity" do
       let(:user) { create(:user, email: "existing@example.com") }
-      let!(:identity) { create(:twitter_identity, user: user, uid: "987654321098") }
+      let!(:identity) { create(:discord_identity, user: user, uid: "987654321098") }
 
       before do
-        mock_twitter_auth(uid: "987654321098", email: "existing@example.com")
+        mock_discord_auth(uid: "987654321098", email: "existing@example.com")
       end
 
       it "does not create a new user" do
         expect {
-          get "/auth/twitter/callback"
+          get "/auth/discord/callback"
         }.not_to change(User, :count)
       end
 
       it "does not create a new identity" do
         expect {
-          get "/auth/twitter/callback"
+          get "/auth/discord/callback"
         }.not_to change(Identity, :count)
       end
 
-      it "logs in the existing user" do
-        get "/auth/twitter/callback"
+      it "logs in the existing user when identity exists" do
+        get "/auth/discord/callback"
         expect(session[:user_id]).to eq(user.id)
       end
 
       it "redirects to root_path" do
-        get "/auth/twitter/callback"
+        get "/auth/discord/callback"
         expect(response).to redirect_to(root_path)
       end
     end
@@ -415,24 +421,24 @@ end
       end
 
       it "displays an error flash message" do
-        get "/auth/twitter/callback"
+        get "/auth/discord/callback"
         expect(flash[:alert]).to include("OAuth認可に失敗しました")
       end
 
       it "redirects to signin_path" do
-        get "/auth/twitter/callback"
+        get "/auth/discord/callback"
         expect(response).to redirect_to(signin_path)
       end
     end
 
     context "when email is nil" do
       before do
-        mock_twitter_auth_with_nil_email(uid: "555666777888")
+        mock_discord_auth_with_nil_email(uid: "555666777888")
       end
 
       it "creates a new user without email" do
         expect {
-          get "/auth/twitter/callback"
+          get "/auth/discord/callback"
         }.to change(User, :count).by(1)
 
         user = User.last
@@ -441,7 +447,7 @@ end
 
       it "creates a new identity linked to the user" do
         expect {
-          get "/auth/twitter/callback"
+          get "/auth/discord/callback"
         }.to change(Identity, :count).by(1)
 
         identity = Identity.last
@@ -449,7 +455,7 @@ end
       end
 
       it "logs in the user" do
-        get "/auth/twitter/callback"
+        get "/auth/discord/callback"
         expect(session[:user_id]).to eq(User.last.id)
       end
     end
@@ -458,12 +464,12 @@ end
       let!(:existing_user) { create(:user, username: "conflict") }
 
       before do
-        mock_twitter_auth(uid: "444333222111", email: "conflict@example.com")
+        mock_discord_auth(uid: "444333222111", email: "conflict@example.com")
       end
 
       it "creates a new user with a suffixed username" do
         expect {
-          get "/auth/twitter/callback"
+          get "/auth/discord/callback"
         }.to change(User, :count).by(1)
 
         new_user = User.last
@@ -472,7 +478,7 @@ end
 
       it "creates a new identity for the user" do
         expect {
-          get "/auth/twitter/callback"
+          get "/auth/discord/callback"
         }.to change(Identity, :count).by(1)
 
         identity = Identity.last
@@ -482,8 +488,8 @@ end
 
     context "when uid is missing from auth_hash" do
       before do
-        OmniAuth.config.mock_auth[:twitter] = OmniAuth::AuthHash.new(
-          provider: "twitter",
+        OmniAuth.config.mock_auth[:discord] = OmniAuth::AuthHash.new(
+          provider: "discord",
           uid: nil,
           info: {
             email: "test@example.com",
@@ -493,28 +499,28 @@ end
       end
 
       it "displays an error flash message" do
-        get "/auth/twitter/callback"
+        get "/auth/discord/callback"
         expect(flash[:alert]).to include("OAuth認可に失敗しました")
       end
 
       it "redirects to signin_path" do
-        get "/auth/twitter/callback"
+        get "/auth/discord/callback"
         expect(response).to redirect_to(signin_path)
       end
 
       it "does not create a new user" do
         expect {
-          get "/auth/twitter/callback"
+          get "/auth/discord/callback"
         }.not_to change(User, :count)
       end
     end
 
     context "when identity creation fails due to TOCTOU race condition" do
       let(:existing_user) { create(:user, email: "existing@example.com") }
-      let!(:existing_identity) { create(:twitter_identity, user: existing_user, uid: "111222333444") }
+      let!(:existing_identity) { create(:discord_identity, user: existing_user, uid: "111222333444") }
 
       before do
-        mock_twitter_auth(uid: "111222333444", email: "newemail@example.com")
+        mock_discord_auth(uid: "111222333444", email: "newemail@example.com")
 
         find_by_call_count = 0
         allow(Identity).to receive(:find_by) do |**kwargs|
@@ -528,18 +534,18 @@ end
       end
 
       it "handles TOCTOU race condition by logging in with the existing user" do
-        get "/auth/twitter/callback"
+        get "/auth/discord/callback"
         expect(session[:user_id]).to eq(existing_user.id)
       end
 
       it "redirects to root_path when identity is found in rescue" do
-        get "/auth/twitter/callback"
+        get "/auth/discord/callback"
         expect(response).to redirect_to(root_path)
       end
 
       it "does not create a duplicate identity" do
         expect {
-          get "/auth/twitter/callback"
+          get "/auth/discord/callback"
         }.not_to change(Identity, :count)
       end
     end

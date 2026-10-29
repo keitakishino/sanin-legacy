@@ -5,7 +5,6 @@ module Users
 
     def show
       @user = current_user
-      @twitter_identity = @user.identities.twitter_identities.first
     end
 
     def edit
