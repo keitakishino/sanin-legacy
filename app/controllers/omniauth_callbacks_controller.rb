@@ -17,6 +17,12 @@ class OmniauthCallbacksController < ApplicationController
     provider = auth_hash.dig("provider")
     email = auth_hash.dig("info", "email")
 
+    link_user_id = session.delete(:oauth_link_user_id)
+    if link_user_id.present? && user_signed_in? && current_user.id == link_user_id
+      link_identity_to(current_user, provider, uid)
+      return
+    end
+
     identity = Identity.find_by(provider: provider, uid: uid)
 
     if identity.present?
@@ -25,6 +31,12 @@ class OmniauthCallbacksController < ApplicationController
       log_in(user)
       redirect_to root_path
     else
+      unless signup_invitation_available?
+        flash[:alert] = "未登録の外部アカウントです。招待コードを入力して登録してください。"
+        redirect_to signin_path
+        return
+      end
+
       begin
         user = nil
         ActiveRecord::Base.transaction do
@@ -57,6 +69,7 @@ class OmniauthCallbacksController < ApplicationController
   end
 
   def failure
+    session.delete(:oauth_link_user_id)
     flash[:alert] = "OAuth認可がキャンセルされました"
     redirect_to signin_path
   end
@@ -85,6 +98,41 @@ class OmniauthCallbacksController < ApplicationController
 
   def create_identity_for_user(user, provider, uid)
     user.identities.create!(provider: provider, uid: uid)
+  end
+
+  def link_identity_to(user, provider, uid)
+    name = Identity.new(provider: provider).provider_display_name
+    existing = Identity.find_by(provider: provider, uid: uid)
+
+    if existing.present? && existing.user_id != user.id
+      flash[:alert] = "この#{name}アカウントはすでに別のユーザーに連携されているため、連携できません。"
+      redirect_to mypage_path
+    elsif existing.present? || user.identities.exists?(provider: provider)
+      flash[:notice] = "#{name}アカウントはすでに連携済みです。"
+      redirect_to mypage_path
+    else
+      begin
+        user.identities.create!(provider: provider, uid: uid)
+        flash[:notice] = "#{name}アカウントを連携しました。"
+        redirect_to mypage_path
+      rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
+        flash[:alert] = "この#{name}アカウントはすでに別のユーザーに連携されているため、連携できません。"
+        redirect_to mypage_path
+      end
+    end
+  end
+
+  def signup_invitation_available?
+    token = session[:signup_token]
+    return false unless token.present?
+
+    invitation = Invitation.find_by_signup_token(token)
+    if invitation.present? && invitation.available?
+      true
+    else
+      session.delete(:signup_token)
+      false
+    end
   end
 
   def build_error_message(record)

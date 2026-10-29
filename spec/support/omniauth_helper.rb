@@ -76,6 +76,13 @@ module OmniAuthHelper
   def clear_omniauth_mocks
     OmniAuth.config.mock_auth.clear
   end
+
+  def start_signup_with_invitation
+    invitation = create(:invitation)
+    token = invitation.generate_signup_token
+    get "/signup", params: { token: token }
+    invitation
+  end
 end
 
 RSpec.configure do |config|
