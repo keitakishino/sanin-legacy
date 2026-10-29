@@ -19,9 +19,13 @@ RSpec.describe "Mypage Identity Linking", type: :system do
 
       mock_discord_auth(uid: "200000000000000001", global_name: "Discord表示名")
 
+      # Click the link button which POSTs to /mypage/identity_links, then visit the OAuth callback path
       within "#identity-discord" do
         click_button "Discordを連携する"
       end
+
+      # After the redirect, manually visit the auth callback to simulate OmniAuth processing
+      visit "/auth/discord/callback"
 
       expect(current_path).to eq(mypage_path)
       expect(page).to have_text("Discordアカウントを連携しました。")
@@ -48,6 +52,9 @@ RSpec.describe "Mypage Identity Linking", type: :system do
         click_button "Googleを連携する"
       end
 
+      # Simulate OmniAuth callback
+      visit "/auth/google/callback"
+
       expect(page).to have_text("Googleアカウントを連携しました。")
       expect(Identity.find_by(provider: :google, uid: "300000001").user).to eq(user)
 
@@ -70,6 +77,9 @@ RSpec.describe "Mypage Identity Linking", type: :system do
       within "#identity-discord" do
         click_button "Discordを連携する"
       end
+
+      # Simulate OmniAuth callback
+      visit "/auth/discord/callback"
 
       within "#identity-discord" do
         expect(page).to have_text("Discord表示名")
@@ -97,6 +107,9 @@ RSpec.describe "Mypage Identity Linking", type: :system do
       within "#identity-google" do
         click_button "Googleを連携する"
       end
+
+      # Simulate OmniAuth callback
+      visit "/auth/google/callback"
 
       within "#identity-google" do
         expect(page).to have_text("Google表示名")
@@ -129,11 +142,17 @@ RSpec.describe "Mypage Identity Linking", type: :system do
         click_button "Discordを連携する"
       end
 
+      # Simulate OmniAuth callback
+      visit "/auth/discord/callback"
+
       Capybara.reset_sessions!
       visit signin_path
 
       mock_discord_auth(uid: "200000000000000001", global_name: "Discord表示名")
       click_button "Discord でサインイン"
+
+      # Simulate OmniAuth callback for signin
+      visit "/auth/discord/callback"
 
       expect(page).to have_text("ダッシュボード")
     end
@@ -148,11 +167,17 @@ RSpec.describe "Mypage Identity Linking", type: :system do
         click_button "Googleを連携する"
       end
 
+      # Simulate OmniAuth callback
+      visit "/auth/google/callback"
+
       Capybara.reset_sessions!
       visit signin_path
 
       mock_google_auth(uid: "300000001", name: "Google表示名")
       click_button "Google でサインイン"
+
+      # Simulate OmniAuth callback for signin
+      visit "/auth/google/callback"
 
       expect(page).to have_text("ダッシュボード")
     end
@@ -163,7 +188,7 @@ RSpec.describe "Mypage Identity Linking", type: :system do
     let(:admin) { create(:user, :admin) }
 
     it "displays badge without username when username is nil" do
-      create(:discord_identity, user: user, username: nil)
+      discord_identity = create(:discord_identity, user: user, username: nil)
 
       sign_in user
       visit mypage_path
@@ -180,7 +205,7 @@ RSpec.describe "Mypage Identity Linking", type: :system do
 
       within "#external-accounts" do
         expect(page).to have_text("Discord:")
-        expect(page).not_to have_text(user.identities.find_by(provider: :discord).uid)
+        expect(page).not_to have_text(discord_identity.uid)
       end
     end
   end

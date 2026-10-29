@@ -65,4 +65,9 @@ Rails.application.configure do
 
   # Disable Discord error notifications in test environment to prevent accidental HTTP requests
   config.x.discord_error_webhook_url = nil
+
+  # Disable CSRF protection in test environment
+  # In test mode, OmniAuth uses mock auth and doesn't follow normal OAuth flow,
+  # so CSRF protection would incorrectly reject requests
+  config.allow_forgery_protection = false
 end

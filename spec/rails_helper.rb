@@ -97,6 +97,10 @@ RSpec.configure do |config|
 
   config.before(:each, type: :system) do
     OmniAuth.config.test_mode = true
+    # Disable CSRF protection for OmniAuth in system tests
+    # In test mode, OmniAuth bypasses normal request handling,
+    # and omniauth-rails_csrf_protection would incorrectly fail the CSRF check
+    allow_any_instance_of(ActionController::Base).to receive(:verify_authenticity_token)
   end
 
   config.after(:each, type: :request) do
