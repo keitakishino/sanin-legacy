@@ -216,17 +216,19 @@ RSpec.describe "Admin::Users", type: :request do
         end
 
         it "displays google identity" do
-          create(:identity, user: user, provider: :google, uid: "google123")
+          create(:identity, user: user, provider: :google, uid: "google123", username: "Google名")
           get admin_user_path(user)
           expect(response.body).to include("Google")
-          expect(response.body).to include("google123")
+          expect(response.body).to include("Google名")
+          expect(response.body).not_to include("google123")
         end
 
         it "does not show twitter account link on admin user page" do
-          discord_identity = create(:identity, user: user, provider: :discord, uid: "123456")
+          discord_identity = create(:identity, user: user, provider: :discord, uid: "987654321012345678", username: "Discord名")
           get admin_user_path(user)
           expect(response.body).to include("Discord")
-          expect(response.body).to include("123456")
+          expect(response.body).to include("Discord名")
+          expect(response.body).not_to include("987654321012345678")
           expect(response.body).not_to include("twitter.com")
         end
 

@@ -17,4 +17,8 @@ OmniAuth.config.path_prefix = "/auth"
 
 if Rails.env.test?
   OmniAuth.config.test_mode = true
+  # In test mode, allow both GET and POST requests to OmniAuth routes
+  OmniAuth.config.allowed_request_methods = [ :get, :post ]
+  # Suppress the warning about allowing GET requests in test mode
+  OmniAuth.config.silence_get_warning = true
 end
