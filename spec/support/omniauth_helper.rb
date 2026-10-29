@@ -87,4 +87,5 @@ end
 
 RSpec.configure do |config|
   config.include OmniAuthHelper, type: :request
+  config.include OmniAuthHelper, type: :system
 end
