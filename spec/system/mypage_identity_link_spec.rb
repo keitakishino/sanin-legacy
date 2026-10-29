@@ -5,22 +5,18 @@ RSpec.describe "Mypage Identity Linking", type: :system do
     clear_omniauth_mocks
   end
 
-  describe "C1: Linking Discord from mypage" do
+  describe "C1: Discord linking from mypage" do
     let(:user) { create(:user) }
 
-    before do
+    it "shows Discord link button and links after authorization" do
       sign_in user
       visit mypage_path
-    end
 
-    it "shows Discord link button when not linked" do
       within "#identity-discord" do
         expect(page).to have_button("Discordを連携する")
         expect(page).not_to have_text("連携済み")
       end
-    end
 
-    it "links Discord and shows badge after authorization" do
       mock_discord_auth(uid: "200000000000000001", global_name: "Discord表示名")
 
       within "#identity-discord" do
@@ -39,15 +35,13 @@ RSpec.describe "Mypage Identity Linking", type: :system do
     end
   end
 
-  describe "C2: Linking Google from mypage" do
+  describe "C2: Google linking from mypage" do
     let(:user) { create(:user) }
 
-    before do
+    it "links Google and shows success message" do
       sign_in user
       visit mypage_path
-    end
 
-    it "links Google and shows success message" do
       mock_google_auth(uid: "300000001", name: "Google表示名")
 
       within "#identity-google" do
@@ -63,11 +57,11 @@ RSpec.describe "Mypage Identity Linking", type: :system do
     end
   end
 
-  describe "C3: Displaying username in mypage and admin page" do
+  describe "C3: Username display in mypage and admin page" do
     let(:user) { create(:user) }
     let(:admin) { create(:user, :admin) }
 
-    it "displays username in mypage and admin page" do
+    it "displays Discord username and no links" do
       sign_in user
       visit mypage_path
 
@@ -92,12 +86,13 @@ RSpec.describe "Mypage Identity Linking", type: :system do
         expect(page).not_to have_selector("a")
         expect(page).not_to have_text("200000000000000001")
       end
+    end
 
-      mock_google_auth(uid: "300000002", name: "Google表示名")
-
-      Capybara.reset_sessions!
+    it "displays Google username and no links" do
       sign_in user
       visit mypage_path
+
+      mock_google_auth(uid: "300000002", name: "Google表示名")
 
       within "#identity-google" do
         click_button "Googleを連携する"
@@ -105,6 +100,7 @@ RSpec.describe "Mypage Identity Linking", type: :system do
 
       within "#identity-google" do
         expect(page).to have_text("Google表示名")
+        expect(page).not_to have_selector("a")
       end
 
       Capybara.reset_sessions!
@@ -114,11 +110,13 @@ RSpec.describe "Mypage Identity Linking", type: :system do
       within "#external-accounts" do
         expect(page).to have_text("Google:")
         expect(page).to have_text("Google表示名")
+        expect(page).not_to have_selector("a")
+        expect(page).not_to have_text("300000002")
       end
     end
   end
 
-  describe "C4: Signing in with linked account" do
+  describe "C4: Signing in with linked accounts" do
     let(:user) { create(:user) }
 
     it "allows signing in with linked Discord account" do

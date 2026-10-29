@@ -95,7 +95,15 @@ RSpec.configure do |config|
     OmniAuth.config.test_mode = true
   end
 
+  config.before(:each, type: :system) do
+    OmniAuth.config.test_mode = true
+  end
+
   config.after(:each, type: :request) do
+    OmniAuth.config.mock_auth.clear
+  end
+
+  config.after(:each, type: :system) do
     OmniAuth.config.mock_auth.clear
   end
 
