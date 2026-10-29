@@ -50,12 +50,15 @@ class ApplicationController < ActionController::Base
 
   private
 
-  def generate_unique_username(email)
-    base_username = email.split("@").first if email.present?
-    base_username = "user" if base_username.blank?
-
-    base_username = base_username.gsub(/[^a-zA-Z0-9_]/, "_")[0..49]
-    base_username = "user" if base_username.blank?
+  def generate_unique_username(email, display_name: nil)
+    base_username = display_name&.strip&.presence
+    base_username = base_username&.gsub(/[^a-zA-Z0-9_]/, "_")&.[](0..49) if base_username.present?
+    if base_username.blank? || base_username.length < 3 || !base_username.match?(/[a-zA-Z0-9]/)
+      base_username = email.split("@").first if email.present?
+      base_username = "user" if base_username.blank?
+      base_username = base_username.gsub(/[^a-zA-Z0-9_]/, "_")[0..49]
+      base_username = "user" if base_username.blank?
+    end
 
     max_attempts = 100
 

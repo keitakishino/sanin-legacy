@@ -1,11 +1,11 @@
 module OmniAuthHelper
-  def mock_google_auth(uid: "123456789", email: "user@example.com")
+  def mock_google_auth(uid: "123456789", email: "user@example.com", name: "Test User")
     OmniAuth.config.mock_auth[:google] = OmniAuth::AuthHash.new(
       provider: "google",
       uid: uid,
       info: {
         email: email,
-        name: "Test User",
+        name: name,
         image: "https://example.com/photo.jpg"
       },
       credentials: {
@@ -31,13 +31,13 @@ module OmniAuthHelper
     )
   end
 
-  def mock_discord_auth(uid: "80351110224678912", email: "user@example.com")
+  def mock_discord_auth(uid: "80351110224678912", email: "user@example.com", name: "testuser", global_name: "Test User")
     OmniAuth.config.mock_auth[:discord] = OmniAuth::AuthHash.new(
       provider: "discord",
       uid: uid,
       info: {
         email: email,
-        name: "testuser",
+        name: name,
         image: "https://cdn.discordapp.com/avatars/x.png"
       },
       credentials: {
@@ -46,7 +46,7 @@ module OmniAuthHelper
       },
       extra: {
         raw_info: {
-          global_name: "Test User"
+          global_name: global_name
         }
       }
     )
