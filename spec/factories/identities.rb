@@ -8,8 +8,8 @@ FactoryBot.define do
       provider { :google }
     end
 
-    factory :twitter_identity do
-      provider { :twitter }
+    factory :discord_identity do
+      provider { :discord }
       sequence(:uid) { |n| "#{100000000000000000 + n}" }
     end
   end

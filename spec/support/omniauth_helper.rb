@@ -31,36 +31,44 @@ module OmniAuthHelper
     )
   end
 
-  def mock_twitter_auth(uid: "987654321012345678", email: "user@example.com")
-    OmniAuth.config.mock_auth[:twitter] = OmniAuth::AuthHash.new(
-      provider: "twitter",
+  def mock_discord_auth(uid: "80351110224678912", email: "user@example.com")
+    OmniAuth.config.mock_auth[:discord] = OmniAuth::AuthHash.new(
+      provider: "discord",
       uid: uid,
       info: {
         email: email,
-        name: "Test User",
-        nickname: "testuser"
+        name: "testuser",
+        image: "https://cdn.discordapp.com/avatars/x.png"
       },
       credentials: {
         token: "test_token",
-        secret: "test_secret",
         expires_at: 1.day.from_now.to_i
+      },
+      extra: {
+        raw_info: {
+          global_name: "Test User"
+        }
       }
     )
   end
 
-  def mock_twitter_auth_with_nil_email(uid: "987654321012345678")
-    OmniAuth.config.mock_auth[:twitter] = OmniAuth::AuthHash.new(
-      provider: "twitter",
+  def mock_discord_auth_with_nil_email(uid: "80351110224678912")
+    OmniAuth.config.mock_auth[:discord] = OmniAuth::AuthHash.new(
+      provider: "discord",
       uid: uid,
       info: {
         email: nil,
-        name: "Test User",
-        nickname: "testuser"
+        name: "testuser",
+        image: "https://cdn.discordapp.com/avatars/x.png"
       },
       credentials: {
         token: "test_token",
-        secret: "test_secret",
         expires_at: 1.day.from_now.to_i
+      },
+      extra: {
+        raw_info: {
+          global_name: "Test User"
+        }
       }
     )
   end

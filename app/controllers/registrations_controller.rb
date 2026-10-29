@@ -41,7 +41,7 @@ class RegistrationsController < ApplicationController
     case auth_method
     when "email"
       handle_email_signup(invitation)
-    when "google", "twitter"
+    when "google", "discord"
       handle_oauth_signup(auth_method)
     else
       flash.now[:alert] = "無効な認証方式です"

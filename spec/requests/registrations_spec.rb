@@ -13,7 +13,24 @@ RSpec.describe "Registrations", type: :request do
         expect(response.body).to include("サインアップ")
         expect(response.body).to include("メール＆パスワード")
         expect(response.body).to include("Google")
-        expect(response.body).to include("X")
+        expect(response.body).to include("Discord")
+      end
+
+      it "shows Discord signup button posting to /auth/discord and no X button" do
+        get "/signup", params: { token: token }
+
+        expect(response.body).to include('action="/auth/discord"')
+        expect(response.body).to match(%r{<form[^>]*method="post"[^>]*action="/auth/discord"})
+        expect(response.body).to include("Discord でサインアップ")
+        expect(response.body).to include('action="/auth/google"')
+        expect(response.body).not_to include("/auth/twitter")
+      end
+
+      it "does not show X button on signup page" do
+        get "/signup", params: { token: token }
+
+        expect(response.body).not_to include("/auth/twitter")
+        expect(response.body).not_to include("X でサインアップ")
       end
 
       it "saves token to session" do
@@ -752,11 +769,11 @@ RSpec.describe "Registrations", type: :request do
       end
     end
 
-    context "with Twitter OAuth" do
-      it "redirects to /auth/twitter" do
-        post "/signup", params: { auth_method: "twitter" }
+    context "with Discord OAuth" do
+      it "redirects to /auth/discord" do
+        post "/signup", params: { auth_method: "discord" }
 
-        expect(response).to redirect_to("/auth/twitter")
+        expect(response).to redirect_to("/auth/discord")
       end
     end
 
@@ -970,92 +987,92 @@ RSpec.describe "Registrations", type: :request do
       end
     end
 
-    context "with new OAuth user via signup (Twitter)" do
+    context "with new OAuth user via signup (Discord)" do
       before do
         get "/signup", params: { token: token }
-        mock_twitter_auth(uid: uid, email: email)
+        mock_discord_auth(uid: uid, email: email)
       end
 
       it "creates a user" do
         expect do
-          post "/auth/twitter/callback"
+          post "/auth/discord/callback"
         end.to change { User.count }.by(1)
       end
 
       it "creates an identity" do
         expect do
-          post "/auth/twitter/callback"
+          post "/auth/discord/callback"
         end.to change { Identity.count }.by(1)
       end
 
       it "marks invitation as used" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(invitation.reload.status).to eq("used")
         expect(invitation.reload.used_by).to eq(User.last)
       end
 
       it "clears signup_token from session" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(session[:signup_token]).to be_nil
       end
 
       it "logs in the user" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(session[:user_id]).to eq(User.last.id)
       end
 
       it "redirects to root_path" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(response).to redirect_to(root_path)
       end
     end
 
-    context "with existing identity via signup (Twitter)" do
+    context "with existing identity via signup (Discord)" do
       let!(:user) { create(:user, email: email) }
-      let!(:identity) { create(:identity, user: user, provider: "twitter", uid: uid) }
+      let!(:identity) { create(:identity, user: user, provider: "discord", uid: uid) }
 
       before do
         get "/signup", params: { token: token }
-        mock_twitter_auth(uid: uid, email: email)
+        mock_discord_auth(uid: uid, email: email)
       end
 
       it "does not create a new user" do
         expect do
-          post "/auth/twitter/callback"
+          post "/auth/discord/callback"
         end.not_to change { User.count }
       end
 
       it "marks invitation as used" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(invitation.reload.status).to eq("used")
         expect(invitation.reload.used_by).to eq(user)
       end
 
       it "clears signup_token from session" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(session[:signup_token]).to be_nil
       end
 
       it "logs in the existing user" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(session[:user_id]).to eq(user.id)
       end
 
       it "redirects to root_path" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(response).to redirect_to(root_path)
       end
     end
 
-    context "with expired invitation via OAuth (Twitter)" do
+    context "with expired invitation via OAuth (Discord)" do
       let(:expired_invitation) { create(:invitation, status: :active, expires_at: 1.hour.from_now) }
       let(:expired_token) do
         token = expired_invitation.generate_signup_token
@@ -1065,77 +1082,77 @@ RSpec.describe "Registrations", type: :request do
 
       before do
         get "/signup", params: { token: expired_token }
-        mock_twitter_auth(uid: uid, email: email)
+        mock_discord_auth(uid: uid, email: email)
       end
 
       it "creates a user" do
         expect do
-          post "/auth/twitter/callback"
+          post "/auth/discord/callback"
         end.to change { User.count }.by(1)
       end
 
       it "does not mark the expired invitation as used" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(expired_invitation.reload.status).to eq("active")
         expect(expired_invitation.reload.used_by).to be_nil
       end
 
       it "clears signup_token from session" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(session[:signup_token]).to be_nil
       end
 
       it "logs in the user" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(session[:user_id]).to eq(User.last.id)
       end
 
       it "redirects to root_path" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(response).to redirect_to(root_path)
       end
     end
 
-    context "with revoked invitation via OAuth (Twitter)" do
+    context "with revoked invitation via OAuth (Discord)" do
       let(:revoked_invitation) { create(:invitation, status: :revoked, expires_at: 1.hour.from_now) }
       let(:revoked_token) { revoked_invitation.generate_signup_token }
 
       before do
         get "/signup", params: { token: revoked_token }
-        mock_twitter_auth(uid: uid, email: email)
+        mock_discord_auth(uid: uid, email: email)
       end
 
       it "creates a user" do
         expect do
-          post "/auth/twitter/callback"
+          post "/auth/discord/callback"
         end.to change { User.count }.by(1)
       end
 
       it "does not mark the revoked invitation as used" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(revoked_invitation.reload.status).to eq("revoked")
         expect(revoked_invitation.reload.used_by).to be_nil
       end
 
       it "clears signup_token from session" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(session[:signup_token]).to be_nil
       end
 
       it "logs in the user" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(session[:user_id]).to eq(User.last.id)
       end
 
       it "redirects to root_path" do
-        post "/auth/twitter/callback"
+        post "/auth/discord/callback"
 
         expect(response).to redirect_to(root_path)
       end

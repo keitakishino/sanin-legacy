@@ -217,7 +217,6 @@ ja:
       registered_at: "登録日"
       external_accounts: "外部アカウント連携"
       google: "Google"
-      twitter: "Twitter(X)"
       trades: "トレード一覧"
       event_title: "イベント名"
       event_date: "イベント日時"
