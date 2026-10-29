@@ -16,10 +16,11 @@ class OmniauthCallbacksController < ApplicationController
 
     provider = auth_hash.dig("provider")
     email = auth_hash.dig("info", "email")
+    display_name = external_display_name(auth_hash)
 
     link_user_id = session.delete(:oauth_link_user_id)
     if link_user_id.present? && user_signed_in? && current_user.id == link_user_id
-      link_identity_to(current_user, provider, uid)
+      link_identity_to(current_user, provider, uid, display_name)
       return
     end
 
@@ -40,8 +41,8 @@ class OmniauthCallbacksController < ApplicationController
       begin
         user = nil
         ActiveRecord::Base.transaction do
-          user = create_user_from_oauth(email)
-          create_identity_for_user(user, provider, uid)
+          user = create_user_from_oauth(email, display_name)
+          create_identity_for_user(user, provider, uid, display_name)
           handle_signup_token_if_present(user)
         end
         log_in(user)
@@ -87,8 +88,8 @@ class OmniauthCallbacksController < ApplicationController
     session.delete(:signup_token)
   end
 
-  def create_user_from_oauth(email)
-    username = generate_unique_username(email)
+  def create_user_from_oauth(email, display_name = nil)
+    username = generate_unique_username(email, display_name: display_name)
     User.create!(
       username: username,
       email: email,
@@ -96,11 +97,11 @@ class OmniauthCallbacksController < ApplicationController
     )
   end
 
-  def create_identity_for_user(user, provider, uid)
-    user.identities.create!(provider: provider, uid: uid)
+  def create_identity_for_user(user, provider, uid, display_name = nil)
+    user.identities.create!(provider: provider, uid: uid, username: display_name)
   end
 
-  def link_identity_to(user, provider, uid)
+  def link_identity_to(user, provider, uid, display_name = nil)
     name = Identity.new(provider: provider).provider_display_name
     existing = Identity.find_by(provider: provider, uid: uid)
 
@@ -112,13 +113,25 @@ class OmniauthCallbacksController < ApplicationController
       redirect_to mypage_path
     else
       begin
-        user.identities.create!(provider: provider, uid: uid)
+        user.identities.create!(provider: provider, uid: uid, username: display_name)
         flash[:notice] = "#{name}アカウントを連携しました。"
         redirect_to mypage_path
       rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
         flash[:alert] = "この#{name}アカウントはすでに別のユーザーに連携されているため、連携できません。"
         redirect_to mypage_path
       end
+    end
+  end
+
+  def external_display_name(auth_hash)
+    provider = auth_hash.dig("provider")
+    if provider == "discord"
+      auth_hash.dig("extra", "raw_info", "global_name")&.strip&.presence ||
+        auth_hash.dig("info", "name")&.strip&.presence
+    elsif provider == "google"
+      auth_hash.dig("info", "name")&.strip&.presence
+    else
+      nil
     end
   end
 

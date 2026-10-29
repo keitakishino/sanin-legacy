@@ -147,6 +147,35 @@ RSpec.describe "OmniAuth Identity Link (from My Page)", type: :request do
 
         expect(flash[:notice]).to eq("Googleアカウントを連携しました。")
       end
+
+      it "stores display name in identity.username when linking Discord with global_name" do
+        original_username = user.username
+        post "/mypage/identities/discord"
+        mock_discord_auth(uid: "200000000000000009", email: "discord@example.com", global_name: "LinkedDisplay", name: "linked_handle")
+        get "/auth/discord/callback"
+
+        identity = user.reload.identities.find_by(provider: "discord")
+        expect(identity.username).to eq("LinkedDisplay")
+        expect(user.reload.username).to eq(original_username)
+      end
+
+      it "stores name in identity.username when linking Discord without global_name" do
+        post "/mypage/identities/discord"
+        mock_discord_auth(uid: "200000000000000010", email: "discord2@example.com", global_name: nil, name: "linked_handle")
+        get "/auth/discord/callback"
+
+        identity = user.reload.identities.find_by(provider: "discord")
+        expect(identity.username).to eq("linked_handle")
+      end
+
+      it "stores display name in identity.username when linking Google" do
+        post "/mypage/identities/google"
+        mock_google_auth(uid: "300000000000000009", email: "google@example.com", name: "Linked Google")
+        get "/auth/google/callback"
+
+        identity = user.reload.identities.find_by(provider: "google")
+        expect(identity.username).to eq("Linked Google")
+      end
     end
 
     context "C3: Linking an account already linked to another user" do

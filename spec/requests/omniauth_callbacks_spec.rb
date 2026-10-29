@@ -5,7 +5,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
     context "when creating a new OAuth user" do
       before do
         start_signup_with_invitation
-        mock_google_auth(uid: "google_123", email: "newuser@example.com")
+        mock_google_auth(uid: "google_123", email: "newuser@example.com", name: nil)
       end
 
       it "creates a new user with the OAuth email" do
@@ -236,7 +236,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
 
       before do
         start_signup_with_invitation
-        mock_google_auth(uid: "google_999", email: "conflict@example.com")
+        mock_google_auth(uid: "google_999", email: "conflict@example.com", name: nil)
       end
 
       it "creates a new user with a suffixed username" do
@@ -265,7 +265,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
 
       before do
         start_signup_with_invitation
-        mock_google_auth(uid: "google_multi", email: "testuser@example.com")
+        mock_google_auth(uid: "google_multi", email: "testuser@example.com", name: nil)
       end
 
       it "creates a new user with the next available suffix" do
@@ -321,7 +321,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
 
       before do
         start_signup_with_invitation
-        mock_google_auth(uid: "google_timestamp", email: "conflict@example.com")
+        mock_google_auth(uid: "google_timestamp", email: "conflict@example.com", name: nil)
       end
 
       it "creates a new user with timestamp-based fallback username" do
@@ -453,7 +453,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
     context "when creating a new OAuth user" do
       before do
         start_signup_with_invitation
-        mock_discord_auth(uid: "123456789012", email: "newuser@example.com")
+        mock_discord_auth(uid: "123456789012", email: "newuser@example.com", name: nil, global_name: nil)
       end
 
       it "creates a new user with the OAuth email" do
@@ -655,7 +655,7 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
 
       before do
         start_signup_with_invitation
-        mock_discord_auth(uid: "444333222111", email: "conflict@example.com")
+        mock_discord_auth(uid: "444333222111", email: "conflict@example.com", name: nil, global_name: nil)
       end
 
       it "creates a new user with a suffixed username" do
@@ -739,6 +739,174 @@ RSpec.describe "OmniAuth Callbacks", type: :request do
         expect {
           get "/auth/discord/callback"
         }.not_to change(Identity, :count)
+      end
+    end
+  end
+
+  describe "external display name" do
+    context "C1: Discord with global_name" do
+      before do
+        start_signup_with_invitation
+        mock_discord_auth(uid: "80351110224678001", email: "dc1@example.com", global_name: "DiscordDisplay", name: "discord_handle")
+      end
+
+      it "creates user with global_name as username" do
+        expect {
+          get "/auth/discord/callback"
+        }.to change(User, :count).by(1)
+
+        user = User.last
+        expect(user.username).to eq("DiscordDisplay")
+      end
+
+      it "stores global_name in identity.username" do
+        get "/auth/discord/callback"
+        identity = Identity.last
+        expect(identity.username).to eq("DiscordDisplay")
+      end
+    end
+
+    context "C2: Discord with name only" do
+      before do
+        start_signup_with_invitation
+        mock_discord_auth(uid: "80351110224678002", email: "dc2@example.com", global_name: nil, name: "discord_handle")
+      end
+
+      it "creates user with name as username" do
+        expect {
+          get "/auth/discord/callback"
+        }.to change(User, :count).by(1)
+
+        user = User.last
+        expect(user.username).to eq("discord_handle")
+      end
+
+      it "stores name in identity.username" do
+        get "/auth/discord/callback"
+        identity = Identity.last
+        expect(identity.username).to eq("discord_handle")
+      end
+    end
+
+    context "C3: Google with name" do
+      before do
+        start_signup_with_invitation
+        mock_google_auth(uid: "g_disp_1", email: "gg1@example.com", name: "GoogleName")
+      end
+
+      it "creates user with Google name as username" do
+        expect {
+          get "/auth/google/callback"
+        }.to change(User, :count).by(1)
+
+        user = User.last
+        expect(user.username).to eq("GoogleName")
+      end
+
+      it "stores name in identity.username" do
+        get "/auth/google/callback"
+        identity = Identity.last
+        expect(identity.username).to eq("GoogleName")
+      end
+    end
+
+    context "Google with name containing spaces" do
+      before do
+        start_signup_with_invitation
+        mock_google_auth(uid: "g_disp_1b", email: "gg1b@example.com", name: "Google Name")
+      end
+
+      it "creates user with name sanitized" do
+        get "/auth/google/callback"
+        user = User.last
+        expect(user.username).to eq("Google_Name")
+      end
+
+      it "stores original name in identity.username" do
+        get "/auth/google/callback"
+        identity = Identity.last
+        expect(identity.username).to eq("Google Name")
+      end
+    end
+
+    context "when display name cannot be retrieved" do
+      before do
+        start_signup_with_invitation
+        mock_google_auth(uid: "g_disp_2", email: "gg2@example.com", name: nil)
+      end
+
+      it "stores nil in identity.username" do
+        get "/auth/google/callback"
+        identity = Identity.last
+        expect(identity.username).to be_nil
+      end
+    end
+
+    context "C8: display name without alphanumeric characters" do
+      before do
+        start_signup_with_invitation
+        mock_google_auth(uid: "g_disp_3", email: "fallback@example.com", name: "山田")
+      end
+
+      it "creates user with email local part as fallback" do
+        get "/auth/google/callback"
+        user = User.last
+        expect(user.username).to eq("fallback")
+      end
+
+      it "stores original display name in identity.username" do
+        get "/auth/google/callback"
+        identity = Identity.last
+        expect(identity.username).to eq("山田")
+      end
+    end
+
+    context "Discord with display name shorter than 3 characters" do
+      before do
+        start_signup_with_invitation
+        mock_discord_auth(uid: "80351110224678003", email: "fb2@example.com", global_name: "ab", name: nil)
+      end
+
+      it "creates user with email local part as fallback" do
+        get "/auth/discord/callback"
+        user = User.last
+        expect(user.username).to eq("fb2")
+      end
+
+      it "stores short display name in identity.username" do
+        get "/auth/discord/callback"
+        identity = Identity.last
+        expect(identity.username).to eq("ab")
+      end
+    end
+
+    context "C9: display name conflicts with existing user" do
+      let!(:existing_user) { create(:user, username: "DiscordDisplay") }
+
+      before do
+        start_signup_with_invitation
+        mock_discord_auth(uid: "80351110224678004", email: "dc4@example.com", global_name: "DiscordDisplay", name: "handle")
+      end
+
+      it "creates user with conflict suffix" do
+        get "/auth/discord/callback"
+        user = User.last
+        expect(user.username).to eq("DiscordDisplay1")
+      end
+    end
+
+    context "display name exceeding 50 characters" do
+      let(:long_name) { "a" * 60 }
+
+      before do
+        start_signup_with_invitation
+        mock_discord_auth(uid: "80351110224678005", email: "long@example.com", global_name: long_name, name: "handle")
+      end
+
+      it "creates user with truncated username" do
+        get "/auth/discord/callback"
+        user = User.last
+        expect(user.username).to eq("a" * 50)
       end
     end
   end
