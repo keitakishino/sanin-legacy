@@ -20,7 +20,7 @@ RSpec.describe "Mypage Identity Linking", type: :system do
       mock_discord_auth(uid: "200000000000000001", global_name: "Discord表示名")
 
       # 連携ボタンは /mypage/identities/:provider に POST し、307 で /auth/:provider へ再送されて
-      # コールバックまで一気に進む（途中で手を貸す必要はない）
+      # コールバックまで一気に進む（以前はここが CSRF で止まるため、手で callback を開いていた）
       within "#identity-discord" do
         click_button "Discordを連携する"
       end

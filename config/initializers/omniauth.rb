@@ -3,7 +3,11 @@ Rails.application.config.middleware.use OmniAuth::Builder do
            ENV["GOOGLE_OAUTH_CLIENT_ID"],
            ENV["GOOGLE_OAUTH_CLIENT_SECRET"],
            name: "google",
-           scope: [ :profile, :email ]
+           # scope は「カンマ区切りの文字列」で渡す。配列やシンボルで渡すと
+           # omniauth-google-oauth2 の BASE_SCOPES（%w[profile email openid]）と一致せず、
+           # https://www.googleapis.com/auth/profile のような存在しないスコープに変換されて
+           # Google に「Some requested scopes were invalid」と拒否される
+           scope: "email,profile"
 
   # Discord OAuth 2.0 integration
   # Explicit scope required to get email; gem default is 'identify' only
