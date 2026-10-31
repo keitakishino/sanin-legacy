@@ -1,6 +1,14 @@
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 ENV['RAILS_ENV'] ||= 'test'
 
+# OmniAuth の strategy は config/initializers/omniauth.rb の読み込み時に ENV を読む。
+# 空のままだと client_id が無く、認可 URL を組み立てる経路（scope の確認など）を
+# テストできないので、ダミー値を入れておく。環境変数が既にあればそちらを使う
+ENV['GOOGLE_OAUTH_CLIENT_ID'] ||= 'test-google-client-id'
+ENV['GOOGLE_OAUTH_CLIENT_SECRET'] ||= 'test-google-client-secret'
+ENV['DISCORD_OAUTH_CLIENT_ID'] ||= 'test-discord-client-id'
+ENV['DISCORD_OAUTH_CLIENT_SECRET'] ||= 'test-discord-client-secret'
+
 require File.expand_path('../config/environment', __dir__)
 
 # Prevent database truncation if the environment is production
