@@ -8,6 +8,23 @@ ja:
   trades:
     event_ended: "このイベントは終了しています"
     not_trade_event: "このイベントにはトレードがありません"
+  proxy_orders:
+    show:
+      back_to_dashboard: "← ダッシュボードへ戻る"
+      status: "ステータス"
+      provisional: "暫定"
+      provisional_notice: "注文中のため暫定の金額です（ロスト 0 として計算）"
+      my_items: "自分の明細"
+      card_name: "カード名"
+      expansion: "セット"
+      foil: "Foil"
+      frame: "枠"
+      quantity: "注文数"
+      lost: "ロスト"
+      unit_price: "単価"
+      subtotal: "小計"
+      my_payment: "自分の支払い"
+      no_items: "明細はまだありません"
   toasts:
     trade_card_offer:
       create: "「%{card_name}」を出すカードに追加しました"
@@ -232,6 +249,9 @@ ja:
       incomplete_trades_title: "未完了トレード"
       no_trades_message: "トレードはまだありません"
       no_trades_guidance: "イベント一覧からトレードを開始してください。"
+      proxy_orders_title: "自分の代理通販"
+      no_proxy_orders_message: "参加している代理通販はありません"
+      provisional: "暫定"
       view_details: "詳細を表示"
       view_events: "イベント一覧を見る"
       event_date_label: "開催日"
