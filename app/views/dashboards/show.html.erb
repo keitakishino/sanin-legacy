@@ -10,6 +10,41 @@
   <!-- Incomplete Trades Section with Turbo Frame (Lazy Loading) -->
   <turbo-frame id="incomplete_trades" src="<%= dashboards_incomplete_trades_path %>" loading="lazy"></turbo-frame>
 
+  <!-- My Proxy Orders Section -->
+  <section id="my_proxy_orders" class="mt-8">
+    <h2 class="text-2xl font-bold text-stone-800 mb-4"><%= t("dashboards.show.proxy_orders_title") %></h2>
+
+    <% if @my_proxy_orders.any? %>
+      <div class="space-y-4">
+        <% @my_proxy_orders.each do |proxy_order| %>
+          <div id="<%= dom_id(proxy_order, :dashboard) %>" class="bg-white border border-stone-200 rounded-[10px] p-4 hover:shadow-md transition-shadow">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <h3 class="text-lg font-bold text-stone-800"><%= proxy_order.event.title %></h3>
+                <p class="text-stone-600 text-sm"><%= l(proxy_order.event.event_date, format: :short) %></p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="badge"><%= t("activerecord.enums.proxy_order.status.#{proxy_order.status}") %></span>
+                <% if proxy_order.ordered? %>
+                  <span class="badge badge-info"><%= t("dashboards.show.provisional") %></span>
+                <% end %>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <%= link_to t("dashboards.show.view_details"), proxy_order_path(proxy_order.event_id),
+                  class: "text-accent hover:text-accent-hover font-bold text-sm" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-stone-600 bg-white border border-stone-200 rounded-[10px] p-4">
+        <%= t("dashboards.show.no_proxy_orders_message") %>
+      </p>
+    <% end %>
+  </section>
+
   <!-- Navigation -->
   <div class="mt-8 pt-8 border-t border-stone-200">
     <%= link_to t("dashboards.show.view_events"), events_path,

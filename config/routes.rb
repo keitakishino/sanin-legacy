@@ -47,6 +47,9 @@ Rails.application.routes.draw do
   put "/trades/:event_id/card_wants/:id", to: "trade_card_wants#update"
   delete "/trades/:event_id/card_wants/:id", to: "trade_card_wants#destroy"
 
+  # User proxy order view
+  get "/proxy_orders/:event_id", to: "proxy_orders#show", as: :proxy_order
+
   # User-facing trade history
   get "/histories", to: "histories#index", as: :histories
 
