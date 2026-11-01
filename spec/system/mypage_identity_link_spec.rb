@@ -25,7 +25,6 @@ RSpec.describe "Mypage Identity Linking", type: :system do
         click_button "Discordを連携する"
       end
 
-
       expect(current_path).to eq(mypage_path)
       expect(page).to have_text("Discordアカウントを連携しました。")
 
@@ -51,7 +50,6 @@ RSpec.describe "Mypage Identity Linking", type: :system do
         click_button "Googleを連携する"
       end
 
-
       expect(page).to have_text("Googleアカウントを連携しました。")
       expect(Identity.find_by(provider: :google, uid: "300000001").user).to eq(user)
 
@@ -75,6 +73,9 @@ RSpec.describe "Mypage Identity Linking", type: :system do
         click_button "Discordを連携する"
       end
 
+      # 連携は POST → 307 → OAuth コールバック → /mypage のリダイレクトまで進む。
+      # click_button はその完了を待たないので、フラッシュが出るまで待ってから次へ進む
+      expect(page).to have_text("Discordアカウントを連携しました。")
 
       within "#identity-discord" do
         expect(page).to have_text("Discord表示名")
@@ -103,6 +104,9 @@ RSpec.describe "Mypage Identity Linking", type: :system do
         click_button "Googleを連携する"
       end
 
+      # 連携は POST → 307 → OAuth コールバック → /mypage のリダイレクトまで進む。
+      # click_button はその完了を待たないので、フラッシュが出るまで待ってから次へ進む
+      expect(page).to have_text("Googleアカウントを連携しました。")
 
       within "#identity-google" do
         expect(page).to have_text("Google表示名")
@@ -135,6 +139,10 @@ RSpec.describe "Mypage Identity Linking", type: :system do
         click_button "Discordを連携する"
       end
 
+      # 連携は POST → 307 → OAuth コールバック → /mypage のリダイレクトまで進む。
+      # click_button はその完了を待たないので、フラッシュが出るまで待ってから次へ進む
+      expect(page).to have_text("Discordアカウントを連携しました。")
+
       Capybara.reset_sessions!
       visit signin_path
 
@@ -156,6 +164,10 @@ RSpec.describe "Mypage Identity Linking", type: :system do
       within "#identity-google" do
         click_button "Googleを連携する"
       end
+
+      # 連携は POST → 307 → OAuth コールバック → /mypage のリダイレクトまで進む。
+      # click_button はその完了を待たないので、フラッシュが出るまで待ってから次へ進む
+      expect(page).to have_text("Googleアカウントを連携しました。")
 
       Capybara.reset_sessions!
       visit signin_path
