@@ -60,7 +60,7 @@ RSpec.describe "Admin Proxy Order Status", type: :system do
 
       # check hand-over and update
       hand_over_checkbox.check
-      click_button "Update"
+      click_button "更新"
 
       # verify handed_over_at is set
       expect(page).to have_content("参加者を更新しました")
