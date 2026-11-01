@@ -1,0 +1,5 @@
+<div id="proxy_order_items" class="space-y-4">
+  <% @items.each do |item| %>
+    <%= render "admin/proxy_orders/item", item: item %>
+  <% end %>
+</div>

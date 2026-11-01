@@ -1,0 +1,9 @@
+<%= turbo_stream.replace "proxy_order_participants" do %>
+  <%= render "admin/proxy_orders/participants" %>
+<% end %>
+
+<%= turbo_stream.append "toast-container" do %>
+  <div class="alert alert-danger alert-toast" role="alert">
+    <%= @participant.errors.full_messages.join(", ") %>
+  </div>
+<% end %>

@@ -107,12 +107,14 @@ RSpec.configure do |config|
     driven_by :chrome_headless
     page.current_window.resize_to(*SYSTEM_SPEC_WINDOW_SIZE)
     @original_default_locale = I18n.default_locale
+    @original_locale = I18n.locale
+    # System tests use Japanese UI, so ensure locale is :ja for both default and current
     I18n.default_locale = :ja
     I18n.locale = :ja
   end
 
   config.after(:each, type: :system) do
     I18n.default_locale = @original_default_locale || :en
-    I18n.locale = I18n.default_locale
+    I18n.locale = @original_locale || I18n.default_locale
   end
 end

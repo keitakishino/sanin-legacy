@@ -1,0 +1,42 @@
+<div id="new_proxy_order_item" class="card bg-base-100 shadow-md mb-6">
+  <div class="card-body">
+    <h2 class="card-title"><%= t("admin.proxy_order.add_card") %></h2>
+
+    <%= form_with model: @proxy_order.proxy_order_items.build, url: admin_event_proxy_order_items_path(@event), id: "new_proxy_order_item_form", local: true do |f| %>
+      <% if @proxy_order.errors.any? %>
+        <div class="alert alert-error mb-4">
+          <ul>
+            <% @proxy_order.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="form-control mb-4">
+        <%= f.label :card_name %>
+        <%= f.text_field :card_name, class: "input input-bordered" %>
+      </div>
+
+      <div class="form-control mb-4">
+        <%= f.label :expansion_id %>
+        <%= f.hidden_field :expansion_id %>
+        <div id="new_proxy_order_item_expansion_select" class="expansion-select">
+          <input type="text" class="input input-bordered" placeholder="セットを選択">
+        </div>
+      </div>
+
+      <div class="form-control mb-4">
+        <%= f.label :foil %>
+        <%= f.select :foil, ProxyOrderItem.foils.keys.map { |k| [t("activerecord.enums.trade_card_offer.foil.#{k}"), k] }, { selected: "non_foil" }, class: "select select-bordered" %>
+      </div>
+
+      <div class="form-control mb-6">
+        <%= f.label :frame %>
+        <%= f.select :frame, ProxyOrderItem.frames.keys.map { |k| [t("activerecord.enums.trade_card_offer.frame.#{k}"), k] }, { selected: "normal" }, class: "select select-bordered" %>
+      </div>
+
+      <%= f.submit t("admin.proxy_order.add_card"), class: "btn btn-primary" %>
+    <% end %>
+  </div>
+</div>

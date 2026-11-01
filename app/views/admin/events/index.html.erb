@@ -31,6 +31,9 @@
               <td class="hidden md:table-cell px-6 py-4 text-sm"><%= event.created_by&.email %></td>
               <td class="hidden md:table-cell px-6 py-4 text-sm"><%= event.created_at.strftime("%Y年%m月%d日 %H:%M") %></td>
               <td class="px-6 py-4 text-sm space-x-2">
+                <% if event.proxy_order? %>
+                  <%= link_to t("admin.events.proxy_order_details"), admin_event_proxy_order_path(event), class: "text-indigo-700 hover:text-indigo-800 font-medium" %>
+                <% end %>
                 <%= link_to t("admin.events.edit"), edit_admin_event_path(event), class: "text-indigo-700 hover:text-indigo-800 font-medium" %>
                 <%= button_to t("admin.events.delete"), admin_event_path(event), method: :delete, data: { turbo_confirm: t("admin.events.confirm_delete") }, class: "text-red-700 hover:text-red-800 font-medium" %>
               </td>

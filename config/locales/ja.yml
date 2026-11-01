@@ -1,4 +1,10 @@
 ja:
+  common:
+    save: "保存"
+    update: "更新"
+    delete: "削除"
+    pending: "未確定"
+    unit_price: "単価"
   trades:
     event_ended: "このイベントは終了しています"
     not_trade_event: "このイベントにはトレードがありません"
@@ -107,6 +113,28 @@ ja:
           borderless: "ボーダーレス"
           showcase: "ショーケース"
           retro: "旧枠"
+      proxy_order_item:
+        card_name: "カード名"
+        expansion_id: "セット"
+        foil: "フォイル"
+        frame: "フレーム"
+      proxy_order_participant:
+        guest_name: "自由入力名"
+        user_id: "ユーザー"
+      proxy_order_price_line:
+        unit_price_usd: "単価"
+        quantity: "数量"
+        lost_quantity: "ロスト"
+      proxy_order_allocation:
+        quantity: "注文数"
+        lost_quantity: "ロスト"
+        proxy_order_participant_id: "参加者"
+        proxy_order_participant: "参加者"
+      proxy_order:
+        tax_usd: "消費税"
+        customs_usd: "関税"
+        shipping_usd: "送料"
+        usd_jpy_rate: "ドル円レート"
     enums:
       trade:
         status:
@@ -157,21 +185,6 @@ ja:
         2: "MP（モデレートプレイ）"
         3: "HP（ヘビープレイ）"
         4: "POOR（悪い）"
-      proxy_order_item:
-        card_name: "カード名"
-        expansion_id: "セット"
-        foil: "フォイル"
-        frame: "フレーム"
-      proxy_order_participant:
-        guest_name: "自由入力名"
-        user_id: "ユーザー"
-      proxy_order_price_line:
-        unit_price_usd: "単価"
-        quantity: "数量"
-        lost_quantity: "ロスト"
-      proxy_order_allocation:
-        quantity: "注文数"
-        lost_quantity: "ロスト"
     errors:
       messages:
         invalid: "は無効です"
@@ -233,6 +246,57 @@ ja:
       delete_failed: "イベントを削除できませんでした"
       confirm_delete: "本当に削除してもよろしいですか？"
       event_type_immutable: "種類は作成後に変更できません"
+      proxy_order_details: "明細"
+    proxy_order:
+      fees: "手数料"
+      add_card: "カードを追加"
+      delete_card: "カードを削除"
+      delete_card_confirm: "このカードを削除しますか？"
+      add_price_line: "価格行を追加"
+      add_allocation: "注文を追加"
+      participants: "参加者一覧"
+      add_participant: "参加者を追加"
+      registered_user: "登録ユーザー"
+      delete_participant_confirm: "この参加者を削除しますか？（注文も削除されます）"
+      payment_summary: "ユーザー別の支払い"
+      total_fees: "手数料総額"
+      fee_per_person: "一人あたり手数料"
+      goods_total: "商品合計"
+      fee: "手数料"
+      payment_usd: "支払い（$）"
+      payment_jpy: "支払い（¥）"
+      quantity_mismatch: "価格行の数量合計（%{ordered}）と注文数合計（%{allocated}）が一致しません"
+    proxy_orders:
+      update:
+        updated: "税・送料・レートを更新しました"
+    proxy_order_items:
+      create:
+        created: "カードを追加しました"
+      update:
+        updated: "カードを更新しました"
+      destroy:
+        deleted: "カードを削除しました"
+    proxy_order_price_lines:
+      create:
+        created: "価格行を追加しました"
+      update:
+        updated: "価格行を更新しました"
+      destroy:
+        deleted: "価格行を削除しました"
+    proxy_order_allocations:
+      create:
+        created: "注文を追加しました"
+      update:
+        updated: "注文を更新しました"
+      destroy:
+        deleted: "注文を削除しました"
+    proxy_order_participants:
+      create:
+        created: "参加者を追加しました"
+      update:
+        updated: "参加者を更新しました"
+      destroy:
+        deleted: "参加者を削除しました"
     users:
       title: "ユーザー管理"
       nav_label: "ユーザー管理"
@@ -295,6 +359,19 @@ ja:
         trade_card_want_create: "希望カード追加"
         trade_card_want_update: "希望カード更新"
         trade_card_want_destroy: "希望カード削除"
+        proxy_order_update: "通販明細更新"
+        proxy_order_item_create: "カード追加"
+        proxy_order_item_update: "カード更新"
+        proxy_order_item_discard: "カード削除"
+        proxy_order_price_line_create: "価格行追加"
+        proxy_order_price_line_update: "価格行更新"
+        proxy_order_price_line_destroy: "価格行削除"
+        proxy_order_allocation_create: "注文追加"
+        proxy_order_allocation_update: "注文更新"
+        proxy_order_allocation_destroy: "注文削除"
+        proxy_order_participant_create: "参加者追加"
+        proxy_order_participant_update: "参加者更新"
+        proxy_order_participant_destroy: "参加者削除"
   errors:
     unauthorized:
       title: "認証が必要です"

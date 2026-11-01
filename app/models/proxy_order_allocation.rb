@@ -9,6 +9,14 @@ class ProxyOrderAllocation < ApplicationRecord
   validate :lost_quantity_not_exceed_quantity
   validate :participant_in_same_order
 
+  before_create :set_default_lost_quantity
+
+  private
+
+  def set_default_lost_quantity
+    self.lost_quantity ||= 0
+  end
+
   private
 
   def lost_quantity_not_exceed_quantity

@@ -19,6 +19,18 @@ class ProxyOrderItem < ApplicationRecord
     discarded_at.present?
   end
 
+  def ordered_quantity
+    proxy_order_price_lines.sum(&:quantity)
+  end
+
+  def allocated_quantity
+    proxy_order_allocations.sum(&:quantity)
+  end
+
+  def quantity_mismatch?
+    ordered_quantity != allocated_quantity
+  end
+
   private
 
   def no_duplicate_card_entry
