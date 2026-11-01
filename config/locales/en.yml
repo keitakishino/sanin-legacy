@@ -42,6 +42,12 @@ en:
         not_a_number: "must be a number"
         cannot_be_changed: "cannot be changed after creation"
         must_be_trade_event: "must be a trade event"
+        must_be_proxy_order_event: "must be a proxy order event"
+        duplicate_card_entry: "This card entry is already registered"
+        user_or_guest_required: "Either a registered user or a guest name must be specified"
+        conflicts_with_username: "conflicts with a registered username"
+        exceeds_quantity: "must be less than or equal to the quantity"
+        must_belong_to_same_order: "must be a participant from the same order"
     attributes:
       event:
         title: "Event Title"
@@ -66,6 +72,21 @@ en:
           used: "Used"
           expired: "Expired"
           revoked: "Revoked"
+      proxy_order_item:
+        card_name: "Card Name"
+        expansion_id: "Set"
+        foil: "Foil"
+        frame: "Frame"
+      proxy_order_participant:
+        guest_name: "Guest Name"
+        user_id: "User"
+      proxy_order_price_line:
+        unit_price_usd: "Unit Price"
+        quantity: "Quantity"
+        lost_quantity: "Lost"
+      proxy_order_allocation:
+        quantity: "Order Quantity"
+        lost_quantity: "Lost"
   admin:
     events:
       title: "Event Management"

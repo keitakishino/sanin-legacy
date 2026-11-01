@@ -9,6 +9,7 @@ class User < ApplicationRecord
   has_many :created_events, class_name: "Event", foreign_key: "created_by_id",
                              dependent: :restrict_with_exception
   has_many :trades, dependent: :restrict_with_exception
+  has_many :proxy_order_participants, dependent: :restrict_with_exception
 
   enum :role, { general: 0, admin: 1 }, prefix: true
 

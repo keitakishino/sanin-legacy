@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_01_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_01_000100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -77,6 +77,74 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_000000) do
     t.index ["signup_token"], name: "index_invitations_on_signup_token", unique: true
     t.index ["status"], name: "index_invitations_on_status"
     t.index ["used_by_id"], name: "index_invitations_on_used_by_id"
+  end
+
+  create_table "proxy_order_allocations", force: :cascade do |t|
+    t.bigint "proxy_order_item_id", null: false
+    t.bigint "proxy_order_participant_id", null: false
+    t.integer "quantity", null: false
+    t.integer "lost_quantity", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["proxy_order_item_id", "proxy_order_participant_id"], name: "index_proxy_order_allocations_on_item_and_participant", unique: true
+    t.index ["proxy_order_item_id"], name: "index_proxy_order_allocations_on_proxy_order_item_id"
+    t.index ["proxy_order_participant_id"], name: "index_proxy_order_allocations_on_proxy_order_participant_id"
+    t.check_constraint "lost_quantity >= 0 AND lost_quantity <= quantity", name: "proxy_order_allocations_lost_quantity_range"
+    t.check_constraint "quantity > 0", name: "proxy_order_allocations_quantity_positive"
+  end
+
+  create_table "proxy_order_items", force: :cascade do |t|
+    t.bigint "proxy_order_id", null: false
+    t.string "card_name", null: false
+    t.bigint "expansion_id"
+    t.integer "foil", null: false
+    t.integer "frame", null: false
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_proxy_order_items_on_discarded_at"
+    t.index ["expansion_id"], name: "index_proxy_order_items_on_expansion_id"
+    t.index ["proxy_order_id"], name: "index_proxy_order_items_on_proxy_order_id"
+  end
+
+  create_table "proxy_order_participants", force: :cascade do |t|
+    t.bigint "proxy_order_id", null: false
+    t.bigint "user_id"
+    t.string "guest_name"
+    t.datetime "handed_over_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["proxy_order_id", "user_id"], name: "index_proxy_order_participants_on_proxy_order_id_and_user_id", unique: true, where: "(user_id IS NOT NULL)"
+    t.index ["proxy_order_id"], name: "index_proxy_order_participants_on_proxy_order_id"
+    t.index ["user_id"], name: "index_proxy_order_participants_on_user_id"
+    t.check_constraint "(user_id IS NULL) <> (guest_name IS NULL)", name: "proxy_order_participants_user_or_guest"
+  end
+
+  create_table "proxy_order_price_lines", force: :cascade do |t|
+    t.bigint "proxy_order_item_id", null: false
+    t.decimal "unit_price_usd", precision: 10, scale: 2, null: false
+    t.integer "quantity", null: false
+    t.integer "lost_quantity", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["proxy_order_item_id"], name: "index_proxy_order_price_lines_on_proxy_order_item_id"
+    t.check_constraint "lost_quantity >= 0 AND lost_quantity <= quantity", name: "proxy_order_price_lines_lost_quantity_range"
+    t.check_constraint "quantity > 0", name: "proxy_order_price_lines_quantity_positive"
+    t.check_constraint "unit_price_usd >= 0::numeric", name: "proxy_order_price_lines_unit_price_non_negative"
+  end
+
+  create_table "proxy_orders", force: :cascade do |t|
+    t.bigint "event_id", null: false
+    t.integer "status", default: 0, null: false, comment: "0=ordered 1=arrived 2=completed"
+    t.decimal "tax_usd", precision: 10, scale: 2, default: "0.0", null: false
+    t.decimal "customs_usd", precision: 10, scale: 2, default: "0.0", null: false
+    t.decimal "shipping_usd", precision: 10, scale: 2, default: "0.0", null: false
+    t.decimal "usd_jpy_rate", precision: 10, scale: 4
+    t.datetime "discarded_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["discarded_at"], name: "index_proxy_orders_on_discarded_at"
+    t.index ["event_id"], name: "index_proxy_orders_on_event_id", unique: true
   end
 
   create_table "trade_card_offers", force: :cascade do |t|
@@ -155,6 +223,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_000000) do
   add_foreign_key "identities", "users"
   add_foreign_key "invitations", "users", column: "issued_by_id"
   add_foreign_key "invitations", "users", column: "used_by_id"
+  add_foreign_key "proxy_order_allocations", "proxy_order_items"
+  add_foreign_key "proxy_order_allocations", "proxy_order_participants"
+  add_foreign_key "proxy_order_items", "expansions"
+  add_foreign_key "proxy_order_items", "proxy_orders"
+  add_foreign_key "proxy_order_participants", "proxy_orders"
+  add_foreign_key "proxy_order_participants", "users"
+  add_foreign_key "proxy_order_price_lines", "proxy_order_items"
+  add_foreign_key "proxy_orders", "events"
   add_foreign_key "trade_card_offers", "expansions"
   add_foreign_key "trade_card_offers", "trades"
   add_foreign_key "trade_card_wants", "expansions"

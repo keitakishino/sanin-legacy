@@ -157,6 +157,21 @@ ja:
         2: "MP（モデレートプレイ）"
         3: "HP（ヘビープレイ）"
         4: "POOR（悪い）"
+      proxy_order_item:
+        card_name: "カード名"
+        expansion_id: "セット"
+        foil: "フォイル"
+        frame: "フレーム"
+      proxy_order_participant:
+        guest_name: "自由入力名"
+        user_id: "ユーザー"
+      proxy_order_price_line:
+        unit_price_usd: "単価"
+        quantity: "数量"
+        lost_quantity: "ロスト"
+      proxy_order_allocation:
+        quantity: "注文数"
+        lost_quantity: "ロスト"
     errors:
       messages:
         invalid: "は無効です"
@@ -167,6 +182,12 @@ ja:
         date_must_not_be_past: "は過去の日付に設定することはできません"
         cannot_be_changed: "は作成後に変更できません"
         must_be_trade_event: "はトレードイベントではありません"
+        must_be_proxy_order_event: "は代理通販イベントではありません"
+        duplicate_card_entry: "このカード明細は既に登録されています"
+        user_or_guest_required: "登録ユーザーか自由入力名のどちらか一方を指定してください"
+        conflicts_with_username: "は登録ユーザー名と同じため使用できません"
+        exceeds_quantity: "は数量以下で入力してください"
+        must_belong_to_same_order: "は同じ通販の参加者を指定してください"
         greater_than: "は%{count}より大きい値で入力してください"
         greater_than_or_equal_to: "は%{count}以上の値で入力してください"
         less_than_or_equal_to: "は%{count}以下の値で入力してください"

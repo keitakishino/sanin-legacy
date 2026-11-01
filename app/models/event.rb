@@ -5,6 +5,7 @@ class Event < ApplicationRecord
   # Design: Events use soft delete (discarded_at), so dependent: :destroy doesn't actually execute.
   # If physical deletion ever occurs, DB foreign key constraint (ON DELETE RESTRICT) will prevent cascade deletion.
   has_many :trades
+  has_one :proxy_order
 
   # Enums
   enum :event_type, { trade: 0, tournament: 1, proxy_order: 2 }, validate: true, default: :trade
