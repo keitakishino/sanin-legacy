@@ -16,7 +16,14 @@
     <div class="space-y-4">
       <% @participants.each do |participant| %>
         <div id="<%= dom_id(participant, :summary) %>" class="p-4 bg-base-200 rounded">
-          <div class="font-bold mb-2"><%= participant_display_name(participant) %></div>
+          <div class="font-bold mb-2">
+            <%= participant_display_name(participant) %>
+            <% if !@proxy_order.ordered? && participant.handed_over_at.present? %>
+              <span data-role="handed-over" class="text-sm font-normal text-success"><%= t("admin.proxy_order.handed_over") %></span>
+            <% elsif !@proxy_order.ordered? && participant.handed_over_at.nil? %>
+              <span data-role="handed-over" class="text-sm font-normal text-error"><%= t("admin.proxy_order.not_handed_over") %></span>
+            <% end %>
+          </div>
           <div class="space-y-1 text-sm">
             <div class="flex justify-between">
               <span><%= t("admin.proxy_order.goods_total") %></span>

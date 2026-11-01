@@ -2,6 +2,8 @@ class Admin::ProxyOrderItemsController < Admin::BaseController
   include AdminProxyOrderLoadable
   helper ProxyOrdersHelper
 
+  before_action :check_details_editable, only: [ :create, :update, :destroy ]
+
   def create
     @item = @proxy_order.proxy_order_items.build(item_params)
 
@@ -59,5 +61,11 @@ class Admin::ProxyOrderItemsController < Admin::BaseController
 
   def item_params
     params.require(:proxy_order_item).permit(:card_name, :expansion_id, :foil, :frame)
+  end
+
+  def check_details_editable
+    unless @proxy_order.details_editable?
+      reject_locked_operation(@proxy_order.completed? ? :completed : :details)
+    end
   end
 end

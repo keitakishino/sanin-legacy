@@ -27,5 +27,20 @@ module AdminProxyOrderLoadable
     @calculator = ProxyOrderCalculator.new(@proxy_order)
     @users = User.order(:username)
     @open_item_ids = open_item_ids
+    @transition_errors = nil unless defined?(@transition_errors)
+  end
+
+  private
+
+  def reject_locked_operation(message_key)
+    load_editor_state
+    @locked_message = t("admin.proxy_order.locked.#{message_key}")
+    respond_to do |format|
+      format.turbo_stream { render "admin/proxy_orders/locked", status: :unprocessable_entity }
+      format.html do
+        @proxy_order.reload
+        render action: :show, controller: "admin/proxy_orders", status: :unprocessable_entity
+      end
+    end
   end
 end

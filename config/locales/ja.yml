@@ -121,6 +121,7 @@ ja:
       proxy_order_participant:
         guest_name: "自由入力名"
         user_id: "ユーザー"
+        handed_over_at: "手渡し済み"
       proxy_order_price_line:
         unit_price_usd: "単価"
         quantity: "数量"
@@ -136,6 +137,11 @@ ja:
         shipping_usd: "送料"
         usd_jpy_rate: "ドル円レート"
     enums:
+      proxy_order:
+        status:
+          ordered: "注文"
+          arrived: "到着"
+          completed: "完了"
       trade:
         status:
           pending: "未処理"
@@ -206,6 +212,11 @@ ja:
         less_than_or_equal_to: "は%{count}以下の値で入力してください"
         not_an_integer: "は整数で入力してください"
         not_a_number: "は数値で入力してください"
+        invalid_status_transition: "この状態には変更できません"
+        rate_required_for_arrival: "ドル円レートを入力してください"
+        quantity_mismatch_for_arrival: "価格行の数量合計と注文数合計が一致しないカードがあります: %{cards}"
+        lost_mismatch_for_completion: "価格行のロスト合計とユーザー別ロスト合計が一致しないカードがあります: %{cards}"
+        handover_required_for_completion: "手渡しが完了していない参加者がいます: %{participants}"
       models:
         user:
           attributes:
@@ -266,9 +277,24 @@ ja:
       payment_usd: "支払い（$）"
       payment_jpy: "支払い（¥）"
       quantity_mismatch: "価格行の数量合計（%{ordered}）と注文数合計（%{allocated}）が一致しません"
+      lost_mismatch: "価格行のロスト合計（%{ordered}）とユーザー別ロスト合計（%{allocated}）が一致しません"
+      to_arrived: "到着へ"
+      to_completed: "完了へ"
+      back_to_ordered: "注文へ差し戻す"
+      back_to_arrived: "到着へ差し戻す"
+      back_to_ordered_confirm: "注文状態へ差し戻しますか？"
+      back_to_arrived_confirm: "到着状態へ差し戻しますか？"
+      handed_over: "手渡し済み"
+      not_handed_over: "未手渡し"
+      locked:
+        details: "注文状態でのみ明細を変更できます"
+        arrival_inputs: "到着状態でのみロスト・手渡しを入力できます"
+        fees: "完了状態では税・関税・送料・レートを変更できません"
+        completed: "完了状態では変更できません"
     proxy_orders:
       update:
         updated: "税・送料・レートを更新しました"
+        status_changed: "ステータスを「%{status}」に変更しました"
     proxy_order_items:
       create:
         created: "カードを追加しました"
@@ -372,6 +398,10 @@ ja:
         proxy_order_participant_create: "参加者追加"
         proxy_order_participant_update: "参加者更新"
         proxy_order_participant_destroy: "参加者削除"
+        proxy_order_status_change: "通販ステータス変更"
+        proxy_order_price_line_update_lost: "価格行ロスト入力"
+        proxy_order_allocation_update_lost: "ユーザー別ロスト入力"
+        proxy_order_participant_hand_over: "手渡しチェック"
   errors:
     unauthorized:
       title: "認証が必要です"

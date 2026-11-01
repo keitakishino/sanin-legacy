@@ -5,6 +5,11 @@ class Admin::ProxyOrderPriceLinesController < Admin::BaseController
   before_action :set_item
 
   def create
+    unless @proxy_order.details_editable?
+      reject_locked_operation(@proxy_order.completed? ? :completed : :details)
+      return
+    end
+
     @line = @item.proxy_order_price_lines.build(price_line_params)
 
     if @line.save
@@ -26,9 +31,35 @@ class Admin::ProxyOrderPriceLinesController < Admin::BaseController
 
   def update
     @line = @item.proxy_order_price_lines.find(params[:id])
+    submitted = params.require(:proxy_order_price_line).keys.map(&:to_s)
 
-    if @line.update(price_line_params)
-      record_audit("proxy_order_price_line.update", target: @line, details: @line.saved_changes.except("updated_at"))
+    if @proxy_order.completed?
+      reject_locked_operation(:completed)
+      return
+    end
+
+    if @proxy_order.ordered?
+      if submitted.include?("lost_quantity")
+        reject_locked_operation(:arrival_inputs)
+        return
+      end
+      params_to_update = price_line_params
+    elsif @proxy_order.arrived?
+      if (submitted - %w[lost_quantity]).any?
+        reject_locked_operation(:details)
+        return
+      end
+      lost = params[:proxy_order_price_line][:lost_quantity]
+      lost = lost.blank? ? 0 : lost.to_i
+      params_to_update = { lost_quantity: lost }
+    end
+
+    if @line.update(params_to_update)
+      if @proxy_order.arrived? && submitted.include?("lost_quantity")
+        record_audit("proxy_order_price_line.update_lost", target: @line, details: @line.saved_changes.except("updated_at"))
+      else
+        record_audit("proxy_order_price_line.update", target: @line, details: @line.saved_changes.except("updated_at"))
+      end
       load_editor_state(open_item_ids: [ @item.id ])
 
       respond_to do |format|
@@ -45,6 +76,11 @@ class Admin::ProxyOrderPriceLinesController < Admin::BaseController
   end
 
   def destroy
+    unless @proxy_order.details_editable?
+      reject_locked_operation(@proxy_order.completed? ? :completed : :details)
+      return
+    end
+
     @line = @item.proxy_order_price_lines.find(params[:id])
     @line.destroy
 

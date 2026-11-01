@@ -86,6 +86,7 @@ en:
       proxy_order_participant:
         guest_name: "Guest Name"
         user_id: "User"
+        handed_over_at: "Handed Over"
       proxy_order_price_line:
         unit_price_usd: "Unit Price"
         quantity: "Quantity"
@@ -100,6 +101,19 @@ en:
         customs_usd: "Customs"
         shipping_usd: "Shipping"
         usd_jpy_rate: "USD/JPY Rate"
+    enums:
+      proxy_order:
+        status:
+          ordered: "Ordered"
+          arrived: "Arrived"
+          completed: "Completed"
+    errors:
+      messages:
+        invalid_status_transition: "Cannot change to this status"
+        rate_required_for_arrival: "Please enter the USD/JPY rate"
+        quantity_mismatch_for_arrival: "Price line quantity total and order total do not match for these cards: %{cards}"
+        lost_mismatch_for_completion: "Price line lost total and user lost total do not match for these cards: %{cards}"
+        handover_required_for_completion: "The following participants have not been handed over: %{participants}"
   admin:
     events:
       title: "Event Management"
@@ -138,8 +152,24 @@ en:
       payment_usd: "Payment ($)"
       payment_jpy: "Payment (¥)"
       quantity_mismatch: "Price line quantity total (%{ordered}) and order total (%{allocated}) do not match"
+      lost_mismatch: "Price line lost total (%{ordered}) and user lost total (%{allocated}) do not match"
+      to_arrived: "To Arrived"
+      to_completed: "To Completed"
+      back_to_ordered: "Back to Ordered"
+      back_to_arrived: "Back to Arrived"
+      back_to_ordered_confirm: "Revert to Ordered state?"
+      back_to_arrived_confirm: "Revert to Arrived state?"
+      handed_over: "Handed Over"
+      not_handed_over: "Not Handed Over"
+      locked:
+        details: "Details can only be changed in the ordered state"
+        arrival_inputs: "Lost and handover can only be entered in the arrived state"
+        fees: "Tax, customs, shipping, and rate cannot be changed in the completed state"
+        completed: "Changes cannot be made in the completed state"
+    proxy_orders:
       update:
         updated: "Tax, shipping, and rate updated"
+        status_changed: "Status changed to \"%{status}\""
     proxy_order_items:
       create:
         created: "Card added"
