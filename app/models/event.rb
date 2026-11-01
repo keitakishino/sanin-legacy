@@ -6,11 +6,16 @@ class Event < ApplicationRecord
   # If physical deletion ever occurs, DB foreign key constraint (ON DELETE RESTRICT) will prevent cascade deletion.
   has_many :trades
 
+  # Enums
+  enum :event_type, { trade: 0, tournament: 1, proxy_order: 2 }, validate: true, default: :trade
+
   # Validations
   validates :created_by, presence: true
   validates :title, presence: true, length: { maximum: 255 }
   validates :event_date, presence: true
+  validates :event_type, presence: true
   validate :event_date_not_in_past, on: %i[create update]
+  validate :event_type_unchanged, on: :update
 
   # Scopes for logical deletion
   default_scope { where(discarded_at: nil) }
@@ -59,5 +64,9 @@ class Event < ApplicationRecord
 
   def event_date_not_in_past
     errors.add(:event_date, :date_must_not_be_past) if event_date.present? && event_date < self.class.current_date
+  end
+
+  def event_type_unchanged
+    errors.add(:event_type, :cannot_be_changed) if will_save_change_to_event_type?
   end
 end
