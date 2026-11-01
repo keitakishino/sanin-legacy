@@ -40,19 +40,31 @@ RSpec.describe "Admin Proxy Order Status", type: :system do
   end
 
   describe "C3: Hand-over check in arrived state" do
-    let(:proxy_order) { create(:proxy_order, event:, status: :arrived) }
+    let(:proxy_order) { create(:proxy_order, event:, status: :arrived, usd_jpy_rate: 150) }
     let(:item) { create(:proxy_order_item, proxy_order:) }
 
     before do
       user = create(:user, username: "test_user")
       participant = create(:proxy_order_participant, proxy_order:, user:)
-      create(:proxy_order_price_line, proxy_order_item: item, quantity: 1)
+      create(:proxy_order_price_line, proxy_order_item: item, quantity: 1, unit_price_usd: 10)
       create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 1)
       visit admin_event_proxy_order_path(event)
     end
 
-    it "page renders participants section in arrived state" do
+    it "can check hand-over for participants" do
       expect(page).to have_content("test_user")
+
+      # hand-over checkbox should be present in arrived state
+      hand_over_checkbox = find('input[type="checkbox"][name*="handed_over_at"]')
+      expect(hand_over_checkbox).not_to be_checked
+
+      # check hand-over and update
+      hand_over_checkbox.check
+      click_button "Update"
+
+      # verify handed_over_at is set
+      expect(page).to have_content("参加者を更新しました")
+      expect(page).to have_content("手渡し済み")
     end
   end
 
