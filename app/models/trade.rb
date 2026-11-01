@@ -10,6 +10,7 @@ class Trade < ApplicationRecord
 
   validates :status, presence: true
   validates :offers_total_amount, :wants_total_amount, :net_amount, numericality: { only_integer: true }
+  validate :event_must_be_trade_type, on: :create
 
   # Scopes for logical deletion
   default_scope { where(discarded_at: nil) }
@@ -63,5 +64,11 @@ class Trade < ApplicationRecord
       wants_total_amount: new_wants_total,
       net_amount: new_net
     )
+  end
+
+  private
+
+  def event_must_be_trade_type
+    errors.add(:event, :must_be_trade_event) if event.present? && !event.trade?
   end
 end

@@ -13,6 +13,10 @@ class TradesController < ApplicationController
 
   def set_or_create_trade
     @event = Event.find(params[:event_id])
+    unless @event.trade?
+      redirect_to events_path, alert: t("trades.not_trade_event")
+      return
+    end
     if @event.past? && !Trade.exists?(event: @event, user: current_user)
       redirect_to events_path, alert: t("trades.event_ended")
       return
