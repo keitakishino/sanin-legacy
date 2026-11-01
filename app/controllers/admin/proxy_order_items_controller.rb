@@ -2,7 +2,7 @@ class Admin::ProxyOrderItemsController < Admin::BaseController
   include AdminProxyOrderLoadable
   helper ProxyOrdersHelper
 
-  before_action :check_details_editable, only: [:create, :update, :destroy]
+  before_action :check_details_editable, only: [ :create, :update, :destroy ]
 
   def create
     @item = @proxy_order.proxy_order_items.build(item_params)

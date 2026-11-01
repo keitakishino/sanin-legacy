@@ -39,7 +39,7 @@ module AdminProxyOrderLoadable
       format.turbo_stream { render "admin/proxy_orders/locked", status: :unprocessable_entity }
       format.html do
         @proxy_order.reload
-        render action: :show, controller: 'admin/proxy_orders', status: :unprocessable_entity
+        render action: :show, controller: "admin/proxy_orders", status: :unprocessable_entity
       end
     end
   end
