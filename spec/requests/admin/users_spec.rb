@@ -41,16 +41,17 @@ RSpec.describe "Admin::Users", type: :request do
       end
 
       it "displays users in reverse chronological order" do
-        user1 = create(:user, username: "user1", created_at: 1.day.ago)
-        user2 = create(:user, username: "user2", created_at: Time.current)
+        older = create(:user, username: "older_member", created_at: 1.day.ago)
+        newer = create(:user, username: "newer_member", created_at: Time.current)
 
         get admin_users_path
-        body = response.body
+        doc = Nokogiri::HTML(response.body)
 
-        pos1 = body.index(user1.username)
-        pos2 = body.index(user2.username)
+        names = doc.css("tbody tr td:first-child").map { |td| td.text.strip }
 
-        expect(pos2).to be < pos1
+        expect(names).to include(older.username)
+        expect(names).to include(newer.username)
+        expect(names.index(newer.username)).to be < names.index(older.username)
       end
 
       it "adds data-url attribute with correct path to user detail page" do
