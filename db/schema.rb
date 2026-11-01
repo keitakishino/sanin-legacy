@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_29_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_01_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -35,6 +35,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_29_000000) do
     t.date "event_date", null: false, comment: "イベント開催日"
     t.string "title", null: false, comment: "イベント名"
     t.datetime "updated_at", null: false
+    t.integer "event_type", default: 0, null: false, comment: "イベント種類（0=trade 1=tournament 2=proxy_order）"
     t.index ["created_by_id"], name: "index_events_on_created_by_id"
     t.index ["discarded_at"], name: "index_events_on_discarded_at"
     t.index ["event_date", "discarded_at"], name: "index_events_on_event_date_and_discarded_at"
