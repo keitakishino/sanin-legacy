@@ -1,0 +1,41 @@
+<div id="proxy_order_fees" class="card bg-base-100 shadow-md mb-6">
+  <div class="card-body">
+    <h2 class="card-title"><%= t("admin.proxy_order.fees") %></h2>
+
+    <%= form_with model: @proxy_order, url: admin_event_proxy_order_path(@event), method: :patch, id: "proxy_order_fees_form", local: true do |f| %>
+      <% if @proxy_order.errors.any? %>
+        <div class="alert alert-error mb-4">
+          <ul>
+            <% @proxy_order.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="form-control mb-4">
+        <%= f.label :tax_usd, t("activerecord.attributes.proxy_order.tax_usd") %>
+        <%= f.number_field :tax_usd, step: 0.01, class: "input input-bordered" %>
+      </div>
+
+      <div class="form-control mb-4">
+        <%= f.label :customs_usd, t("activerecord.attributes.proxy_order.customs_usd") %>
+        <%= f.number_field :customs_usd, step: 0.01, class: "input input-bordered" %>
+      </div>
+
+      <div class="form-control mb-4">
+        <%= f.label :shipping_usd, t("activerecord.attributes.proxy_order.shipping_usd") %>
+        <%= f.number_field :shipping_usd, step: 0.01, class: "input input-bordered" %>
+      </div>
+
+      <div class="form-control mb-6">
+        <%= f.label :usd_jpy_rate, t("activerecord.attributes.proxy_order.usd_jpy_rate") %>
+        <%= f.number_field :usd_jpy_rate, step: 0.0001, class: "input input-bordered" %>
+      </div>
+
+      <div class="form-control">
+        <%= f.submit t("common.save"), class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

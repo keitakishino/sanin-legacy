@@ -1,0 +1,61 @@
+<div id="proxy_order_participants" class="card bg-base-100 shadow-md mb-6">
+  <div class="card-body">
+    <h2 class="card-title"><%= t("admin.proxy_order.participants") %></h2>
+
+    <div class="space-y-4 mb-6">
+      <% @participants.each do |participant| %>
+        <div id="<%= dom_id(participant) %>" class="card bg-base-200 p-4">
+          <div class="mb-4">
+            <strong><%= participant_display_name(participant) %></strong>
+          </div>
+
+          <%= form_with model: participant, url: admin_event_proxy_order_participant_path(@event, participant), method: :patch, local: true do |f| %>
+            <% if participant.user.present? %>
+              <div class="form-control mb-4">
+                <%= f.label :user_id %>
+                <%= f.collection_select :user_id, @users, :id, :username, {}, class: "select select-bordered" %>
+              </div>
+            <% else %>
+              <div class="form-control mb-4">
+                <%= f.label :guest_name %>
+                <%= f.text_field :guest_name, class: "input input-bordered" %>
+              </div>
+            <% end %>
+
+            <%= f.submit t("common.update"), class: "btn btn-sm btn-primary" %>
+          <% end %>
+
+          <%= button_to t("common.delete"), admin_event_proxy_order_participant_path(@event, participant), method: :delete, data: { confirm: t("admin.proxy_order.delete_participant_confirm") }, class: "btn btn-sm btn-outline btn-error" %>
+        </div>
+      <% end %>
+    </div>
+
+    <div id="new_proxy_order_participant_form" class="card bg-base-200 p-4">
+      <h3 class="font-bold mb-4"><%= t("admin.proxy_order.add_participant") %></h3>
+
+      <%= form_with model: @proxy_order.proxy_order_participants.build, url: admin_event_proxy_order_participants_path(@event), local: true do |f| %>
+        <% if @proxy_order.errors.any? %>
+          <div class="alert alert-error mb-4">
+            <ul>
+              <% @proxy_order.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="form-control mb-4">
+          <%= f.label :user_id, t("admin.proxy_order.registered_user") %>
+          <%= f.collection_select :user_id, @users, :id, :username, { include_blank: true }, class: "select select-bordered" %>
+        </div>
+
+        <div class="form-control mb-6">
+          <%= f.label :guest_name %>
+          <%= f.text_field :guest_name, class: "input input-bordered" %>
+        </div>
+
+        <%= f.submit t("admin.proxy_order.add_participant"), class: "btn btn-primary" %>
+      <% end %>
+    </div>
+  </div>
+</div>

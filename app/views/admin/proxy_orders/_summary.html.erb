@@ -1,0 +1,42 @@
+<div id="proxy_order_summary" class="card bg-base-100 shadow-md">
+  <div class="card-body">
+    <h2 class="card-title"><%= t("admin.proxy_order.payment_summary") %></h2>
+
+    <div class="mb-6 p-4 bg-base-200 rounded">
+      <div class="flex justify-between mb-2">
+        <span><%= t("admin.proxy_order.total_fees") %></span>
+        <strong><%= usd(@calculator.fee_total) %></strong>
+      </div>
+      <div class="flex justify-between">
+        <span><%= t("admin.proxy_order.fee_per_person") %></span>
+        <strong id="proxy_order_fee_per_person"><%= usd(@calculator.fee_per_person) %></strong>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <% @participants.each do |participant| %>
+        <div id="<%= dom_id(participant, :summary) %>" class="p-4 bg-base-200 rounded">
+          <div class="font-bold mb-2"><%= participant_display_name(participant) %></div>
+          <div class="space-y-1 text-sm">
+            <div class="flex justify-between">
+              <span><%= t("admin.proxy_order.goods_total") %></span>
+              <span data-role="goods-total"><%= usd(@calculator.goods_total(participant)) %></span>
+            </div>
+            <div class="flex justify-between">
+              <span><%= t("admin.proxy_order.fee") %></span>
+              <span data-role="fee"><%= usd(@calculator.fee_for(participant)) %></span>
+            </div>
+            <div class="flex justify-between">
+              <span><%= t("admin.proxy_order.payment_usd") %></span>
+              <span data-role="payment-usd"><%= usd(@calculator.payment_usd(participant)) %></span>
+            </div>
+            <div class="flex justify-between border-t border-base-300 pt-1">
+              <strong><%= t("admin.proxy_order.payment_jpy") %></strong>
+              <strong data-role="payment-jpy"><%= jpy_or_pending(@calculator.payment_jpy(participant)) %></strong>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

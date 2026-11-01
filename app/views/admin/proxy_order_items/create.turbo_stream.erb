@@ -1,0 +1,17 @@
+<%= turbo_stream.append "proxy_order_items" do %>
+  <%= render "admin/proxy_orders/item", item: @item %>
+<% end %>
+
+<%= turbo_stream.replace "new_proxy_order_item" do %>
+  <%= render "admin/proxy_orders/new_item_form" %>
+<% end %>
+
+<%= turbo_stream.replace "proxy_order_summary" do %>
+  <%= render "admin/proxy_orders/summary" %>
+<% end %>
+
+<%= turbo_stream.append "toast-container" do %>
+  <div class="alert alert-success alert-toast" role="alert">
+    <%= t(".created") %>
+  </div>
+<% end %>

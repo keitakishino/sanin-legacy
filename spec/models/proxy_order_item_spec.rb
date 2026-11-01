@@ -97,4 +97,53 @@ RSpec.describe ProxyOrderItem, type: :model do
       expect(item.discarded?).to be true
     end
   end
+
+  describe "quantity aggregation methods" do
+    let(:proxy_order) { create(:proxy_order) }
+    let(:item) { create(:proxy_order_item, proxy_order:) }
+    let(:participant) { create(:proxy_order_participant, proxy_order:) }
+
+    describe "#ordered_quantity" do
+      it "sums quantities from all price lines" do
+        create(:proxy_order_price_line, proxy_order_item: item, quantity: 2)
+        create(:proxy_order_price_line, proxy_order_item: item, quantity: 3)
+        expect(item.ordered_quantity).to eq(5)
+      end
+
+      it "returns 0 when no price lines exist" do
+        expect(item.ordered_quantity).to eq(0)
+      end
+    end
+
+    describe "#allocated_quantity" do
+      it "sums quantities from all allocations" do
+        create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 2)
+        other_participant = create(:proxy_order_participant, proxy_order:)
+        create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: other_participant, quantity: 3)
+        expect(item.allocated_quantity).to eq(5)
+      end
+
+      it "returns 0 when no allocations exist" do
+        expect(item.allocated_quantity).to eq(0)
+      end
+    end
+
+    describe "#quantity_mismatch?" do
+      it "returns false when ordered and allocated quantities match" do
+        create(:proxy_order_price_line, proxy_order_item: item, quantity: 5)
+        create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 5)
+        expect(item.quantity_mismatch?).to be false
+      end
+
+      it "returns true when ordered and allocated quantities differ" do
+        create(:proxy_order_price_line, proxy_order_item: item, quantity: 5)
+        create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 4)
+        expect(item.quantity_mismatch?).to be true
+      end
+
+      it "returns false when both are zero" do
+        expect(item.quantity_mismatch?).to be false
+      end
+    end
+  end
 end

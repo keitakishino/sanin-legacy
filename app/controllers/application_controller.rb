@@ -10,9 +10,15 @@ class ApplicationController < ActionController::Base
 
   helper_method :current_user, :user_signed_in?
 
+  before_action :set_i18n_locale
+
   rescue_from ForbiddenError, with: :handle_forbidden
 
   private
+
+  def set_i18n_locale
+    I18n.locale = :ja
+  end
 
   def handle_forbidden
     @status_code = 403
