@@ -37,7 +37,10 @@ module AdminProxyOrderLoadable
     @locked_message = t("admin.proxy_order.locked.#{message_key}")
     respond_to do |format|
       format.turbo_stream { render "admin/proxy_orders/locked", status: :unprocessable_entity }
-      format.html { render "admin/proxy_orders/show", status: :unprocessable_entity }
+      format.html do
+        @proxy_order.reload
+        render action: :show, controller: 'admin/proxy_orders', status: :unprocessable_entity
+      end
     end
   end
 end

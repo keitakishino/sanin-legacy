@@ -132,19 +132,19 @@ RSpec.describe "Admin Proxy Order Status", type: :request do
     let(:allocation) { create(:proxy_order_allocation, proxy_order_item: item, quantity: 5, lost_quantity: 0) }
 
     it "updates price line lost_quantity" do
-      patch admin_event_proxy_order_item_price_line_path(event, item, price_line), params: { proxy_order_price_line: { lost_quantity: "1" } }
+      patch admin_event_proxy_order_item_price_line_path(event, item, price_line), params: { proxy_order_price_line: { lost_quantity: "1" } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       expect(response).to have_http_status(:ok)
       expect(price_line.reload.lost_quantity).to eq(1)
     end
 
     it "updates allocation lost_quantity" do
-      patch admin_event_proxy_order_item_allocation_path(event, item, allocation), params: { proxy_order_allocation: { lost_quantity: "2" } }
+      patch admin_event_proxy_order_item_allocation_path(event, item, allocation), params: { proxy_order_allocation: { lost_quantity: "2" } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       expect(response).to have_http_status(:ok)
       expect(allocation.reload.lost_quantity).to eq(2)
     end
 
     it "treats blank lost_quantity as 0" do
-      patch admin_event_proxy_order_item_price_line_path(event, item, price_line), params: { proxy_order_price_line: { lost_quantity: "" } }
+      patch admin_event_proxy_order_item_price_line_path(event, item, price_line), params: { proxy_order_price_line: { lost_quantity: "" } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       expect(response).to have_http_status(:ok)
       expect(price_line.reload.lost_quantity).to eq(0)
     end
@@ -169,95 +169,102 @@ RSpec.describe "Admin Proxy Order Status", type: :request do
   end
 
   describe "C5: Completed state restrictions" do
-    before { proxy_order.update(status: :completed) }
-
     let(:item) { create(:proxy_order_item, proxy_order:) }
     let(:participant) { create(:proxy_order_participant, proxy_order:) }
     let(:price_line) { create(:proxy_order_price_line, proxy_order_item: item) }
     let(:allocation) { create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant) }
 
+    before do
+      # Force creation of related objects before setting status
+      item
+      participant
+      price_line
+      allocation
+      proxy_order.update(status: :completed)
+    end
+
     it "prevents item create" do
       expect {
-        post admin_event_proxy_order_items_path(event), params: { proxy_order_item: { card_name: "Test" } }
+        post admin_event_proxy_order_items_path(event), params: { proxy_order_item: { card_name: "Test" } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       }.not_to change(ProxyOrderItem, :count)
       expect(response).to have_http_status(:unprocessable_entity)
     end
 
     it "prevents item update" do
-      patch admin_event_proxy_order_item_path(event, item), params: { proxy_order_item: { card_name: "Updated" } }
+      patch admin_event_proxy_order_item_path(event, item), params: { proxy_order_item: { card_name: "Updated" } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       expect(response).to have_http_status(:unprocessable_entity)
       expect(item.reload.card_name).not_to eq("Updated")
     end
 
     it "prevents item destroy" do
       expect {
-        delete admin_event_proxy_order_item_path(event, item)
+        delete admin_event_proxy_order_item_path(event, item), headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       }.not_to change(ProxyOrderItem, :count)
       expect(response).to have_http_status(:unprocessable_entity)
     end
 
     it "prevents price_line create" do
       expect {
-        post admin_event_proxy_order_item_price_lines_path(event, item), params: { proxy_order_price_line: { unit_price_usd: 5, quantity: 1 } }
+        post admin_event_proxy_order_item_price_lines_path(event, item), params: { proxy_order_price_line: { unit_price_usd: 5, quantity: 1 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       }.not_to change(ProxyOrderPriceLine, :count)
       expect(response).to have_http_status(:unprocessable_entity)
     end
 
     it "prevents price_line update quantity" do
-      patch admin_event_proxy_order_item_price_line_path(event, item, price_line), params: { proxy_order_price_line: { quantity: 10 } }
+      patch admin_event_proxy_order_item_price_line_path(event, item, price_line), params: { proxy_order_price_line: { quantity: 10 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       expect(response).to have_http_status(:unprocessable_entity)
       expect(price_line.reload.quantity).not_to eq(10)
     end
 
     it "prevents price_line destroy" do
       expect {
-        delete admin_event_proxy_order_item_price_line_path(event, item, price_line)
+        delete admin_event_proxy_order_item_price_line_path(event, item, price_line), headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       }.not_to change(ProxyOrderPriceLine, :count)
       expect(response).to have_http_status(:unprocessable_entity)
     end
 
     it "prevents allocation create" do
       expect {
-        post admin_event_proxy_order_item_allocations_path(event, item), params: { proxy_order_allocation: { proxy_order_participant_id: participant.id, quantity: 1 } }
+        post admin_event_proxy_order_item_allocations_path(event, item), params: { proxy_order_allocation: { proxy_order_participant_id: participant.id, quantity: 1 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       }.not_to change(ProxyOrderAllocation, :count)
       expect(response).to have_http_status(:unprocessable_entity)
     end
 
     it "prevents allocation update" do
-      patch admin_event_proxy_order_item_allocation_path(event, item, allocation), params: { proxy_order_allocation: { quantity: 10 } }
+      patch admin_event_proxy_order_item_allocation_path(event, item, allocation), params: { proxy_order_allocation: { quantity: 10 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       expect(response).to have_http_status(:unprocessable_entity)
       expect(allocation.reload.quantity).not_to eq(10)
     end
 
     it "prevents allocation destroy" do
       expect {
-        delete admin_event_proxy_order_item_allocation_path(event, item, allocation)
+        delete admin_event_proxy_order_item_allocation_path(event, item, allocation), headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       }.not_to change(ProxyOrderAllocation, :count)
       expect(response).to have_http_status(:unprocessable_entity)
     end
 
     it "prevents participant create" do
       expect {
-        post admin_event_proxy_order_participants_path(event), params: { proxy_order_participant: { user_id: admin.id } }
+        post admin_event_proxy_order_participants_path(event), params: { proxy_order_participant: { user_id: admin.id } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       }.not_to change(ProxyOrderParticipant, :count)
       expect(response).to have_http_status(:unprocessable_entity)
     end
 
     it "prevents participant update" do
-      patch admin_event_proxy_order_participant_path(event, participant), params: { proxy_order_participant: { guest_name: "Updated" } }
+      patch admin_event_proxy_order_participant_path(event, participant), params: { proxy_order_participant: { guest_name: "Updated" } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       expect(response).to have_http_status(:unprocessable_entity)
       expect(participant.reload.guest_name).not_to eq("Updated")
     end
 
     it "prevents participant destroy" do
       expect {
-        delete admin_event_proxy_order_participant_path(event, participant)
+        delete admin_event_proxy_order_participant_path(event, participant), headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       }.not_to change(ProxyOrderParticipant, :count)
       expect(response).to have_http_status(:unprocessable_entity)
     end
 
     it "prevents fee update" do
-      patch admin_event_proxy_order_path(event), params: { proxy_order: { tax_usd: 5 } }
+      patch admin_event_proxy_order_path(event), params: { proxy_order: { tax_usd: 5 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       expect(response).to have_http_status(:unprocessable_entity)
       expect(proxy_order.reload.tax_usd).not_to eq(5)
     end
@@ -306,19 +313,19 @@ RSpec.describe "Admin Proxy Order Status", type: :request do
 
     describe "ordered state" do
       it "allows quantity update" do
-        patch admin_event_proxy_order_item_price_line_path(event, item, price_line), params: { proxy_order_price_line: { quantity: 3 } }
+        patch admin_event_proxy_order_item_price_line_path(event, item, price_line), params: { proxy_order_price_line: { quantity: 3 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
         expect(response).to have_http_status(:ok)
         expect(price_line.reload.quantity).to eq(3)
       end
 
       it "rejects lost_quantity input" do
-        patch admin_event_proxy_order_item_price_line_path(event, item, price_line), params: { proxy_order_price_line: { lost_quantity: "1" } }
+        patch admin_event_proxy_order_item_price_line_path(event, item, price_line), params: { proxy_order_price_line: { lost_quantity: "1" } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
         expect(response).to have_http_status(:unprocessable_entity)
         expect(price_line.reload.lost_quantity).to eq(0)
       end
 
       it "rejects participant handed_over_at update" do
-        patch admin_event_proxy_order_participant_path(event, participant), params: { proxy_order_participant: { handed_over_at: "1" } }
+        patch admin_event_proxy_order_participant_path(event, participant), params: { proxy_order_participant: { handed_over_at: "1" } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
         expect(response).to have_http_status(:unprocessable_entity)
         expect(participant.reload.handed_over_at).to be_nil
       end
@@ -328,33 +335,33 @@ RSpec.describe "Admin Proxy Order Status", type: :request do
       before { proxy_order.update(status: :arrived) }
 
       it "rejects quantity update for price_line" do
-        patch admin_event_proxy_order_item_price_line_path(event, item, price_line), params: { proxy_order_price_line: { quantity: 3 } }
+        patch admin_event_proxy_order_item_price_line_path(event, item, price_line), params: { proxy_order_price_line: { quantity: 3 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
         expect(response).to have_http_status(:unprocessable_entity)
         expect(price_line.reload.quantity).to eq(5)
       end
 
       it "rejects quantity update for allocation" do
-        patch admin_event_proxy_order_item_allocation_path(event, item, allocation), params: { proxy_order_allocation: { quantity: 3 } }
+        patch admin_event_proxy_order_item_allocation_path(event, item, allocation), params: { proxy_order_allocation: { quantity: 3 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
         expect(response).to have_http_status(:unprocessable_entity)
         expect(allocation.reload.quantity).to eq(5)
       end
 
       it "rejects card_name update" do
-        patch admin_event_proxy_order_item_path(event, item), params: { proxy_order_item: { card_name: "Updated" } }
+        patch admin_event_proxy_order_item_path(event, item), params: { proxy_order_item: { card_name: "Updated" } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
         expect(response).to have_http_status(:unprocessable_entity)
         expect(item.reload.card_name).not_to eq("Updated")
       end
 
       it "rejects item create" do
         expect {
-          post admin_event_proxy_order_items_path(event), params: { proxy_order_item: { card_name: "New" } }
+          post admin_event_proxy_order_items_path(event), params: { proxy_order_item: { card_name: "New" } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
         }.not_to change(ProxyOrderItem, :count)
         expect(response).to have_http_status(:unprocessable_entity)
       end
 
       it "rejects allocation create" do
         expect {
-          post admin_event_proxy_order_item_allocations_path(event, item), params: { proxy_order_allocation: { proxy_order_participant_id: participant.id, quantity: 1 } }
+          post admin_event_proxy_order_item_allocations_path(event, item), params: { proxy_order_allocation: { proxy_order_participant_id: participant.id, quantity: 1 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
         }.not_to change(ProxyOrderAllocation, :count)
         expect(response).to have_http_status(:unprocessable_entity)
       end
@@ -373,7 +380,7 @@ RSpec.describe "Admin Proxy Order Status", type: :request do
     end
 
     it "allows tax_usd update" do
-      patch admin_event_proxy_order_path(event), params: { proxy_order: { tax_usd: 5 } }
+      patch admin_event_proxy_order_path(event), params: { proxy_order: { tax_usd: 5 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       expect(response).to have_http_status(:ok)
       expect(proxy_order.reload.tax_usd).to eq(5)
     end
@@ -382,7 +389,7 @@ RSpec.describe "Admin Proxy Order Status", type: :request do
       original_calc = ProxyOrderCalculator.new(proxy_order)
       original_payment = original_calc.payment_usd(participant)
 
-      patch admin_event_proxy_order_path(event), params: { proxy_order: { tax_usd: 5 } }
+      patch admin_event_proxy_order_path(event), params: { proxy_order: { tax_usd: 5 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
 
       proxy_order.reload
       new_calc = ProxyOrderCalculator.new(proxy_order)
@@ -393,7 +400,7 @@ RSpec.describe "Admin Proxy Order Status", type: :request do
 
     it "rejects fee update in completed state" do
       proxy_order.update(status: :completed)
-      patch admin_event_proxy_order_path(event), params: { proxy_order: { tax_usd: 5 } }
+      patch admin_event_proxy_order_path(event), params: { proxy_order: { tax_usd: 5 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       expect(response).to have_http_status(:unprocessable_entity)
       expect(proxy_order.reload.tax_usd).not_to eq(5)
     end

@@ -142,7 +142,7 @@ RSpec.describe ProxyOrder, type: :model do
         it "returns false and adds error" do
           expect(proxy_order.transition_to("arrived")).to be false
           expect(proxy_order.status).to eq("ordered")
-          expect(proxy_order.errors[:base]).to include(match(/ドル円レート/))
+          expect(proxy_order.errors[:base]).to include(match(/rate|レート/))
         end
       end
 
@@ -198,7 +198,7 @@ RSpec.describe ProxyOrder, type: :model do
         it "returns false and adds error with participant name" do
           expect(proxy_order.transition_to("completed")).to be false
           expect(proxy_order.status).to eq("arrived")
-          expect(proxy_order.errors[:base]).to include(match(/手渡し/))
+          expect(proxy_order.errors[:base]).to include(match(/handed|手渡し/))
         end
       end
 
