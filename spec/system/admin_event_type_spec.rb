@@ -62,6 +62,8 @@ RSpec.describe 'Admin Event Type', type: :system do
 
       click_button I18n.t("admin.events.submit")
 
+      # click_button はリクエストの完了を待たないので、先に画面遷移を確かめてから DB を見る
+      expect(page).to have_current_path(admin_events_path)
       expect(Event.last.trade?).to be true
     end
   end
