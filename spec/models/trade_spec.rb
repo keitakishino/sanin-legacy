@@ -20,6 +20,23 @@ describe Trade, type: :model do
     it { is_expected.to validate_numericality_of(:offers_total_amount).only_integer }
     it { is_expected.to validate_numericality_of(:wants_total_amount).only_integer }
     it { is_expected.to validate_numericality_of(:net_amount).only_integer }
+
+    describe 'event_must_be_trade_type' do
+      let(:tournament_event) { create(:event, :tournament) }
+      let(:user) { create(:user) }
+
+      it 'rejects creation on tournament event' do
+        trade = build(:trade, event: tournament_event, user: user)
+        expect(trade.valid?).to be false
+        expect(trade.errors[:event]).to be_present
+      end
+
+      it 'allows creation on trade event' do
+        trade_event = create(:event, :trade)
+        trade = build(:trade, event: trade_event, user: user)
+        expect(trade.valid?).to be true
+      end
+    end
   end
 
   describe 'unique constraint' do
