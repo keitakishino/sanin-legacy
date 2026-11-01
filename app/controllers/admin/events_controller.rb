@@ -6,15 +6,15 @@ class Admin::EventsController < Admin::BaseController
   end
 
   def new
-    @event = Event.new
+    @event = Event.new(event_type: :trade)
   end
 
   def create
-    @event = Event.new(event_params)
+    @event = Event.new(create_event_params)
     @event.created_by = current_user
 
     if @event.save
-      record_audit("event.create", target: @event, details: { title: @event.title, event_date: @event.event_date })
+      record_audit("event.create", target: @event, details: { title: @event.title, event_date: @event.event_date, event_type: @event.event_type })
       redirect_to admin_events_path, notice: t("admin.events.created")
     else
       record_audit("event.create", target: nil, result: :failure, details: audit_failure_details(@event))
@@ -26,7 +26,7 @@ class Admin::EventsController < Admin::BaseController
   end
 
   def update
-    if @event.update(event_params)
+    if @event.update(update_event_params)
       record_audit("event.update", target: @event, details: @event.saved_changes.except("updated_at"))
       redirect_to admin_events_path, notice: t("admin.events.updated")
     else
@@ -53,7 +53,11 @@ class Admin::EventsController < Admin::BaseController
     @event = Event.find(params[:id])
   end
 
-  def event_params
+  def create_event_params
+    params.require(:event).permit(:event_type, :title, :description, :event_date)
+  end
+
+  def update_event_params
     params.require(:event).permit(:title, :description, :event_date)
   end
 end

@@ -1,6 +1,7 @@
 ja:
   trades:
     event_ended: "このイベントは終了しています"
+    not_trade_event: "このイベントにはトレードがありません"
   toasts:
     trade_card_offer:
       create: "「%{card_name}」を出すカードに追加しました"
@@ -24,8 +25,13 @@ ja:
         title: "イベント名"
         description: "説明"
         event_date: "イベント日時"
+        event_type: "種類"
         created_by_id: "作成者"
         created_at: "作成日時"
+        event_types:
+          trade: "トレード"
+          tournament: "大会"
+          proxy_order: "代理通販"
       invitation:
         code: "招待コード"
         status: "ステータス"
@@ -159,6 +165,8 @@ ja:
         too_long: "は長すぎます（最大%{count}文字）"
         blank: "を入力してください"
         date_must_not_be_past: "は過去の日付に設定することはできません"
+        cannot_be_changed: "は作成後に変更できません"
+        must_be_trade_event: "はトレードイベントではありません"
         greater_than: "は%{count}より大きい値で入力してください"
         greater_than_or_equal_to: "は%{count}以上の値で入力してください"
         less_than_or_equal_to: "は%{count}以下の値で入力してください"
@@ -203,6 +211,7 @@ ja:
       deleted: "イベントを削除しました"
       delete_failed: "イベントを削除できませんでした"
       confirm_delete: "本当に削除してもよろしいですか？"
+      event_type_immutable: "種類は作成後に変更できません"
     users:
       title: "ユーザー管理"
       nav_label: "ユーザー管理"
