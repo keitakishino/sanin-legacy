@@ -171,6 +171,21 @@ RSpec.describe "Trades", type: :request do
         end
       end
 
+      context "with tournament event" do
+        let(:tournament_event) { create(:event, :tournament) }
+
+        it "redirects to events_path" do
+          get "/trades/#{tournament_event.id}"
+          expect(response).to redirect_to(events_path)
+        end
+
+        it "does not create a trade" do
+          expect {
+            get "/trades/#{tournament_event.id}"
+          }.not_to change { Trade.count }
+        end
+      end
+
       context "with non-existent event id" do
         it "returns 404" do
           get "/trades/999999"

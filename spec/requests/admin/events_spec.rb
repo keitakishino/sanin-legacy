@@ -231,6 +231,35 @@ RSpec.describe "Admin::Events", type: :request do
           end
         end
       end
+
+      context "with event_type" do
+        it "creates an event with tournament type" do
+          expect {
+            post admin_events_path, params: {
+              event: {
+                title: "Tournament Event",
+                description: "Tournament Description",
+                event_date: Event.current_date + 7.days,
+                event_type: "tournament"
+              }
+            }
+          }.to change(Event, :count).by(1)
+          expect(Event.last.tournament?).to be true
+        end
+
+        it "creates an event with default trade type when not specified" do
+          expect {
+            post admin_events_path, params: {
+              event: {
+                title: "Trade Event",
+                description: "Trade Description",
+                event_date: Event.current_date + 7.days
+              }
+            }
+          }.to change(Event, :count).by(1)
+          expect(Event.last.trade?).to be true
+        end
+      end
     end
   end
 
@@ -268,6 +297,11 @@ RSpec.describe "Admin::Events", type: :request do
       it "displays the event data" do
         get edit_admin_event_path(event)
         expect(response.body).to include(event.title)
+      end
+
+      it "does not have event_type input field" do
+        get edit_admin_event_path(event)
+        expect(response.body).not_to include('name="event[event_type]"')
       end
     end
   end
@@ -375,6 +409,20 @@ RSpec.describe "Admin::Events", type: :request do
             patch admin_event_path(event), params: past_params
             expect(response).to have_http_status(:unprocessable_entity)
           end
+        end
+      end
+
+      context "with event_type change attempt" do
+        let(:trade_event) { create(:event, created_by: admin_user, event_type: :trade) }
+
+        it "does not change event_type" do
+          patch admin_event_path(trade_event), params: {
+            event: {
+              title: "Updated Title",
+              event_type: "tournament"
+            }
+          }
+          expect(trade_event.reload.trade?).to be true
         end
       end
     end

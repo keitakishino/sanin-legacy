@@ -64,6 +64,47 @@ RSpec.describe Event, type: :model do
       end
     end
 
+    describe 'event_type validations' do
+      let(:user) { create(:user) }
+
+      it 'has default event_type as trade' do
+        event = Event.new(title: 'Test Event', event_date: Event.current_date + 1.day, created_by: user)
+        expect(event.event_type).to eq('trade')
+      end
+
+      it 'allows creating with trade event_type' do
+        event = Event.new(title: 'Test Event', event_date: Event.current_date + 1.day, created_by: user, event_type: :trade)
+        expect(event.valid?).to be true
+      end
+
+      it 'allows creating with tournament event_type' do
+        event = Event.new(title: 'Test Event', event_date: Event.current_date + 1.day, created_by: user, event_type: :tournament)
+        expect(event.valid?).to be true
+        expect(event.tournament?).to be true
+      end
+
+      it 'allows creating with proxy_order event_type' do
+        event = Event.new(title: 'Test Event', event_date: Event.current_date + 1.day, created_by: user, event_type: :proxy_order)
+        expect(event.valid?).to be true
+        expect(event.proxy_order?).to be true
+      end
+
+      it 'prevents changing event_type after creation' do
+        event = create(:event)
+        expect(event.trade?).to be true
+        event.event_type = :tournament
+        expect(event.valid?).to be false
+        expect(event.errors[:event_type]).to be_present
+      end
+
+      it 'allows updating other attributes after creation' do
+        event = create(:event)
+        event.title = 'Updated Title'
+        event.event_date = Event.current_date + 10.days
+        expect(event.valid?).to be true
+      end
+    end
+
     describe 'error messages' do
       let(:user) { create(:user) }
 

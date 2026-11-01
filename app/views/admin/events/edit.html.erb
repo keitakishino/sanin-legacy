@@ -14,6 +14,12 @@
         </div>
       <% end %>
 
+      <div id="event_type_display">
+        <p class="block text-sm font-medium mb-1 text-stone-800"><%= t("activerecord.attributes.event.event_type") %></p>
+        <p class="text-base text-stone-800 mb-2"><%= t("activerecord.attributes.event.event_types.#{@event.event_type}") %></p>
+        <p class="text-sm text-stone-500"><%= t("admin.events.event_type_immutable") %></p>
+      </div>
+
       <div>
         <%= f.label :title, t("activerecord.attributes.event.title"), class: "block text-sm font-medium mb-1 text-stone-800" %>
         <%= f.text_field :title, class: "w-full px-3 py-2 border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500", required: true %>
