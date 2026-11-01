@@ -49,6 +49,7 @@ class Admin::ProxyOrdersController < Admin::BaseController
       redirect_to admin_event_proxy_order_path(@event), notice: t(".status_changed", status: t("activerecord.enums.proxy_order.status.#{new_status}")), status: :see_other
     else
       @transition_errors = @proxy_order.errors.full_messages
+      record_audit("proxy_order.status_change", target: @proxy_order, result: :failure, details: { from: from_status, to: new_status, reason: @transition_errors.join(", ") })
       load_editor_state
 
       respond_to do |format|
