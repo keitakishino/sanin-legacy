@@ -121,6 +121,7 @@ ja:
       proxy_order_participant:
         guest_name: "自由入力名"
         user_id: "ユーザー"
+        handed_over_at: "手渡し済み"
       proxy_order_price_line:
         unit_price_usd: "単価"
         quantity: "数量"
@@ -135,8 +136,6 @@ ja:
         customs_usd: "関税"
         shipping_usd: "送料"
         usd_jpy_rate: "ドル円レート"
-      proxy_order_participant:
-        handed_over_at: "手渡し済み"
     enums:
       proxy_order:
         status:
