@@ -6,7 +6,7 @@
     <span data-role="card-name" class="truncate flex-1"><%= item.card_name %></span>
     <span data-role="ordered-quantity" class="text-sm text-gray-600"><%= item.ordered_quantity %>枚</span>
     <% if !@proxy_order.ordered? %>
-      <span data-role="lost-quantity" class="text-sm text-gray-600"><%= t("admin.proxy_order.to_arrived") %> <%= item.lost_ordered_quantity %></span>
+      <span data-role="lost-quantity" class="text-sm text-gray-600">ロスト <%= item.lost_ordered_quantity %></span>
     <% end %>
     <span data-role="unit-price" class="text-sm text-gray-600"><%= usd(@calculator.unit_price(item)) %></span>
   </summary>

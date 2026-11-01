@@ -16,9 +16,9 @@
       <%= button_to t("admin.proxy_order.to_arrived"), admin_event_proxy_order_path(@event), method: :patch, params: { proxy_order: { status: "arrived" } }, class: "btn btn-sm btn-primary" %>
     <% elsif @proxy_order.arrived? %>
       <%= button_to t("admin.proxy_order.to_completed"), admin_event_proxy_order_path(@event), method: :patch, params: { proxy_order: { status: "completed" } }, class: "btn btn-sm btn-primary" %>
-      <%= button_to t("admin.proxy_order.back_to_ordered"), admin_event_proxy_order_path(@event), method: :patch, params: { proxy_order: { status: "ordered" } }, data: { turbo_confirm: t("admin.proxy_order.back_to_ordered") + "しますか？" }, class: "btn btn-sm btn-secondary" %>
+      <%= button_to t("admin.proxy_order.back_to_ordered"), admin_event_proxy_order_path(@event), method: :patch, params: { proxy_order: { status: "ordered" } }, data: { turbo_confirm: t("admin.proxy_order.back_to_ordered_confirm") }, class: "btn btn-sm btn-secondary" %>
     <% elsif @proxy_order.completed? %>
-      <%= button_to t("admin.proxy_order.back_to_arrived"), admin_event_proxy_order_path(@event), method: :patch, params: { proxy_order: { status: "arrived" } }, data: { turbo_confirm: t("admin.proxy_order.back_to_arrived") + "しますか？" }, class: "btn btn-sm btn-secondary" %>
+      <%= button_to t("admin.proxy_order.back_to_arrived"), admin_event_proxy_order_path(@event), method: :patch, params: { proxy_order: { status: "arrived" } }, data: { turbo_confirm: t("admin.proxy_order.back_to_arrived_confirm") }, class: "btn btn-sm btn-secondary" %>
     <% end %>
   </div>
 </div>

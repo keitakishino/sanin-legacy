@@ -157,6 +157,8 @@ en:
       to_completed: "To Completed"
       back_to_ordered: "Back to Ordered"
       back_to_arrived: "Back to Arrived"
+      back_to_ordered_confirm: "Revert to Ordered state?"
+      back_to_arrived_confirm: "Revert to Arrived state?"
       handed_over: "Handed Over"
       not_handed_over: "Not Handed Over"
       locked:

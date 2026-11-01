@@ -282,6 +282,8 @@ ja:
       to_completed: "完了へ"
       back_to_ordered: "注文へ差し戻す"
       back_to_arrived: "到着へ差し戻す"
+      back_to_ordered_confirm: "注文状態へ差し戻しますか？"
+      back_to_arrived_confirm: "到着状態へ差し戻しますか？"
       handed_over: "手渡し済み"
       not_handed_over: "未手渡し"
       locked:
