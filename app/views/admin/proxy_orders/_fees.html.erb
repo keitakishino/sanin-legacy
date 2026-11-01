@@ -15,27 +15,29 @@
 
       <div class="form-control mb-4">
         <%= f.label :tax_usd, t("activerecord.attributes.proxy_order.tax_usd") %>
-        <%= f.number_field :tax_usd, step: 0.01, class: "input input-bordered" %>
+        <%= f.number_field :tax_usd, step: 0.01, class: "input input-bordered", disabled: !@proxy_order.fees_editable? %>
       </div>
 
       <div class="form-control mb-4">
         <%= f.label :customs_usd, t("activerecord.attributes.proxy_order.customs_usd") %>
-        <%= f.number_field :customs_usd, step: 0.01, class: "input input-bordered" %>
+        <%= f.number_field :customs_usd, step: 0.01, class: "input input-bordered", disabled: !@proxy_order.fees_editable? %>
       </div>
 
       <div class="form-control mb-4">
         <%= f.label :shipping_usd, t("activerecord.attributes.proxy_order.shipping_usd") %>
-        <%= f.number_field :shipping_usd, step: 0.01, class: "input input-bordered" %>
+        <%= f.number_field :shipping_usd, step: 0.01, class: "input input-bordered", disabled: !@proxy_order.fees_editable? %>
       </div>
 
       <div class="form-control mb-6">
         <%= f.label :usd_jpy_rate, t("activerecord.attributes.proxy_order.usd_jpy_rate") %>
-        <%= f.number_field :usd_jpy_rate, step: 0.0001, class: "input input-bordered" %>
+        <%= f.number_field :usd_jpy_rate, step: 0.0001, class: "input input-bordered", disabled: !@proxy_order.fees_editable? %>
       </div>
 
-      <div class="form-control">
-        <%= f.submit t("common.save"), class: "btn btn-primary" %>
-      </div>
+      <% if @proxy_order.fees_editable? %>
+        <div class="form-control">
+          <%= f.submit t("common.save"), class: "btn btn-primary" %>
+        </div>
+      <% end %>
     <% end %>
   </div>
 </div>
