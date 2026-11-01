@@ -27,7 +27,7 @@ module AdminProxyOrderLoadable
     @calculator = ProxyOrderCalculator.new(@proxy_order)
     @users = User.order(:username)
     @open_item_ids = open_item_ids
-    @transition_errors = nil
+    @transition_errors ||= nil
   end
 
   private
