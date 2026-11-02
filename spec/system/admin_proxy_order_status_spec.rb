@@ -84,4 +84,25 @@ RSpec.describe "Admin Proxy Order Status", type: :system do
       expect(page).to have_current_path(admin_event_proxy_order_path(event))
     end
   end
+
+  describe "C5: Rate required on completion" do
+    let(:proxy_order) { create(:proxy_order, event:, status: :arrived, usd_jpy_rate: nil) }
+    let(:item) { create(:proxy_order_item, proxy_order:) }
+    let(:participant) { create(:proxy_order_participant, proxy_order:, handed_over_at: Time.current) }
+
+    before do
+      create(:proxy_order_price_line, proxy_order_item: item, quantity: 1, unit_price_usd: 10)
+      create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 1)
+      visit admin_event_proxy_order_path(event)
+    end
+
+    it "shows rate error when rate is not set" do
+      click_button "完了にする"
+      expect(page).to have_selector("#proxy_order_status_errors")
+      expect(page).to have_content("ドル円レートを入力してください")
+      expect(page).not_to have_content("手渡しが完了していない参加者がいます")
+      expect(page).to have_current_path(admin_event_proxy_order_path(event))
+      expect(proxy_order.reload.status).to eq("arrived")
+    end
+  end
 end

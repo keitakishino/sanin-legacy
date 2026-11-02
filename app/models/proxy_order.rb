@@ -73,6 +73,10 @@ class ProxyOrder < ApplicationRecord
     end
 
     if new_status == "completed" && status == "arrived"
+      if usd_jpy_rate.nil?
+        errors.add(:base, :rate_required_for_arrival)
+      end
+
       mismatched_items = proxy_order_items.includes(:proxy_order_price_lines, :proxy_order_allocations).select(&:lost_mismatch?)
       if mismatched_items.any?
         card_names = mismatched_items.map(&:card_name).join("、")

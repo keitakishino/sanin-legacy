@@ -122,6 +122,22 @@ RSpec.describe "Admin Proxy Order Status", type: :request do
         expect(log.details["to"]).to eq("completed")
       end
     end
+
+    context "when rate is cleared after hand-over" do
+      before do
+        create(:proxy_order_price_line, proxy_order_item: item, quantity: 3, lost_quantity: 0, unit_price_usd: 10)
+        create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 3, lost_quantity: 0)
+        participant.update(handed_over_at: Time.current)
+        proxy_order.update(usd_jpy_rate: nil)
+      end
+
+      it "returns 422 and keeps status as arrived" do
+        patch admin_event_proxy_order_path(event), params: { proxy_order: { status: "completed" } }
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(proxy_order.reload.status).to eq("arrived")
+        expect(response.body).to include("ドル円レート")
+      end
+    end
   end
 
   describe "C2: Lost quantity input in arrived state" do
@@ -403,6 +419,12 @@ RSpec.describe "Admin Proxy Order Status", type: :request do
       patch admin_event_proxy_order_path(event), params: { proxy_order: { tax_usd: 5 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       expect(response).to have_http_status(:unprocessable_entity)
       expect(proxy_order.reload.tax_usd).not_to eq(5)
+    end
+
+    it "allows clearing usd_jpy_rate" do
+      patch admin_event_proxy_order_path(event), params: { proxy_order: { usd_jpy_rate: "" } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
+      expect(response).to have_http_status(:ok)
+      expect(proxy_order.reload.usd_jpy_rate).to be_nil
     end
   end
 
