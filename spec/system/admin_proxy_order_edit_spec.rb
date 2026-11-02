@@ -39,12 +39,24 @@ RSpec.describe "Admin Proxy Order Edit", type: :system do
     expect(page).to have_content("価格行を追加しました")
   end
 
+  # JS の String.prototype.trim と同じ規則で前後の空白を落とす。
+  # Ruby の String#strip は全角空白（U+3000）を落とさないので使わない
+  def js_trim(value)
+    value.gsub(/\A[[:space:]]+|[[:space:]]+\z/, "")
+  end
+
+  # 「ユーザーを追加」はコンボボックス 1 つに統合されている。
+  # 画面の操作だけで行う（hidden field を直接触らない）
   def add_user(item, quantity:, user: nil, guest_name: nil)
     within "#new_allocation_proxy_order_item_#{item.id}" do
-      select user.username, from: "proxy_order_allocation[user_id]" if user
-      fill_in "proxy_order_allocation[guest_name]", with: guest_name if guest_name
+      find("input[role='combobox']").set(user ? user.username : guest_name)
+
+      # ゲスト行のラベルは入力値を JS の trim() にかけた文字列で作られる
+      option_text = user ? user.username : "『#{js_trim(guest_name)}』をゲストとして追加"
+      find("[role='listbox'] [role='option']", text: option_text, match: :first).click
+
       fill_in "proxy_order_allocation[quantity]", with: quantity
-      click_button "＋ ユーザーを追加（登録 / 自由入力）"
+      click_button "追加"
     end
   end
 
@@ -126,8 +138,13 @@ RSpec.describe "Admin Proxy Order Edit", type: :system do
       add_user(item, user: user, quantity: "5")
       expect(page).to have_content("注文を追加しました")
 
-      add_user(item, user: user, quantity: "3")
-      expect(page).to have_content("参加者 は既に存在します")
+      # 2回目は同じユーザーが選べない（disabled）
+      within "#new_allocation_proxy_order_item_#{item.id}" do
+        find("input[role='combobox']").set(user.username)
+        expect(page).to have_selector("[role='option'][aria-disabled='true']", text: user.username)
+        expect(page).to have_content("この明細に追加済み")
+        expect(page).to have_button("追加", disabled: true)
+      end
       expect(ProxyOrderAllocation.count).to eq(1)
       expect(ProxyOrderParticipant.count).to eq(1)
 
@@ -141,6 +158,7 @@ RSpec.describe "Admin Proxy Order Edit", type: :system do
     it "prevents a guest name that matches a registered username" do
       item = add_card("Test Card")
 
+      # addAsGuest option is still selectable in combobox, but server validation catches it
       add_user(item, guest_name: "　ＴＡＮＡＫＡ　", quantity: "1")
 
       expect(page).to have_content("自由入力名 は登録ユーザー名と同じため使用できません")
