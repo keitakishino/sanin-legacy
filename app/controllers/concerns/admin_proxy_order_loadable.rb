@@ -27,6 +27,7 @@ module AdminProxyOrderLoadable
     @calculator = ProxyOrderCalculator.new(@proxy_order)
     @users = User.order(:username)
     @participant_candidates = helpers.participant_candidates(@users, @participants)
+    @participant_name_conflicts = helpers.participant_name_conflicts(@users, @participants)
     @open_item_ids = open_item_ids
     @transition_errors = nil unless defined?(@transition_errors)
     # 保存に失敗した子（価格行・注文）が関連に残ったまま再描画すると、

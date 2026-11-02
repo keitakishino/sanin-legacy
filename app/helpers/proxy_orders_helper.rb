@@ -63,4 +63,12 @@ module ProxyOrdersHelper
 
     candidates
   end
+
+  # ゲスト行を選べない条件の判定用。ProxyOrderParticipant の guest_name_not_conflict_with_username / guest_name_unique_in_order と同じ対象
+  def participant_name_conflicts(users, participants)
+    {
+      usernames: users.map(&:username),
+      guest_names: participants.select { |p| p.user_id.nil? }.map(&:guest_name)
+    }
+  end
 end

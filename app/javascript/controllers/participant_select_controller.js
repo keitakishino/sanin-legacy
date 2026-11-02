@@ -13,7 +13,7 @@ export default class extends Controller {
     "hiddenGuestName",
     "submit"
   ]
-  static values = { candidates: Array, itemId: Number, labels: Object }
+  static values = { candidates: Array, itemId: Number, labels: Object, conflicts: Object }
 
   connect() {
     this.options = []
@@ -30,6 +30,25 @@ export default class extends Controller {
   // ProxyOrderParticipant.normalize_name（NFKC → strip → downcase）と同じ規則。変えるときは両方そろえる
   normalize(s) {
     return String(s ?? "").normalize("NFKC").trim().toLowerCase()
+  }
+
+  guestConflictReason(rawValue) {
+    const q = this.normalize(rawValue)
+    const usernames = this.conflictsValue.usernames || []
+    const guestNames = this.conflictsValue.guest_names || []
+
+    // ユーザー名との衝突を確認
+    const conflictingUsername = usernames.find(u => this.normalize(u) === q)
+    if (conflictingUsername) {
+      return this.labelsValue.conflictWithUsername.replace("%{name}", conflictingUsername)
+    }
+
+    // ゲスト名との衝突を確認
+    if (guestNames.some(g => this.normalize(g) === q)) {
+      return this.labelsValue.conflictWithGuest
+    }
+
+    return null
   }
 
   filter(event) {
@@ -92,7 +111,8 @@ export default class extends Controller {
     const guestLabel = event.target.value.trim()
     const guestCandidate = {
       kind: "guest",
-      label: guestLabel
+      label: guestLabel,
+      disabled_reason: this.guestConflictReason(event.target.value)
     }
     this.appendOption(guestCandidate, this.options.length, this.options.length + 1)
 
@@ -106,8 +126,14 @@ export default class extends Controller {
     li.id = `${this.listTarget.id}-opt-${idx}`
     li.className = "flex items-center justify-between gap-2 min-h-11 px-3 py-2 cursor-pointer hover:bg-stone-50"
 
-    const isDisabled = candidate.kind === "participant" &&
-                       candidate.assigned_item_ids.includes(this.itemIdValue)
+    let disabledReason = null
+    if (candidate.kind === "participant" && candidate.assigned_item_ids.includes(this.itemIdValue)) {
+      disabledReason = this.labelsValue.alreadyInItem
+    } else if (candidate.kind === "guest" && candidate.disabled_reason) {
+      disabledReason = candidate.disabled_reason
+    }
+
+    const isDisabled = disabledReason !== null
 
     if (isDisabled) {
       li.setAttribute("aria-disabled", "true")
@@ -129,11 +155,11 @@ export default class extends Controller {
     const rightContainer = document.createElement("span")
     rightContainer.className = "flex items-center gap-2"
 
-    if (isDisabled) {
+    if (disabledReason) {
       const reason = document.createElement("span")
       reason.setAttribute("data-role", "disabled-reason")
       reason.className = "text-[10px] text-stone-400"
-      reason.textContent = this.labelsValue.alreadyInItem
+      reason.textContent = disabledReason
       rightContainer.appendChild(reason)
     }
 
