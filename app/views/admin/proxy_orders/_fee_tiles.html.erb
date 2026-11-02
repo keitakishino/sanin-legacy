@@ -1,0 +1,16 @@
+<div id="proxy_order_fee_tiles" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="bg-stone-50 border border-stone-200 rounded p-4">
+    <p class="m-0 mb-1 text-[11px] font-bold text-stone-400 uppercase"><%= t("admin.proxy_order.tile_fee_total") %></p>
+    <p class="m-0 text-xl font-extrabold tabular-nums text-stone-800"><%= usd(@calculator.fee_total) %></p>
+  </div>
+  <div class="bg-stone-50 border border-stone-200 rounded p-4">
+    <p class="m-0 mb-1 text-[11px] font-bold text-stone-400 uppercase"><%= t("admin.proxy_order.tile_fee_per_person", count: @calculator.fee_payer_count) %></p>
+    <p id="proxy_order_fee_per_person" class="m-0 text-xl font-extrabold tabular-nums text-sky-700"><%= usd(@calculator.fee_per_person) %></p>
+  </div>
+  <div class="bg-stone-50 border border-stone-200 rounded p-4">
+    <p class="m-0 mb-1 text-[11px] font-bold text-stone-400 uppercase">
+      <%= @proxy_order.ordered? ? "#{t('admin.proxy_order.tile_payment_total')}（#{t('admin.proxy_order.provisional')}）" : t("admin.proxy_order.tile_payment_total") %>
+    </p>
+    <p class="m-0 text-xl font-extrabold tabular-nums text-emerald-700"><%= jpy_or_pending(total_payment_jpy(@calculator, @participants)) %></p>
+  </div>
+</div>
