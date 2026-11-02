@@ -165,9 +165,11 @@
           <%# 参加者ボタン列 %>
           <% unassigned = @participant_candidates.select { |c| c[:kind] == "participant" && !c[:assigned_item_ids].include?(item.id) } %>
           <% if unassigned.any? %>
+            <%# 狭い画面では指で押せるよう 44px 四方を保ち、sm 以上では細い角丸チップにする。
+                min-h-11 / min-w-11 を消すとスマホ幅のタップ領域の spec（#384 の C3）が落ちる %>
             <div data-role="participant-buttons" class="flex flex-wrap gap-2 mb-2">
               <% unassigned.each do |candidate| %>
-                <button type="button" data-action="participant-select#pick" data-participant-id="<%= candidate[:participant_id] %>" class="inline-flex items-center min-h-11 min-w-11 px-3 py-1.5 rounded-full border border-offer bg-offer-soft text-offer-text hover:bg-offer hover:text-white font-bold text-xs cursor-pointer justify-center max-w-full break-all text-left flex-shrink-0 flex-grow-0">
+                <button type="button" data-action="participant-select#pick" data-participant-id="<%= candidate[:participant_id] %>" class="inline-flex items-center min-h-11 min-w-11 px-3 py-1.5 rounded-full sm:min-h-0 sm:min-w-0 sm:px-2.5 sm:py-1 sm:rounded-md border border-offer bg-offer-soft text-offer-text hover:bg-offer hover:text-white font-bold text-xs cursor-pointer justify-center max-w-full break-all text-left flex-shrink-0 flex-grow-0">
                   <%= candidate[:label] %>
                 </button>
               <% end %>
