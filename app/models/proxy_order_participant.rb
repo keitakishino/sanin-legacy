@@ -10,6 +10,14 @@ class ProxyOrderParticipant < ApplicationRecord
   validate :guest_name_unique_in_order
   validate :guest_name_not_conflict_with_username
 
+  default_scope { where(discarded_at: nil) }
+  scope :with_discarded, -> { unscope(where: :discarded_at) }
+  scope :only_discarded, -> { unscope(where: :discarded_at).where.not(discarded_at: nil) }
+
+  def discarded?
+    discarded_at.present?
+  end
+
   class << self
     def normalize_name(name)
       name.to_s.unicode_normalize(:nfkc).strip.downcase

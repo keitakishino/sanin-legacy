@@ -93,4 +93,26 @@ RSpec.describe ProxyOrderPriceLine, type: :model do
       expect(line).not_to be_valid
     end
   end
+
+  describe "logical deletion" do
+    let(:item) { create(:proxy_order_item) }
+    let(:price_line) { create(:proxy_order_price_line, proxy_order_item: item) }
+
+    it "excludes discarded records by default scope" do
+      price_line.update(discarded_at: Time.current)
+      expect(ProxyOrderPriceLine.find_by(id: price_line.id)).to be_nil
+    end
+
+    it "includes discarded records with .with_discarded" do
+      price_line.update(discarded_at: Time.current)
+      expect(ProxyOrderPriceLine.with_discarded.find(price_line.id)).to eq(price_line)
+    end
+
+    it "returns only discarded records with .only_discarded" do
+      other_line = create(:proxy_order_price_line, proxy_order_item: item)
+      price_line.update(discarded_at: Time.current)
+      expect(ProxyOrderPriceLine.only_discarded).to contain_exactly(price_line)
+      expect(ProxyOrderPriceLine.only_discarded).not_to include(other_line)
+    end
+  end
 end

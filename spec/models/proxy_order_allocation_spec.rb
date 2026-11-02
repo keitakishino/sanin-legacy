@@ -106,4 +106,29 @@ RSpec.describe ProxyOrderAllocation, type: :model do
       expect(allocation).to be_valid
     end
   end
+
+  describe "logical deletion" do
+    let(:proxy_order) { create(:proxy_order) }
+    let(:item) { create(:proxy_order_item, proxy_order:) }
+    let(:participant) { create(:proxy_order_participant, proxy_order:) }
+    let(:allocation) { create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant) }
+
+    it "excludes discarded records by default scope" do
+      allocation.update(discarded_at: Time.current)
+      expect(ProxyOrderAllocation.find_by(id: allocation.id)).to be_nil
+    end
+
+    it "includes discarded records with .with_discarded" do
+      allocation.update(discarded_at: Time.current)
+      expect(ProxyOrderAllocation.with_discarded.find(allocation.id)).to eq(allocation)
+    end
+
+    it "returns only discarded records with .only_discarded" do
+      other_participant = create(:proxy_order_participant, proxy_order:)
+      other_allocation = create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: other_participant)
+      allocation.update(discarded_at: Time.current)
+      expect(ProxyOrderAllocation.only_discarded).to contain_exactly(allocation)
+      expect(ProxyOrderAllocation.only_discarded).not_to include(other_allocation)
+    end
+  end
 end

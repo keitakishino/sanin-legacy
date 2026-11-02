@@ -177,4 +177,26 @@ RSpec.describe ProxyOrderParticipant, type: :model do
       expect(participant).to be_valid
     end
   end
+
+  describe "logical deletion" do
+    let(:proxy_order) { create(:proxy_order) }
+    let(:participant) { create(:proxy_order_participant, proxy_order:) }
+
+    it "excludes discarded records by default scope" do
+      participant.update(discarded_at: Time.current)
+      expect(ProxyOrderParticipant.find_by(id: participant.id)).to be_nil
+    end
+
+    it "includes discarded records with .with_discarded" do
+      participant.update(discarded_at: Time.current)
+      expect(ProxyOrderParticipant.with_discarded.find(participant.id)).to eq(participant)
+    end
+
+    it "returns only discarded records with .only_discarded" do
+      other_participant = create(:proxy_order_participant, proxy_order:)
+      participant.update(discarded_at: Time.current)
+      expect(ProxyOrderParticipant.only_discarded).to contain_exactly(participant)
+      expect(ProxyOrderParticipant.only_discarded).not_to include(other_participant)
+    end
+  end
 end

@@ -188,6 +188,53 @@ RSpec.describe Event, type: :model do
         expect(offer.reload.discarded?).to be true
         expect(want.reload.discarded?).to be true
       end
+
+      context 'when event is a proxy_order event' do
+        let(:proxy_event) { create(:event, :proxy_order) }
+        let(:proxy_order) { create(:proxy_order, event: proxy_event) }
+        let(:item) { create(:proxy_order_item, proxy_order: proxy_order) }
+        let(:price_line) { create(:proxy_order_price_line, proxy_order_item: item) }
+        let(:participant) { create(:proxy_order_participant, proxy_order: proxy_order) }
+        let(:allocation) { create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant) }
+
+        it 'cascades logical deletion to proxy order and its children' do
+          # Create all related records
+          price_line
+          participant
+          allocation
+
+          # Pre-discard one item to verify existing discarded_at is not overwritten
+          past_time = 1.week.ago.change(usec: 0)
+          old_item = create(:proxy_order_item, proxy_order: proxy_order)
+          old_item.update_column(:discarded_at, past_time)
+
+          expect(proxy_order.discarded?).to be false
+          expect(item.discarded?).to be false
+          expect(price_line.discarded?).to be false
+          expect(participant.discarded?).to be false
+          expect(allocation.discarded?).to be false
+
+          result = proxy_event.discard!
+
+          expect(result).to be true
+          expect(proxy_event.reload.discarded?).to be true
+          expect(ProxyOrder.with_discarded.find(proxy_order.id).discarded?).to be true
+          expect(ProxyOrderItem.with_discarded.find(item.id).discarded?).to be true
+          expect(ProxyOrderPriceLine.with_discarded.find(price_line.id).discarded?).to be true
+          expect(ProxyOrderParticipant.with_discarded.find(participant.id).discarded?).to be true
+          expect(ProxyOrderAllocation.with_discarded.find(allocation.id).discarded?).to be true
+
+          # Verify records are hidden via default_scope
+          expect(ProxyOrder.find_by(id: proxy_order.id)).to be_nil
+          expect(ProxyOrderItem.find_by(id: item.id)).to be_nil
+          expect(ProxyOrderPriceLine.find_by(id: price_line.id)).to be_nil
+          expect(ProxyOrderParticipant.find_by(id: participant.id)).to be_nil
+          expect(ProxyOrderAllocation.find_by(id: allocation.id)).to be_nil
+
+          # Verify old item's discarded_at was not changed
+          expect(ProxyOrderItem.with_discarded.find(old_item.id).discarded_at).to eq(past_time)
+        end
+      end
     end
 
     describe '#restore!' do

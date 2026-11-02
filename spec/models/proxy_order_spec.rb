@@ -121,6 +121,51 @@ RSpec.describe ProxyOrder, type: :model do
     end
   end
 
+  describe "#discard!" do
+    let(:event) { create(:event, :proxy_order) }
+    let(:proxy_order) { create(:proxy_order, event:) }
+
+    it "logically deletes proxy order and all related records" do
+      item = create(:proxy_order_item, proxy_order:)
+      price_line = create(:proxy_order_price_line, proxy_order_item: item)
+      participant = create(:proxy_order_participant, proxy_order:)
+      allocation = create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant)
+
+      expect(proxy_order.discarded?).to be false
+      expect(item.discarded?).to be false
+      expect(price_line.discarded?).to be false
+      expect(participant.discarded?).to be false
+      expect(allocation.discarded?).to be false
+
+      result = proxy_order.discard!
+
+      expect(result).to be true
+      expect(proxy_order.reload.discarded?).to be true
+      expect(item.reload.discarded?).to be true
+      expect(price_line.reload.discarded?).to be true
+      expect(participant.reload.discarded?).to be true
+      expect(allocation.reload.discarded?).to be true
+    end
+
+    it "returns false and does not delete children when update fails" do
+      item = create(:proxy_order_item, proxy_order:)
+      price_line = create(:proxy_order_price_line, proxy_order_item: item)
+      participant = create(:proxy_order_participant, proxy_order:)
+      allocation = create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant)
+
+      allow_any_instance_of(ProxyOrder).to receive(:update).and_return(false)
+
+      result = proxy_order.discard!
+
+      expect(result).to be false
+      expect(proxy_order.discard_failures).to include(proxy_order)
+      expect(item.reload.discarded?).to be false
+      expect(price_line.reload.discarded?).to be false
+      expect(participant.reload.discarded?).to be false
+      expect(allocation.reload.discarded?).to be false
+    end
+  end
+
   describe "association to Event" do
     it "can be accessed via event.proxy_order" do
       event = create(:event, :proxy_order)
