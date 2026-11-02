@@ -105,6 +105,9 @@ RSpec.describe Event, type: :model do
       end
     end
 
+    # 属性名と本文の間に空白は入らない。ja.errors.format は rails-i18n の
+    # "%{attribute}%{message}"。以前は ja に format が無く en の
+    # "%{attribute} %{message}" にフォールバックしていたため空白が入っていた
     describe 'error messages' do
       let(:user) { create(:user) }
 
@@ -113,7 +116,7 @@ RSpec.describe Event, type: :model do
           with_locale(:ja) do
             event = Event.new(title: '', event_date: Event.current_date, created_by: user)
             event.valid?
-            expect(event.errors.full_messages).to include("イベント名 を入力してください")
+            expect(event.errors.full_messages).to include("イベント名を入力してください")
           end
         end
       end
@@ -123,7 +126,7 @@ RSpec.describe Event, type: :model do
           with_locale(:ja) do
             event = Event.new(title: 'a' * 256, event_date: Event.current_date, created_by: user)
             event.valid?
-            expect(event.errors.full_messages).to include("イベント名 は長すぎます（最大255文字）")
+            expect(event.errors.full_messages).to include("イベント名は長すぎます（最大255文字）")
           end
         end
       end
@@ -133,7 +136,7 @@ RSpec.describe Event, type: :model do
           with_locale(:ja) do
             event = Event.new(title: 'Test Event', event_date: nil, created_by: user)
             event.valid?
-            expect(event.errors.full_messages).to include("イベント日時 を入力してください")
+            expect(event.errors.full_messages).to include("イベント日時を入力してください")
           end
         end
       end
@@ -143,7 +146,7 @@ RSpec.describe Event, type: :model do
           with_locale(:ja) do
             event = Event.new(title: 'Test Event', event_date: Event.current_date - 1.day, created_by: user)
             event.valid?
-            expect(event.errors.full_messages).to include("イベント日時 は過去の日付に設定することはできません")
+            expect(event.errors.full_messages).to include("イベント日時は過去の日付に設定することはできません")
           end
         end
       end
