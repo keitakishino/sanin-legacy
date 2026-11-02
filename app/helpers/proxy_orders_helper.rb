@@ -33,4 +33,34 @@ module ProxyOrdersHelper
 
     amounts.sum
   end
+
+  # コンボボックスの候補データ。画面に埋め込むので id と username/label だけ
+  def participant_candidates(users, participants)
+    candidates = []
+
+    # 先に参加者（order(:id) の順）
+    participants.each do |p|
+      candidates << {
+        kind: "participant",
+        label: p.user&.username || p.guest_name,
+        participant_id: p.id,
+        user_id: p.user_id,
+        assigned_item_ids: p.proxy_order_allocations.map(&:proxy_order_item_id)
+      }
+    end
+
+    # 次にユーザーのうち、参加者に含まれないもの（username 順）
+    participant_user_ids = participants.map(&:user_id).compact
+    users.reject { |u| participant_user_ids.include?(u.id) }.each do |u|
+      candidates << {
+        kind: "user",
+        label: u.username,
+        participant_id: nil,
+        user_id: u.id,
+        assigned_item_ids: []
+      }
+    end
+
+    candidates
+  end
 end

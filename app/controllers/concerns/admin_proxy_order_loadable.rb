@@ -23,9 +23,10 @@ module AdminProxyOrderLoadable
   def load_editor_state(open_item_ids: [])
     @proxy_order.reload
     @items = @proxy_order.proxy_order_items.includes(:expansion, :proxy_order_price_lines, proxy_order_allocations: { proxy_order_participant: :user }).order(:id)
-    @participants = @proxy_order.proxy_order_participants.includes(:user).order(:id)
+    @participants = @proxy_order.proxy_order_participants.includes(:user, :proxy_order_allocations).order(:id)
     @calculator = ProxyOrderCalculator.new(@proxy_order)
     @users = User.order(:username)
+    @participant_candidates = helpers.participant_candidates(@users, @participants)
     @open_item_ids = open_item_ids
     @transition_errors = nil unless defined?(@transition_errors)
     # 保存に失敗した子（価格行・注文）が関連に残ったまま再描画すると、
