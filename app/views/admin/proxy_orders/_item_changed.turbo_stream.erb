@@ -7,7 +7,5 @@
 <% end %>
 
 <%= turbo_stream.append "toast-container" do %>
-  <div class="alert alert-success alert-toast" role="alert">
-    <%= toast_message %>
-  </div>
+  <%= render(partial: "shared/toast", locals: { message: toast_message }, formats: [:html]) %>
 <% end %>

@@ -12,23 +12,23 @@
 
   <!-- Status Display -->
   <div id="proxy_order_status" class="flex items-center gap-4 mb-8">
-    <span data-status="ordered" class="px-4 py-2 rounded <%= 'bg-primary text-primary-content font-bold' if @proxy_order.ordered? %>">
+    <span data-status="ordered" class="px-4 py-2 rounded-md text-sm <%= @proxy_order.ordered? ? 'bg-indigo-700 text-white font-bold' : 'bg-white border border-stone-200 text-stone-600' %>">
       <%= t("activerecord.enums.proxy_order.status.ordered") %>
     </span>
-    <span class="text-gray-400">→</span>
-    <span data-status="arrived" class="px-4 py-2 rounded <%= 'bg-primary text-primary-content font-bold' if @proxy_order.arrived? %>">
+    <span class="text-stone-400">→</span>
+    <span data-status="arrived" class="px-4 py-2 rounded-md text-sm <%= @proxy_order.arrived? ? 'bg-indigo-700 text-white font-bold' : 'bg-white border border-stone-200 text-stone-600' %>">
       <%= t("activerecord.enums.proxy_order.status.arrived") %>
     </span>
-    <span class="text-gray-400">→</span>
-    <span data-status="completed" class="px-4 py-2 rounded <%= 'bg-primary text-primary-content font-bold' if @proxy_order.completed? %>">
+    <span class="text-stone-400">→</span>
+    <span data-status="completed" class="px-4 py-2 rounded-md text-sm <%= @proxy_order.completed? ? 'bg-indigo-700 text-white font-bold' : 'bg-white border border-stone-200 text-stone-600' %>">
       <%= t("activerecord.enums.proxy_order.status.completed") %>
     </span>
   </div>
 
   <!-- Provisional Notice -->
   <% if @proxy_order.ordered? %>
-    <div id="proxy_order_provisional" class="alert alert-info mb-6">
-      <span class="badge badge-info mr-2"><%= t("proxy_orders.show.provisional") %></span>
+    <div id="proxy_order_provisional" class="bg-accent-soft border border-border rounded-lg p-4 mb-6 text-sm text-stone-700">
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-accent-soft text-accent mr-2"><%= t("proxy_orders.show.provisional") %></span>
       <%= t("proxy_orders.show.provisional_notice") %>
     </div>
   <% end %>
@@ -39,30 +39,30 @@
 
     <% if @allocations.any? %>
       <div class="overflow-x-auto">
-        <table id="proxy_order_my_items" class="table table-compact w-full bg-white border border-stone-200 rounded-[10px]">
-          <thead>
-            <tr class="bg-stone-50">
-              <th class="text-left"><%= t("proxy_orders.show.card_name") %></th>
-              <th class="text-left"><%= t("proxy_orders.show.expansion") %></th>
-              <th class="text-left"><%= t("proxy_orders.show.foil") %></th>
-              <th class="text-left"><%= t("proxy_orders.show.frame") %></th>
-              <th class="text-center"><%= t("proxy_orders.show.quantity") %></th>
-              <th class="text-center"><%= t("proxy_orders.show.lost") %></th>
-              <th class="text-right"><%= t("proxy_orders.show.unit_price") %></th>
-              <th class="text-right"><%= t("proxy_orders.show.subtotal") %></th>
+        <table id="proxy_order_my_items" class="w-full bg-white border border-stone-200 rounded-[10px] text-sm">
+          <thead class="bg-stone-100 border-b border-stone-200">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-bold text-stone-500"><%= t("proxy_orders.show.card_name") %></th>
+              <th class="px-4 py-3 text-left text-xs font-bold text-stone-500"><%= t("proxy_orders.show.expansion") %></th>
+              <th class="px-4 py-3 text-left text-xs font-bold text-stone-500"><%= t("proxy_orders.show.foil") %></th>
+              <th class="px-4 py-3 text-left text-xs font-bold text-stone-500"><%= t("proxy_orders.show.frame") %></th>
+              <th class="px-4 py-3 text-center text-xs font-bold text-stone-500"><%= t("proxy_orders.show.quantity") %></th>
+              <th class="px-4 py-3 text-center text-xs font-bold text-stone-500"><%= t("proxy_orders.show.lost") %></th>
+              <th class="px-4 py-3 text-right text-xs font-bold text-stone-500"><%= t("proxy_orders.show.unit_price") %></th>
+              <th class="px-4 py-3 text-right text-xs font-bold text-stone-500"><%= t("proxy_orders.show.subtotal") %></th>
             </tr>
           </thead>
           <tbody>
             <% @allocations.each do |allocation| %>
               <tr id="<%= dom_id(allocation) %>" class="border-t border-stone-200">
-                <td><%= allocation.proxy_order_item.card_name %></td>
-                <td><%= allocation.proxy_order_item.expansion&.name %></td>
-                <td><%= t("activerecord.enums.trade_card_offer.foil.#{allocation.proxy_order_item.foil}") %></td>
-                <td><%= t("activerecord.enums.trade_card_offer.frame.#{allocation.proxy_order_item.frame}") %></td>
-                <td class="text-center"><%= allocation.quantity %></td>
-                <td class="text-center"><%= allocation.lost_quantity %></td>
-                <td class="text-right"><%= usd(@calculator.unit_price(allocation.proxy_order_item)) %></td>
-                <td class="text-right"><%= usd(@calculator.subtotal(allocation)) %></td>
+                <td class="px-4 py-3"><%= allocation.proxy_order_item.card_name %></td>
+                <td class="px-4 py-3"><%= allocation.proxy_order_item.expansion&.name %></td>
+                <td class="px-4 py-3"><%= t("activerecord.enums.trade_card_offer.foil.#{allocation.proxy_order_item.foil}") %></td>
+                <td class="px-4 py-3"><%= t("activerecord.enums.trade_card_offer.frame.#{allocation.proxy_order_item.frame}") %></td>
+                <td class="px-4 py-3 text-center"><%= allocation.quantity %></td>
+                <td class="px-4 py-3 text-center"><%= allocation.lost_quantity %></td>
+                <td class="px-4 py-3 text-right"><%= usd(@calculator.unit_price(allocation.proxy_order_item)) %></td>
+                <td class="px-4 py-3 text-right"><%= usd(@calculator.subtotal(allocation)) %></td>
               </tr>
             <% end %>
           </tbody>
@@ -108,7 +108,7 @@
           <div class="flex items-center gap-2">
             <span><%= t("admin.proxy_order.payment_jpy") %></span>
             <% if @proxy_order.ordered? %>
-              <span class="badge badge-info text-xs"><%= t("proxy_orders.show.provisional") %></span>
+              <span class="inline-block px-2 py-0.5 rounded-full text-xs font-bold bg-accent-soft text-accent"><%= t("proxy_orders.show.provisional") %></span>
             <% end %>
           </div>
           <span data-role="payment-jpy"><%= jpy_or_pending(@calculator.payment_jpy(@participant)) %></span>

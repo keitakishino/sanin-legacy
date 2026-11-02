@@ -3,7 +3,5 @@
 <% end %>
 
 <%= turbo_stream.append "toast-container" do %>
-  <div class="alert alert-danger alert-toast" role="alert">
-    <%= @item.errors.full_messages.join(", ") %>
-  </div>
+  <%= render(partial: "shared/toast", locals: { message: @item.errors.full_messages.join(", "), variant: :danger }, formats: [:html]) %>
 <% end %>

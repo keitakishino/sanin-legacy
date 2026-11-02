@@ -1,97 +1,100 @@
 <% details_editable = @proxy_order.details_editable? %>
 <% arrival_inputs_editable = @proxy_order.arrival_inputs_editable? %>
+<% field_class = "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-stone-100 disabled:text-stone-500" %>
+<% label_class = "block text-xs font-bold text-stone-500 mb-1" %>
+<% section_class = "text-xs font-bold text-stone-500 border-t border-stone-200 pt-4 mt-6 mb-3" %>
 
-<details id="<%= dom_id(item) %>" class="card bg-base-100 shadow-md" <%= "open" if item.quantity_mismatch? || item.lost_mismatch? || @open_item_ids.include?(item.id) %>>
-  <summary class="card-title cursor-pointer p-4 hover:bg-base-200">
+<details id="<%= dom_id(item) %>" class="bg-white border border-stone-200 rounded-lg" <%= "open" if item.quantity_mismatch? || item.lost_mismatch? || @open_item_ids.include?(item.id) %>>
+  <summary class="flex items-center gap-3 cursor-pointer p-4 hover:bg-stone-50 font-bold text-stone-800">
     <span data-role="card-name" class="truncate flex-1"><%= item.card_name %></span>
-    <span data-role="ordered-quantity" class="text-sm text-gray-600"><%= item.ordered_quantity %>枚</span>
+    <span data-role="ordered-quantity" class="text-xs font-normal text-stone-500"><%= item.ordered_quantity %>枚</span>
     <% if !@proxy_order.ordered? %>
-      <span data-role="lost-quantity" class="text-sm text-gray-600">ロスト <%= item.lost_ordered_quantity %></span>
+      <span data-role="lost-quantity" class="text-xs font-normal text-stone-500">ロスト <%= item.lost_ordered_quantity %></span>
     <% end %>
-    <span data-role="unit-price" class="text-sm text-gray-600"><%= usd(@calculator.unit_price(item)) %></span>
+    <span data-role="unit-price" class="text-xs font-normal text-stone-500"><%= usd(@calculator.unit_price(item)) %></span>
   </summary>
 
-  <div class="card-body">
+  <div class="px-4 pb-4">
     <% if item.quantity_mismatch? %>
-      <div id="<%= dom_id(item, :mismatch) %>" class="alert alert-warning mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 4v2M7.272 15.546a9.001 9.001 0 011.45-14.546m5.556 0a9.001 9.001 0 011.45 14.546M9.305 9.305a6 6 0 018.39 8.39M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+      <div id="<%= dom_id(item, :mismatch) %>" class="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-md p-3 mb-4 text-sm text-amber-800">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 4v2M7.272 15.546a9.001 9.001 0 011.45-14.546m5.556 0a9.001 9.001 0 011.45 14.546M9.305 9.305a6 6 0 018.39 8.39M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
         <span><%= t("admin.proxy_order.quantity_mismatch", ordered: item.ordered_quantity, allocated: item.allocated_quantity) %></span>
       </div>
     <% end %>
 
     <% if !@proxy_order.ordered? && item.lost_mismatch? %>
-      <div id="<%= dom_id(item, :lost_mismatch) %>" class="alert alert-warning mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 4v2M7.272 15.546a9.001 9.001 0 011.45-14.546m5.556 0a9.001 9.001 0 011.45 14.546M9.305 9.305a6 6 0 018.39 8.39M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+      <div id="<%= dom_id(item, :lost_mismatch) %>" class="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-md p-3 mb-4 text-sm text-amber-800">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 4v2M7.272 15.546a9.001 9.001 0 011.45-14.546m5.556 0a9.001 9.001 0 011.45 14.546M9.305 9.305a6 6 0 018.39 8.39M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
         <span><%= t("admin.proxy_order.lost_mismatch", ordered: item.lost_ordered_quantity, allocated: item.lost_allocated_quantity) %></span>
       </div>
     <% end %>
 
-    <div class="divider">カード情報</div>
+    <div class="<%= section_class %>">カード情報</div>
 
     <%= form_with model: item, url: admin_event_proxy_order_item_path(@event, item), method: :patch, id: dom_id(item, :edit_form), local: true do |f| %>
-      <div class="form-control mb-4">
-        <%= f.label :card_name %>
-        <%= f.text_field :card_name, class: "input input-bordered", disabled: !details_editable %>
+      <div class="mb-3">
+        <%= f.label :card_name, class: label_class %>
+        <%= f.text_field :card_name, class: field_class, disabled: !details_editable %>
       </div>
 
-      <div class="form-control mb-4">
-        <%= f.label :expansion_id %>
+      <div class="mb-3">
+        <%= f.label :expansion_id, class: label_class %>
         <%= f.hidden_field :expansion_id %>
         <div id="<%= dom_id(item, :expansion_select) %>" class="expansion-select" data-disabled="<%= !details_editable %>">
-          <input type="text" class="input input-bordered" placeholder="セットを選択" value="<%= item.expansion&.name %>" data-expansion-id="<%= item.expansion_id %>" <%= "disabled" unless details_editable %>>
+          <input type="text" class="<%= field_class %>" placeholder="セットを選択" value="<%= item.expansion&.name %>" data-expansion-id="<%= item.expansion_id %>" <%= "disabled" unless details_editable %>>
         </div>
       </div>
 
-      <div class="form-control mb-4">
-        <%= f.label :foil, t("activerecord.enums.trade_card_offer.foil.#{item.foil}") %>
-        <%= f.select :foil, ProxyOrderItem.foils.keys.map { |k| [t("activerecord.enums.trade_card_offer.foil.#{k}"), k] }, {}, class: "select select-bordered", disabled: !details_editable %>
+      <div class="mb-3">
+        <%= f.label :foil, class: label_class %>
+        <%= f.select :foil, ProxyOrderItem.foils.keys.map { |k| [t("activerecord.enums.trade_card_offer.foil.#{k}"), k] }, {}, class: field_class, disabled: !details_editable %>
       </div>
 
-      <div class="form-control mb-6">
-        <%= f.label :frame, t("activerecord.enums.trade_card_offer.frame.#{item.frame}") %>
-        <%= f.select :frame, ProxyOrderItem.frames.keys.map { |k| [t("activerecord.enums.trade_card_offer.frame.#{k}"), k] }, {}, class: "select select-bordered", disabled: !details_editable %>
+      <div class="mb-4">
+        <%= f.label :frame, class: label_class %>
+        <%= f.select :frame, ProxyOrderItem.frames.keys.map { |k| [t("activerecord.enums.trade_card_offer.frame.#{k}"), k] }, {}, class: field_class, disabled: !details_editable %>
       </div>
 
       <% if details_editable %>
-        <div class="form-control mb-4">
-          <%= f.submit t("common.update"), class: "btn btn-primary" %>
-        </div>
+        <%= f.submit t("common.update"), class: "bg-indigo-700 text-white px-4 py-2 rounded hover:bg-indigo-800 font-medium text-sm cursor-pointer" %>
       <% end %>
     <% end %>
 
     <% if details_editable %>
-      <%= button_to t("admin.proxy_order.delete_card"), admin_event_proxy_order_item_path(@event, item), method: :delete, data: { confirm: t("admin.proxy_order.delete_card_confirm") }, class: "btn btn-outline btn-error mb-6" %>
+      <div class="mt-2">
+        <%= button_to t("admin.proxy_order.delete_card"), admin_event_proxy_order_item_path(@event, item), method: :delete, data: { confirm: t("admin.proxy_order.delete_card_confirm") }, class: "px-4 py-2 bg-white text-red-700 border border-red-300 rounded-md hover:bg-red-50 font-bold text-sm" %>
+      </div>
     <% end %>
 
-    <div class="divider">価格行</div>
+    <div class="<%= section_class %>">価格行</div>
 
-    <div class="space-y-4 mb-6">
+    <div class="space-y-3">
       <% item.proxy_order_price_lines.each do |line| %>
-        <div id="<%= dom_id(line) %>" class="card bg-base-200 p-4">
+        <div id="<%= dom_id(line) %>" class="bg-stone-50 border border-stone-200 rounded-md p-4">
           <div class="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
             <%= form_with model: line, url: admin_event_proxy_order_item_price_line_path(@event, item, line), method: :patch, local: true, class: "contents" do |f| %>
-              <div class="form-control">
-                <%= f.label :unit_price_usd, t("common.unit_price") %>
-                <%= f.number_field :unit_price_usd, step: 0.01, class: "input input-bordered", disabled: !details_editable %>
+              <div>
+                <%= f.label :unit_price_usd, t("common.unit_price"), class: label_class %>
+                <%= f.number_field :unit_price_usd, step: 0.01, class: field_class, disabled: !details_editable %>
               </div>
 
-              <div class="form-control">
-                <%= f.label :quantity %>
-                <%= f.number_field :quantity, class: "input input-bordered", disabled: !details_editable %>
+              <div>
+                <%= f.label :quantity, class: label_class %>
+                <%= f.number_field :quantity, class: field_class, disabled: !details_editable %>
               </div>
 
-              <div class="form-control">
-                <%= f.label :lost_quantity %>
-                <%= f.number_field :lost_quantity, class: "input input-bordered", disabled: !arrival_inputs_editable %>
+              <div>
+                <%= f.label :lost_quantity, class: label_class %>
+                <%= f.number_field :lost_quantity, class: field_class, disabled: !arrival_inputs_editable %>
               </div>
 
               <% if details_editable || arrival_inputs_editable %>
-                <%= f.submit t("common.update"), class: "btn btn-sm btn-primary" %>
+                <%= f.submit t("common.update"), class: "bg-indigo-700 text-white px-3 py-1.5 rounded hover:bg-indigo-800 font-bold text-xs cursor-pointer" %>
               <% end %>
             <% end %>
 
             <% if details_editable %>
-              <%= button_to t("common.delete"), admin_event_proxy_order_item_price_line_path(@event, item, line), method: :delete, data: { confirm: "削除しますか？" }, class: "btn btn-sm btn-outline btn-error" %>
+              <%= button_to t("common.delete"), admin_event_proxy_order_item_price_line_path(@event, item, line), method: :delete, data: { confirm: "削除しますか？" }, class: "px-3 py-1.5 bg-white text-red-700 border border-red-300 rounded-md hover:bg-red-50 font-bold text-xs" %>
             <% end %>
           </div>
         </div>
@@ -99,53 +102,53 @@
     </div>
 
     <% if details_editable %>
-      <div id="<%= dom_id(item, :new_price_line) %>" class="card bg-base-200 p-4 mb-6">
+      <div id="<%= dom_id(item, :new_price_line) %>" class="bg-stone-50 border border-stone-200 rounded-md p-4 mt-3">
         <%= form_with model: item.proxy_order_price_lines.build, url: admin_event_proxy_order_item_price_lines_path(@event, item), local: true do |f| %>
           <div class="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
-            <div class="form-control">
-              <%= f.label :unit_price_usd, t("common.unit_price") %>
-              <%= f.number_field :unit_price_usd, step: 0.01, class: "input input-bordered" %>
+            <div>
+              <%= f.label :unit_price_usd, t("common.unit_price"), class: label_class %>
+              <%= f.number_field :unit_price_usd, step: 0.01, class: field_class %>
             </div>
 
-            <div class="form-control">
-              <%= f.label :quantity %>
-              <%= f.number_field :quantity, class: "input input-bordered" %>
+            <div>
+              <%= f.label :quantity, class: label_class %>
+              <%= f.number_field :quantity, class: field_class %>
             </div>
 
-            <%= f.submit t("admin.proxy_order.add_price_line"), class: "btn btn-primary" %>
+            <%= f.submit t("admin.proxy_order.add_price_line"), class: "bg-indigo-700 text-white px-3 py-1.5 rounded hover:bg-indigo-800 font-bold text-xs cursor-pointer" %>
           </div>
         <% end %>
       </div>
     <% end %>
 
-    <div class="divider">注文数割り当て</div>
+    <div class="<%= section_class %>">注文数割り当て</div>
 
-    <div class="space-y-4 mb-6">
+    <div class="space-y-3">
       <% item.proxy_order_allocations.each do |allocation| %>
-        <div id="<%= dom_id(allocation) %>" class="card bg-base-200 p-4">
-          <div class="mb-4">
-            <strong><%= participant_display_name(allocation.proxy_order_participant) %></strong>
+        <div id="<%= dom_id(allocation) %>" class="bg-stone-50 border border-stone-200 rounded-md p-4">
+          <div class="mb-3">
+            <strong class="text-sm text-stone-800"><%= participant_display_name(allocation.proxy_order_participant) %></strong>
           </div>
 
           <div class="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
             <%= form_with model: allocation, url: admin_event_proxy_order_item_allocation_path(@event, item, allocation), method: :patch, local: true, class: "contents" do |f| %>
-              <div class="form-control">
-                <%= f.label :quantity %>
-                <%= f.number_field :quantity, class: "input input-bordered", disabled: !details_editable %>
+              <div>
+                <%= f.label :quantity, class: label_class %>
+                <%= f.number_field :quantity, class: field_class, disabled: !details_editable %>
               </div>
 
-              <div class="form-control">
-                <%= f.label :lost_quantity %>
-                <%= f.number_field :lost_quantity, class: "input input-bordered", disabled: !arrival_inputs_editable %>
+              <div>
+                <%= f.label :lost_quantity, class: label_class %>
+                <%= f.number_field :lost_quantity, class: field_class, disabled: !arrival_inputs_editable %>
               </div>
 
               <% if details_editable || arrival_inputs_editable %>
-                <%= f.submit t("common.update"), class: "btn btn-sm btn-primary" %>
+                <%= f.submit t("common.update"), class: "bg-indigo-700 text-white px-3 py-1.5 rounded hover:bg-indigo-800 font-bold text-xs cursor-pointer" %>
               <% end %>
             <% end %>
 
             <% if details_editable %>
-              <%= button_to t("common.delete"), admin_event_proxy_order_item_allocation_path(@event, item, allocation), method: :delete, data: { confirm: "削除しますか？" }, class: "btn btn-sm btn-outline btn-error" %>
+              <%= button_to t("common.delete"), admin_event_proxy_order_item_allocation_path(@event, item, allocation), method: :delete, data: { confirm: "削除しますか？" }, class: "px-3 py-1.5 bg-white text-red-700 border border-red-300 rounded-md hover:bg-red-50 font-bold text-xs" %>
             <% end %>
           </div>
         </div>
@@ -153,19 +156,19 @@
     </div>
 
     <% if details_editable %>
-      <div id="<%= dom_id(item, :new_allocation) %>" class="card bg-base-200 p-4">
+      <div id="<%= dom_id(item, :new_allocation) %>" class="bg-stone-50 border border-stone-200 rounded-md p-4 mt-3">
         <%= form_with model: item.proxy_order_allocations.build, url: admin_event_proxy_order_item_allocations_path(@event, item), local: true do |f| %>
-          <div class="form-control mb-4">
-            <%= f.label :proxy_order_participant_id, t("activerecord.attributes.proxy_order_allocation.proxy_order_participant") %>
-            <%= f.collection_select :proxy_order_participant_id, @participants, :id, ->(p) { participant_display_name(p) }, { include_blank: true }, class: "select select-bordered" %>
+          <div class="mb-3">
+            <%= f.label :proxy_order_participant_id, t("activerecord.attributes.proxy_order_allocation.proxy_order_participant"), class: label_class %>
+            <%= f.collection_select :proxy_order_participant_id, @participants, :id, ->(p) { participant_display_name(p) }, { include_blank: true }, class: field_class %>
           </div>
 
-          <div class="form-control mb-4">
-            <%= f.label :quantity %>
-            <%= f.number_field :quantity, class: "input input-bordered" %>
+          <div class="mb-4">
+            <%= f.label :quantity, class: label_class %>
+            <%= f.number_field :quantity, class: field_class %>
           </div>
 
-          <%= f.submit t("admin.proxy_order.add_allocation"), class: "btn btn-primary" %>
+          <%= f.submit t("admin.proxy_order.add_allocation"), class: "bg-indigo-700 text-white px-4 py-2 rounded hover:bg-indigo-800 font-medium text-sm cursor-pointer" %>
         <% end %>
       </div>
     <% end %>
