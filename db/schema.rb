@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_01_000100) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_000100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -86,6 +86,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_000100) do
     t.integer "lost_quantity", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "discarded_at"
+    t.index ["discarded_at"], name: "index_proxy_order_allocations_on_discarded_at"
     t.index ["proxy_order_item_id", "proxy_order_participant_id"], name: "index_proxy_order_allocations_on_item_and_participant", unique: true
     t.index ["proxy_order_item_id"], name: "index_proxy_order_allocations_on_proxy_order_item_id"
     t.index ["proxy_order_participant_id"], name: "index_proxy_order_allocations_on_proxy_order_participant_id"
@@ -114,6 +116,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_000100) do
     t.datetime "handed_over_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "discarded_at"
+    t.index ["discarded_at"], name: "index_proxy_order_participants_on_discarded_at"
     t.index ["proxy_order_id", "user_id"], name: "index_proxy_order_participants_on_proxy_order_id_and_user_id", unique: true, where: "(user_id IS NOT NULL)"
     t.index ["proxy_order_id"], name: "index_proxy_order_participants_on_proxy_order_id"
     t.index ["user_id"], name: "index_proxy_order_participants_on_user_id"
@@ -127,6 +131,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_01_000100) do
     t.integer "lost_quantity", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "discarded_at"
+    t.index ["discarded_at"], name: "index_proxy_order_price_lines_on_discarded_at"
     t.index ["proxy_order_item_id"], name: "index_proxy_order_price_lines_on_proxy_order_item_id"
     t.check_constraint "lost_quantity >= 0 AND lost_quantity <= quantity", name: "proxy_order_price_lines_lost_quantity_range"
     t.check_constraint "quantity > 0", name: "proxy_order_price_lines_quantity_positive"

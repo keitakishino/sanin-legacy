@@ -506,6 +506,40 @@ RSpec.describe "Admin::Events", type: :request do
         expect(Trade.with_discarded.find_by(id: trade_id).discarded?).to be true
       end
 
+      it "cascades logical deletion to proxy order and its children when proxy_order event is deleted" do
+        proxy_event = create(:event, :proxy_order, created_by: admin_user)
+        proxy_order = create(:proxy_order, event: proxy_event)
+        item = create(:proxy_order_item, proxy_order:)
+        price_line = create(:proxy_order_price_line, proxy_order_item: item)
+        participant = create(:proxy_order_participant, proxy_order:)
+        allocation = create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant)
+
+        proxy_order_id = proxy_order.id
+        item_id = item.id
+        price_line_id = price_line.id
+        participant_id = participant.id
+        allocation_id = allocation.id
+
+        delete admin_event_path(proxy_event)
+
+        expect(response).to redirect_to(admin_events_path)
+        follow_redirect!
+
+        expect(proxy_event.reload.discarded?).to be true
+        expect(ProxyOrder.with_discarded.find(proxy_order_id).discarded?).to be true
+        expect(ProxyOrderItem.with_discarded.find(item_id).discarded?).to be true
+        expect(ProxyOrderPriceLine.with_discarded.find(price_line_id).discarded?).to be true
+        expect(ProxyOrderParticipant.with_discarded.find(participant_id).discarded?).to be true
+        expect(ProxyOrderAllocation.with_discarded.find(allocation_id).discarded?).to be true
+
+        # Verify records are hidden via default_scope
+        expect(ProxyOrder.find_by(id: proxy_order_id)).to be_nil
+        expect(ProxyOrderItem.find_by(id: item_id)).to be_nil
+        expect(ProxyOrderPriceLine.find_by(id: price_line_id)).to be_nil
+        expect(ProxyOrderParticipant.find_by(id: participant_id)).to be_nil
+        expect(ProxyOrderAllocation.find_by(id: allocation_id)).to be_nil
+      end
+
       context "with past event_date" do
         let(:past_event) do
           create(:event, created_by: admin_user).tap do |e|

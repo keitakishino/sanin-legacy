@@ -39,6 +39,7 @@ class Event < ApplicationRecord
       trades.each do |trade|
         @discard_failures.concat(trade.discard_failures) unless trade.discard!
       end
+      @discard_failures.concat(proxy_order.discard_failures) if proxy_order && !proxy_order.discard!
       raise ActiveRecord::Rollback if @discard_failures.any?
     end
     self.discarded_at = nil if @discard_failures.any?

@@ -21,6 +21,24 @@ class ProxyOrder < ApplicationRecord
     discarded_at.present?
   end
 
+  def discard!
+    @discard_failures = []
+    now = Time.current
+    @discard_failures << self unless update(discarded_at: now)
+    return false if @discard_failures.any?
+
+    item_ids = ProxyOrderItem.with_discarded.where(proxy_order_id: id).select(:id)
+    ProxyOrderItem.where(proxy_order_id: id, discarded_at: nil).update_all(discarded_at: now, updated_at: now)
+    ProxyOrderPriceLine.where(proxy_order_item_id: item_ids, discarded_at: nil).update_all(discarded_at: now, updated_at: now)
+    ProxyOrderAllocation.where(proxy_order_item_id: item_ids, discarded_at: nil).update_all(discarded_at: now, updated_at: now)
+    ProxyOrderParticipant.where(proxy_order_id: id, discarded_at: nil).update_all(discarded_at: now, updated_at: now)
+    true
+  end
+
+  def discard_failures
+    @discard_failures || []
+  end
+
   def details_editable?
     ordered?
   end

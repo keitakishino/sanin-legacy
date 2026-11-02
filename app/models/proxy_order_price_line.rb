@@ -5,17 +5,23 @@ class ProxyOrderPriceLine < ApplicationRecord
   validates :quantity, presence: true, numericality: { only_integer: true, greater_than: 0 }
   validates :lost_quantity, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
+  validate :lost_quantity_not_exceed_quantity
+
   before_create :set_default_lost_quantity
+
+  default_scope { where(discarded_at: nil) }
+  scope :with_discarded, -> { unscope(where: :discarded_at) }
+  scope :only_discarded, -> { unscope(where: :discarded_at).where.not(discarded_at: nil) }
+
+  def discarded?
+    discarded_at.present?
+  end
 
   private
 
   def set_default_lost_quantity
     self.lost_quantity ||= 0
   end
-
-  validate :lost_quantity_not_exceed_quantity
-
-  private
 
   def lost_quantity_not_exceed_quantity
     return if quantity.blank? || lost_quantity.blank?

@@ -11,6 +11,14 @@ class ProxyOrderAllocation < ApplicationRecord
 
   before_create :set_default_lost_quantity
 
+  default_scope { where(discarded_at: nil) }
+  scope :with_discarded, -> { unscope(where: :discarded_at) }
+  scope :only_discarded, -> { unscope(where: :discarded_at).where.not(discarded_at: nil) }
+
+  def discarded?
+    discarded_at.present?
+  end
+
   private
 
   def set_default_lost_quantity
