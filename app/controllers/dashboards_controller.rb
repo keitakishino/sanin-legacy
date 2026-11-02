@@ -2,8 +2,11 @@ class DashboardsController < ApplicationController
   before_action :authenticate_user!
 
   def show
-    # Dashboard displays only the empty turbo-frame with src attribute
-    # Actual content is loaded lazily via turbo-frame
+    @my_proxy_orders = ProxyOrder.joins(:proxy_order_participants, :event)
+                                  .where(proxy_order_participants: { user_id: current_user.id })
+                                  .where(events: { discarded_at: nil })
+                                  .includes(:event)
+                                  .order("events.event_date DESC")
   end
 
   def incomplete_trades

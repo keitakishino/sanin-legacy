@@ -9,12 +9,20 @@ class ProxyOrderAllocation < ApplicationRecord
   validate :lost_quantity_not_exceed_quantity
   validate :participant_in_same_order
 
+  before_create :set_default_lost_quantity
+
   default_scope { where(discarded_at: nil) }
   scope :with_discarded, -> { unscope(where: :discarded_at) }
   scope :only_discarded, -> { unscope(where: :discarded_at).where.not(discarded_at: nil) }
 
   def discarded?
     discarded_at.present?
+  end
+
+  private
+
+  def set_default_lost_quantity
+    self.lost_quantity ||= 0
   end
 
   private

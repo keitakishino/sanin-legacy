@@ -1,0 +1,17 @@
+<%= turbo_stream.replace "proxy_order_participants" do %>
+  <%= render "admin/proxy_orders/participants" %>
+<% end %>
+
+<%= turbo_stream.replace "proxy_order_items" do %>
+  <%= render "admin/proxy_orders/items" %>
+<% end %>
+
+<%= turbo_stream.replace "proxy_order_summary" do %>
+  <%= render "admin/proxy_orders/summary" %>
+<% end %>
+
+<%= turbo_stream.append "toast-container" do %>
+  <div class="alert alert-success alert-toast" role="alert">
+    <%= t(".updated") %>
+  </div>
+<% end %>

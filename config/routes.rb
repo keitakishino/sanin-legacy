@@ -47,6 +47,9 @@ Rails.application.routes.draw do
   put "/trades/:event_id/card_wants/:id", to: "trade_card_wants#update"
   delete "/trades/:event_id/card_wants/:id", to: "trade_card_wants#destroy"
 
+  # User proxy order view
+  get "/proxy_orders/:event_id", to: "proxy_orders#show", as: :proxy_order
+
   # User-facing trade history
   get "/histories", to: "histories#index", as: :histories
 
@@ -56,6 +59,13 @@ Rails.application.routes.draw do
     resources :users, only: %i[ index show ]
     resources :events, only: [ :index, :new, :create, :edit, :update, :destroy ] do
       resources :trades, only: [ :show, :update ]
+      resource :proxy_order, only: [ :show, :update ] do
+        resources :items, only: [ :create, :update, :destroy ], controller: "proxy_order_items" do
+          resources :price_lines, only: [ :create, :update, :destroy ], controller: "proxy_order_price_lines"
+          resources :allocations, only: [ :create, :update, :destroy ], controller: "proxy_order_allocations"
+        end
+        resources :participants, only: [ :create, :update, :destroy ], controller: "proxy_order_participants"
+      end
     end
   end
 
