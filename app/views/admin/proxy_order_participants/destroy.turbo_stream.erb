@@ -11,7 +11,5 @@
 <% end %>
 
 <%= turbo_stream.append "toast-container" do %>
-  <div class="alert alert-success alert-toast" role="alert">
-    <%= t(".deleted") %>
-  </div>
+  <%= render(partial: "shared/toast", locals: { message: t(".deleted") }, formats: [:html]) %>
 <% end %>

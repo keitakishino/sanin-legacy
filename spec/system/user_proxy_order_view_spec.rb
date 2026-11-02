@@ -86,9 +86,11 @@ RSpec.describe "User Proxy Order View", type: :system do
 
     it "displays status with ordered state highlighted" do
       expect(page).to have_selector("#proxy_order_status [data-status='ordered']")
-      # Check that ordered span has the primary color class
+      # 現在のステータスだけが塗り潰しで強調される
       ordered_span = find("#proxy_order_status [data-status='ordered']")
-      expect(ordered_span["class"]).to include("bg-primary")
+      expect(ordered_span["class"]).to include("bg-indigo-700")
+      arrived_span = find("#proxy_order_status [data-status='arrived']")
+      expect(arrived_span["class"]).not_to include("bg-indigo-700")
     end
 
     it "has no form, input, select, textarea, or button elements" do

@@ -1,8 +1,6 @@
 <%= turbo_stream.replace "proxy_order_status", partial: "admin/proxy_orders/status" %>
 <% if @transition_errors.present? %>
   <%= turbo_stream.append "toast-container" do %>
-    <div class="alert alert-error alert-toast" role="alert">
-      <%= @transition_errors.join("<br/>").html_safe %>
-    </div>
+    <%= render(partial: "shared/toast", locals: { message: @transition_errors.join("、"), variant: :danger }, formats: [:html]) %>
   <% end %>
 <% end %>

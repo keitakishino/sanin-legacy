@@ -1,61 +1,61 @@
-<div id="proxy_order_participants" class="card bg-base-100 shadow-md mb-6">
-  <div class="card-body">
-    <h2 class="card-title"><%= t("admin.proxy_order.participants") %></h2>
+<div id="proxy_order_participants" class="bg-white border border-stone-200 rounded-lg mb-6">
+  <div class="p-6">
+    <h2 class="text-lg font-bold text-stone-800 mb-4"><%= t("admin.proxy_order.participants") %></h2>
 
     <div class="space-y-4 mb-6">
       <% @participants.each do |participant| %>
-        <div id="<%= dom_id(participant) %>" class="card bg-base-200 p-4">
-          <div class="mb-4">
-            <strong><%= participant_display_name(participant) %></strong>
+        <div id="<%= dom_id(participant) %>" class="bg-stone-50 border border-stone-200 rounded-md p-4">
+          <div class="mb-3">
+            <strong class="text-sm text-stone-800"><%= participant_display_name(participant) %></strong>
           </div>
 
           <% if @proxy_order.ordered? %>
             <%= form_with model: participant, url: admin_event_proxy_order_participant_path(@event, participant), method: :patch, local: true do |f| %>
               <% if participant.user.present? %>
-                <div class="form-control mb-4">
-                  <%= f.label :user_id %>
-                  <%= f.collection_select :user_id, @users, :id, :username, {}, class: "select select-bordered" %>
+                <div class="mb-3">
+                  <%= f.label :user_id, class: "block text-xs font-bold text-stone-500 mb-1" %>
+                  <%= f.collection_select :user_id, @users, :id, :username, {}, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
                 </div>
               <% else %>
-                <div class="form-control mb-4">
-                  <%= f.label :guest_name %>
-                  <%= f.text_field :guest_name, class: "input input-bordered" %>
+                <div class="mb-3">
+                  <%= f.label :guest_name, class: "block text-xs font-bold text-stone-500 mb-1" %>
+                  <%= f.text_field :guest_name, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
                 </div>
               <% end %>
 
-              <%= f.submit t("common.update"), class: "btn btn-sm btn-primary" %>
+              <%= f.submit t("common.update"), class: "bg-indigo-700 text-white px-3 py-1.5 rounded hover:bg-indigo-800 font-bold text-xs cursor-pointer" %>
             <% end %>
 
-            <%= button_to t("common.delete"), admin_event_proxy_order_participant_path(@event, participant), method: :delete, data: { confirm: t("admin.proxy_order.delete_participant_confirm") }, class: "btn btn-sm btn-outline btn-error" %>
+            <div class="mt-2">
+              <%= button_to t("common.delete"), admin_event_proxy_order_participant_path(@event, participant), method: :delete, data: { confirm: t("admin.proxy_order.delete_participant_confirm") }, class: "px-3 py-1.5 bg-white text-red-700 border border-red-300 rounded-md hover:bg-red-50 font-bold text-xs" %>
+            </div>
           <% elsif @proxy_order.arrived? %>
             <%= form_with model: participant, url: admin_event_proxy_order_participant_path(@event, participant), method: :patch, local: true do |f| %>
-              <div class="form-control">
-                <%= f.check_box :handed_over_at, { checked: participant.handed_over_at.present? }, "1", "0" %>
-                <%= f.label :handed_over_at, t("activerecord.attributes.proxy_order_participant.handed_over_at") %>
+              <div class="flex items-center gap-2 mb-3">
+                <%= f.check_box :handed_over_at, { checked: participant.handed_over_at.present?, class: "h-4 w-4 rounded border-stone-300 text-accent focus:ring-accent" }, "1", "0" %>
+                <%= f.label :handed_over_at, t("activerecord.attributes.proxy_order_participant.handed_over_at"), class: "text-xs font-bold text-stone-500" %>
               </div>
 
-              <%= f.submit t("common.update"), class: "btn btn-sm btn-primary" %>
+              <%= f.submit t("common.update"), class: "bg-indigo-700 text-white px-3 py-1.5 rounded hover:bg-indigo-800 font-bold text-xs cursor-pointer" %>
             <% end %>
           <% elsif @proxy_order.completed? %>
-            <div class="form-control">
-              <label class="label">
-                <input type="checkbox" class="checkbox" <%= "checked" if participant.handed_over_at.present? %> disabled />
-                <span class="label-text"><%= t("activerecord.attributes.proxy_order_participant.handed_over_at") %></span>
-              </label>
-            </div>
+            <label class="flex items-center gap-2">
+              <input type="checkbox" class="h-4 w-4 rounded border-stone-300 text-accent" <%= "checked" if participant.handed_over_at.present? %> disabled />
+              <span class="text-xs font-bold text-stone-500"><%= t("activerecord.attributes.proxy_order_participant.handed_over_at") %></span>
+            </label>
           <% end %>
         </div>
       <% end %>
     </div>
 
     <% if @proxy_order.details_editable? %>
-      <div id="new_proxy_order_participant_form" class="card bg-base-200 p-4">
-        <h3 class="font-bold mb-4"><%= t("admin.proxy_order.add_participant") %></h3>
+      <div id="new_proxy_order_participant_form" class="bg-stone-50 border border-stone-200 rounded-md p-4">
+        <h3 class="text-sm font-bold text-stone-800 mb-3"><%= t("admin.proxy_order.add_participant") %></h3>
 
         <%= form_with model: @proxy_order.proxy_order_participants.build, url: admin_event_proxy_order_participants_path(@event), local: true do |f| %>
           <% if @proxy_order.errors.any? %>
-            <div class="alert alert-error mb-4">
-              <ul>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <ul class="list-disc list-inside space-y-1 text-red-700 text-sm">
                 <% @proxy_order.errors.full_messages.each do |message| %>
                   <li><%= message %></li>
                 <% end %>
@@ -63,17 +63,17 @@
             </div>
           <% end %>
 
-          <div class="form-control mb-4">
-            <%= f.label :user_id, t("admin.proxy_order.registered_user") %>
-            <%= f.collection_select :user_id, @users, :id, :username, { include_blank: true }, class: "select select-bordered" %>
+          <div class="mb-3">
+            <%= f.label :user_id, t("admin.proxy_order.registered_user"), class: "block text-xs font-bold text-stone-500 mb-1" %>
+            <%= f.collection_select :user_id, @users, :id, :username, { include_blank: true }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
           </div>
 
-          <div class="form-control mb-6">
-            <%= f.label :guest_name %>
-            <%= f.text_field :guest_name, class: "input input-bordered" %>
+          <div class="mb-4">
+            <%= f.label :guest_name, class: "block text-xs font-bold text-stone-500 mb-1" %>
+            <%= f.text_field :guest_name, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
           </div>
 
-          <%= f.submit t("admin.proxy_order.add_participant"), class: "btn btn-primary" %>
+          <%= f.submit t("admin.proxy_order.add_participant"), class: "bg-indigo-700 text-white px-4 py-2 rounded hover:bg-indigo-800 font-medium text-sm cursor-pointer" %>
         <% end %>
       </div>
     <% end %>
