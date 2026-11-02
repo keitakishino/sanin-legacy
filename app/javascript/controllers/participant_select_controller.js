@@ -283,8 +283,9 @@ export default class extends Controller {
     }
     this.tagKindTarget.textContent = kindText
 
-    // コンボボックス入力欄を非表示、タグを表示
-    this.comboboxTarget.hidden = true
+    // 入力欄はその場に残したまま見えなくする。hidden にすると relative の親が高さ 0 に
+    // 潰れ、その上に重ねているタグが行から外れて別の場所に出てしまう
+    this.comboboxTarget.style.visibility = "hidden"
     this.tagTarget.hidden = false
 
     // 送信ボタンを有効化
@@ -321,7 +322,7 @@ export default class extends Controller {
     this.hiddenGuestNameTarget.value = ""
     this.inputTarget.value = ""
     this.tagTarget.hidden = true
-    this.comboboxTarget.hidden = false
+    this.comboboxTarget.style.visibility = ""
     this.submitTarget.disabled = true
     this.inputTarget.focus()
   }
