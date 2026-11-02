@@ -4,7 +4,9 @@
   show_lost = !@proxy_order.ordered?
   cell = "w-full px-2 py-2 border border-stone-300 rounded-md text-xs tabular-nums text-right bg-white focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-stone-100 disabled:text-stone-500"
   loss_cell = "#{cell} border-warning bg-warning-soft"
-  head = "bg-stone-100 px-3 py-3 text-xs font-bold text-stone-500 text-left"
+  # グリッドが items-center なので、中身が空のヘッダ（削除列）だけ高さが縮んで
+  # 灰色の小さい四角として浮いてしまう。self-stretch で行の高さに揃える
+  head = "bg-stone-100 self-stretch px-3 py-3 text-xs font-bold text-stone-500 text-left"
   auto = { controller: "auto-submit", action: "change->auto-submit#submit" }
 %>
 
