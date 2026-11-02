@@ -28,6 +28,9 @@ module AdminProxyOrderLoadable
     @users = User.order(:username)
     @open_item_ids = open_item_ids
     @transition_errors = nil unless defined?(@transition_errors)
+    # 保存に失敗した子（価格行・注文）が関連に残ったまま再描画すると、
+    # id が nil のレコードで URL を組もうとして落ちる。DB から読み直した個体に差し替える
+    @item = @items.find { |i| i.id == @item.id } || @item if @item&.persisted?
   end
 
   private

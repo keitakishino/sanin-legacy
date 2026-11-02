@@ -1,7 +1,3 @@
-<%= turbo_stream.replace "proxy_order_participants" do %>
-  <%= render "admin/proxy_orders/participants" %>
-<% end %>
-
 <%= turbo_stream.append "toast-container" do %>
   <%= render(partial: "shared/toast", locals: { message: @participant.errors.full_messages.join(", "), variant: :danger }, formats: [:html]) %>
 <% end %>

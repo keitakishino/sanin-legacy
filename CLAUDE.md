@@ -32,6 +32,11 @@ Tailwind 既定の `stone` / `indigo` / `red` / `amber` を使う。
 | エラー枠 | `bg-red-50 border border-red-200 rounded-lg p-4 mb-4`（中の `ul` は `list-disc list-inside space-y-1 text-red-700 text-sm`） |
 | テーブル | `table` は `w-full`、`thead` は `bg-stone-100 border-b border-stone-200`、`th` は `px-6 py-3 text-left text-xs font-bold text-stone-500` |
 
+代理通販の画面（`admin/proxy_orders`、`proxy_orders`）だけは Artifact のデザイン案
+「代理通販 画面デザイン」に合わせてあり、主ボタンに `bg-indigo-700` ではなく
+`bg-accent` / `hover:bg-accent-hover`、追加ボタンに `bg-offer` を使う。
+この画面を直すときはデザイン案を先に読むこと。
+
 ビルド結果 `app/assets/builds/tailwind.css` は gitignore されている。クラスを足したら
 `docker compose exec -T -e RAILS_ENV=test app bin/rails tailwindcss:build` を実行する。
 

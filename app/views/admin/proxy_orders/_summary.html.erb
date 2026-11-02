@@ -1,49 +1,59 @@
-<div id="proxy_order_summary" class="bg-white border border-stone-200 rounded-lg">
-  <div class="p-6">
-    <h2 class="text-lg font-bold text-stone-800 mb-4"><%= t("admin.proxy_order.payment_summary") %></h2>
+<div id="proxy_order_summary" class="bg-white border border-stone-200 rounded-lg p-4 flex flex-col gap-3">
+  <h2 class="text-xl font-bold text-stone-800">
+    <%= @proxy_order.ordered? ? t("admin.proxy_order.payment_summary_ordered") : t("admin.proxy_order.payment_summary_arrived") %>
+  </h2>
+  <p class="text-xs text-stone-500">
+    <%= @proxy_order.ordered? ? t("admin.proxy_order.summary_note_ordered") : t("admin.proxy_order.summary_note_arrived") %>
+  </p>
 
-    <div class="mb-6 p-4 bg-stone-50 border border-stone-200 rounded-md">
-      <div class="flex justify-between mb-2 text-sm">
-        <span class="text-stone-600"><%= t("admin.proxy_order.total_fees") %></span>
-        <strong class="text-stone-800"><%= usd(@calculator.fee_total) %></strong>
-      </div>
-      <div class="flex justify-between text-sm">
-        <span class="text-stone-600"><%= t("admin.proxy_order.fee_per_person") %></span>
-        <strong id="proxy_order_fee_per_person" class="text-stone-800"><%= usd(@calculator.fee_per_person) %></strong>
-      </div>
-    </div>
+  <% if @participants.empty? %>
+    <p class="text-xs text-stone-500"><%= t("admin.proxy_order.no_participants") %></p>
+  <% end %>
 
-    <div class="space-y-4">
-      <% @participants.each do |participant| %>
-        <div id="<%= dom_id(participant, :summary) %>" class="p-4 bg-stone-50 border border-stone-200 rounded-md">
-          <div class="font-bold text-sm text-stone-800 mb-2">
-            <%= participant_display_name(participant) %>
-            <% if !@proxy_order.ordered? && participant.handed_over_at.present? %>
-              <span data-role="handed-over" class="text-xs font-normal text-success"><%= t("admin.proxy_order.handed_over") %></span>
-            <% elsif !@proxy_order.ordered? && participant.handed_over_at.nil? %>
-              <span data-role="handed-over" class="text-xs font-normal text-danger"><%= t("admin.proxy_order.not_handed_over") %></span>
-            <% end %>
-          </div>
-          <div class="space-y-1 text-sm">
-            <div class="flex justify-between">
-              <span class="text-stone-600"><%= t("admin.proxy_order.goods_total") %></span>
-              <span data-role="goods-total" class="text-stone-800"><%= usd(@calculator.goods_total(participant)) %></span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-stone-600"><%= t("admin.proxy_order.fee") %></span>
-              <span data-role="fee" class="text-stone-800"><%= usd(@calculator.fee_for(participant)) %></span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-stone-600"><%= t("admin.proxy_order.payment_usd") %></span>
-              <span data-role="payment-usd" class="text-stone-800"><%= usd(@calculator.payment_usd(participant)) %></span>
-            </div>
-            <div class="flex justify-between border-t border-stone-200 pt-1 mt-1">
-              <strong class="text-stone-800"><%= t("admin.proxy_order.payment_jpy") %></strong>
-              <strong data-role="payment-jpy" class="text-stone-800"><%= jpy_or_pending(@calculator.payment_jpy(participant)) %></strong>
-            </div>
-          </div>
+  <% @participants.each do |participant| %>
+    <div id="<%= dom_id(participant, :summary) %>" class="border border-stone-200 rounded-lg p-3 flex flex-col gap-1.5">
+      <div class="flex justify-between items-baseline gap-2">
+        <b class="text-sm text-stone-800 truncate"><%= participant_display_name(participant) %></b>
+        <b data-role="payment-jpy" class="text-lg font-extrabold tabular-nums text-emerald-700 whitespace-nowrap"><%= jpy_or_pending(@calculator.payment_jpy(participant)) %></b>
+      </div>
+
+      <div class="text-xs text-stone-500 tabular-nums">
+        <%= t("admin.proxy_order.breakdown",
+              goods: "<span data-role=\"goods-total\">#{usd(@calculator.goods_total(participant))}</span>",
+              fee: "<span data-role=\"fee\">#{usd(@calculator.fee_for(participant))}</span>",
+              total: "<span data-role=\"payment-usd\">#{usd(@calculator.payment_usd(participant))}</span>").html_safe %>
+      </div>
+
+      <% if @proxy_order.ordered? %>
+        <div id="<%= dom_id(participant, :delete) %>" class="text-right">
+          <%= button_to t("common.delete"), admin_event_proxy_order_participant_path(@event, participant), method: :delete, data: { turbo_confirm: t("admin.proxy_order.delete_participant_confirm") }, class: "px-1 py-1 text-danger hover:underline font-bold text-xs" %>
         </div>
+      <% elsif @proxy_order.arrived? %>
+        <%= form_with model: participant, url: admin_event_proxy_order_participant_path(@event, participant), method: :patch, local: true, data: { controller: "auto-submit", action: "change->auto-submit#submit" } do |f| %>
+          <label class="flex gap-2 items-center text-xs font-bold text-stone-800 min-h-7">
+            <%= f.check_box :handed_over_at, { checked: participant.handed_over_at.present?, class: "h-4 w-4 rounded border-stone-300 text-accent focus:ring-accent" }, "1", "0" %>
+            <span data-role="handed-over"><%= t("admin.proxy_order.handed_over") %></span>
+          </label>
+        <% end %>
+      <% elsif @proxy_order.completed? %>
+        <label class="flex gap-2 items-center text-xs font-bold text-stone-800 min-h-7">
+          <input type="checkbox" class="h-4 w-4 rounded border-stone-300 text-accent" <%= "checked" if participant.handed_over_at.present? %> disabled />
+          <span data-role="handed-over"><%= participant.handed_over_at.present? ? t("admin.proxy_order.handed_over") : t("admin.proxy_order.not_handed_over") %></span>
+        </label>
       <% end %>
     </div>
+  <% end %>
+
+  <p class="text-xs text-stone-500"><%= t("admin.proxy_order.rounding_note") %></p>
+
+  <div class="flex flex-col gap-2">
+    <% if @proxy_order.ordered? %>
+      <%= button_to t("admin.proxy_order.to_arrived"), admin_event_proxy_order_path(@event), method: :patch, params: { proxy_order: { status: "arrived" } }, class: "w-full bg-accent text-white px-4 py-2 rounded-md hover:bg-accent-hover font-bold text-xs" %>
+    <% elsif @proxy_order.arrived? %>
+      <%= button_to t("admin.proxy_order.to_completed"), admin_event_proxy_order_path(@event), method: :patch, params: { proxy_order: { status: "completed" } }, class: "w-full bg-accent text-white px-4 py-2 rounded-md hover:bg-accent-hover font-bold text-xs" %>
+      <%= button_to t("admin.proxy_order.back_to_ordered"), admin_event_proxy_order_path(@event), method: :patch, params: { proxy_order: { status: "ordered" } }, data: { turbo_confirm: t("admin.proxy_order.back_to_ordered_confirm") }, class: "w-full px-4 py-2 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs" %>
+    <% elsif @proxy_order.completed? %>
+      <%= button_to t("admin.proxy_order.back_to_arrived"), admin_event_proxy_order_path(@event), method: :patch, params: { proxy_order: { status: "arrived" } }, data: { turbo_confirm: t("admin.proxy_order.back_to_arrived_confirm") }, class: "w-full px-4 py-2 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs" %>
+    <% end %>
   </div>
 </div>

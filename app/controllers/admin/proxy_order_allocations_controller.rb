@@ -10,7 +10,20 @@ class Admin::ProxyOrderAllocationsController < Admin::BaseController
       return
     end
 
-    @allocation = @item.proxy_order_allocations.build(allocation_params)
+    @allocation = @item.proxy_order_allocations.build(quantity: params.require(:proxy_order_allocation)[:quantity])
+    participant = find_or_build_participant
+
+    if participant.nil?
+      @allocation.errors.add(:proxy_order_participant, :blank)
+      return render_create_error
+    end
+
+    if participant.new_record? && !participant.save
+      participant.errors.full_messages.each { |m| @allocation.errors.add(:base, m) }
+      return render_create_error
+    end
+
+    @allocation.proxy_order_participant = participant
 
     if @allocation.save
       record_audit("proxy_order_allocation.create", target: @allocation)
@@ -101,5 +114,36 @@ class Admin::ProxyOrderAllocationsController < Admin::BaseController
 
   def allocation_params
     params.require(:proxy_order_allocation).permit(:proxy_order_participant_id, :quantity)
+  end
+
+  # カード明細の中の「ユーザーを追加（登録 / 自由入力）」は、参加者の作成と注文の追加を同時に行う。
+  # すでに参加者になっているユーザー・名前を選んだときは、その参加者を使い回す
+  def find_or_build_participant
+    attrs = params.require(:proxy_order_allocation)
+
+    if attrs[:proxy_order_participant_id].present?
+      @proxy_order.proxy_order_participants.find_by(id: attrs[:proxy_order_participant_id])
+    elsif attrs[:user_id].present?
+      @proxy_order.proxy_order_participants.find_by(user_id: attrs[:user_id]) ||
+        @proxy_order.proxy_order_participants.build(user_id: attrs[:user_id])
+    elsif attrs[:guest_name].present?
+      find_guest_participant(attrs[:guest_name]) ||
+        @proxy_order.proxy_order_participants.build(guest_name: attrs[:guest_name])
+    end
+  end
+
+  def find_guest_participant(guest_name)
+    normalized = ProxyOrderParticipant.normalize_name(guest_name)
+    @proxy_order.proxy_order_participants.where.not(guest_name: nil).find do |candidate|
+      ProxyOrderParticipant.normalize_name(candidate.guest_name) == normalized
+    end
+  end
+
+  def render_create_error
+    load_editor_state(open_item_ids: [ @item.id ])
+    respond_to do |format|
+      format.turbo_stream { render :create_error, status: :unprocessable_entity }
+      format.html { render "admin/proxy_orders/show", status: :unprocessable_entity }
+    end
   end
 end

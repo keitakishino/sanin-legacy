@@ -88,9 +88,9 @@ RSpec.describe "User Proxy Order View", type: :system do
       expect(page).to have_selector("#proxy_order_status [data-status='ordered']")
       # 現在のステータスだけが塗り潰しで強調される
       ordered_span = find("#proxy_order_status [data-status='ordered']")
-      expect(ordered_span["class"]).to include("bg-indigo-700")
+      expect(ordered_span["class"]).to include("bg-accent-soft")
       arrived_span = find("#proxy_order_status [data-status='arrived']")
-      expect(arrived_span["class"]).not_to include("bg-indigo-700")
+      expect(arrived_span["class"]).not_to include("bg-accent-soft")
     end
 
     it "has no form, input, select, textarea, or button elements" do

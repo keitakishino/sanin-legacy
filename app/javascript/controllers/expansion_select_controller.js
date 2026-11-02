@@ -35,7 +35,7 @@ export default class extends Controller {
 
     // Debounce API request by 300ms
     this.debounceTimer = setTimeout(() => {
-      this.frameTarget.src = `/expansions?q=${encodeURIComponent(query)}`
+      this.frameTarget.src = `/expansions?q=${encodeURIComponent(query)}&frame=${encodeURIComponent(this.frameTarget.id)}`
       this.frameTarget.style.display = "block"
     }, 300)
   }
