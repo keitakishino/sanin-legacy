@@ -424,4 +424,46 @@ RSpec.describe "Admin Proxy Order Participant Select", type: :system do
       expect(allocation.quantity).to eq(1)
     end
   end
+
+  describe "PC layout (Issue #384 C4)" do
+    it "displays candidate list within combobox container at PC width" do
+      scope = "#new_allocation_proxy_order_item_#{item.id}"
+      within scope do
+        input = find("input[role='combobox']")
+        input.set("buy")
+
+        list = find("ul[role='listbox']")
+        expect(list).to be_visible
+
+        list_rect = page.evaluate_script(
+          "document.querySelector('ul[role=\"listbox\"]').getBoundingClientRect()"
+        )
+
+        # Find the combobox container (parent of input)
+        combobox_container_rect = page.evaluate_script(
+          "document.querySelector('input[role=\"combobox\"]').closest('.relative').getBoundingClientRect()"
+        )
+
+        # List left and right should align with container
+        expect((list_rect["left"] - combobox_container_rect["left"]).abs).to be <= 1
+        expect((list_rect["right"] - combobox_container_rect["right"]).abs).to be <= 1
+      end
+    end
+
+    it "displays participant buttons without horizontal scroll at PC width" do
+      scope = "#new_allocation_proxy_order_item_#{item.id}"
+
+      buttons = find(scope).all("button[data-action='participant-select#pick']")
+      expect(buttons.length).to be >= 2
+
+      # Buttons should fit within scope (no horizontal scroll)
+      scope_rect = page.evaluate_script(
+        "document.querySelector('#{scope}').getBoundingClientRect()"
+      )
+
+      scroll_width = page.evaluate_script("document.querySelector('#{scope}').scrollWidth")
+      client_width = page.evaluate_script("document.querySelector('#{scope}').clientWidth")
+      expect(scroll_width).to be <= client_width + 1
+    end
+  end
 end
