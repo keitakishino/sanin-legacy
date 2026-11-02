@@ -1,34 +1,25 @@
-<div id="proxy_order_status" class="flex flex-wrap items-center gap-3 mb-8">
-  <span data-status="ordered" class="px-4 py-2 rounded-md text-sm <%= @proxy_order.status == 'ordered' ? 'bg-indigo-700 text-white font-bold' : 'bg-white border border-stone-200 text-stone-600' %>">
-    <%= t("activerecord.enums.proxy_order.status.ordered") %>
-  </span>
-  <span class="text-stone-400">→</span>
-  <span data-status="arrived" class="px-4 py-2 rounded-md text-sm <%= @proxy_order.status == 'arrived' ? 'bg-indigo-700 text-white font-bold' : 'bg-white border border-stone-200 text-stone-600' %>">
-    <%= t("activerecord.enums.proxy_order.status.arrived") %>
-  </span>
-  <span class="text-stone-400">→</span>
-  <span data-status="completed" class="px-4 py-2 rounded-md text-sm <%= @proxy_order.status == 'completed' ? 'bg-indigo-700 text-white font-bold' : 'bg-white border border-stone-200 text-stone-600' %>">
-    <%= t("activerecord.enums.proxy_order.status.completed") %>
-  </span>
-
-  <div class="ml-auto flex gap-2">
-    <% if @proxy_order.ordered? %>
-      <%= button_to t("admin.proxy_order.to_arrived"), admin_event_proxy_order_path(@event), method: :patch, params: { proxy_order: { status: "arrived" } }, class: "bg-indigo-700 text-white px-3 py-1.5 rounded hover:bg-indigo-800 font-bold text-xs" %>
-    <% elsif @proxy_order.arrived? %>
-      <%= button_to t("admin.proxy_order.to_completed"), admin_event_proxy_order_path(@event), method: :patch, params: { proxy_order: { status: "completed" } }, class: "bg-indigo-700 text-white px-3 py-1.5 rounded hover:bg-indigo-800 font-bold text-xs" %>
-      <%= button_to t("admin.proxy_order.back_to_ordered"), admin_event_proxy_order_path(@event), method: :patch, params: { proxy_order: { status: "ordered" } }, data: { turbo_confirm: t("admin.proxy_order.back_to_ordered_confirm") }, class: "px-3 py-1.5 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs" %>
-    <% elsif @proxy_order.completed? %>
-      <%= button_to t("admin.proxy_order.back_to_arrived"), admin_event_proxy_order_path(@event), method: :patch, params: { proxy_order: { status: "arrived" } }, data: { turbo_confirm: t("admin.proxy_order.back_to_arrived_confirm") }, class: "px-3 py-1.5 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs" %>
-    <% end %>
+<div id="proxy_order_status" class="flex flex-col items-start gap-2">
+  <div class="flex items-center gap-2">
+    <span data-status="ordered" class="text-xs font-bold px-3 py-1 rounded-full <%= @proxy_order.ordered? ? 'bg-accent-soft text-accent' : 'text-stone-500' %>">
+      <%= t("activerecord.enums.proxy_order.status.ordered") %>
+    </span>
+    <span class="text-stone-400 text-xs">→</span>
+    <span data-status="arrived" class="text-xs font-bold px-3 py-1 rounded-full <%= @proxy_order.arrived? ? 'bg-accent-soft text-accent' : 'text-stone-500' %>">
+      <%= t("activerecord.enums.proxy_order.status.arrived") %>
+    </span>
+    <span class="text-stone-400 text-xs">→</span>
+    <span data-status="completed" class="text-xs font-bold px-3 py-1 rounded-full <%= @proxy_order.completed? ? 'bg-accent-soft text-accent' : 'text-stone-500' %>">
+      <%= t("activerecord.enums.proxy_order.status.completed") %>
+    </span>
   </div>
+
+  <% if @transition_errors.present? %>
+    <div id="proxy_order_status_errors" role="alert" class="bg-danger-soft border border-red-300 text-danger rounded-md px-4 py-3 text-sm font-semibold leading-relaxed max-w-md">
+      <ul class="list-disc list-inside space-y-1">
+        <% @transition_errors.each do |error| %>
+          <li><%= error %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
 </div>
-
-<% if @transition_errors.present? %>
-  <div id="proxy_order_status_errors" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-    <ul class="list-disc list-inside space-y-1 text-red-700 text-sm">
-      <% @transition_errors.each do |error| %>
-        <li><%= error %></li>
-      <% end %>
-    </ul>
-  </div>
-<% end %>

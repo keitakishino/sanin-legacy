@@ -15,7 +15,7 @@ RSpec.describe "Admin Proxy Order Status", type: :system do
     before { visit admin_event_proxy_order_path(event) }
 
     it "shows rate error when transitioning without rate" do
-      click_button "到着へ"
+      click_button "到着にする"
       expect(page).to have_selector("#proxy_order_status_errors")
       expect(page).to have_content("ドル円レート")
       expect(page).to have_current_path(admin_event_proxy_order_path(event))
@@ -58,11 +58,9 @@ RSpec.describe "Admin Proxy Order Status", type: :system do
       hand_over_checkbox = find('input[type="checkbox"][name*="handed_over_at"]')
       expect(hand_over_checkbox).not_to be_checked
 
-      # check hand-over and update
+      # チェックするとその場で保存される（auto-submit）
       hand_over_checkbox.check
-      click_button "更新"
 
-      # verify handed_over_at is set
       expect(page).to have_content("参加者を更新しました")
       expect(page).to have_content("手渡し済み")
     end
@@ -80,7 +78,7 @@ RSpec.describe "Admin Proxy Order Status", type: :system do
     end
 
     it "shows error when hand-over not checked" do
-      click_button "完了へ"
+      click_button "完了にする"
       expect(page).to have_selector("#proxy_order_status_errors")
       expect(page).to have_content("手渡し")
       expect(page).to have_current_path(admin_event_proxy_order_path(event))
