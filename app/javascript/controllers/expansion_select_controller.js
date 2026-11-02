@@ -6,7 +6,8 @@ export default class extends Controller {
   connect() {
     this.debounceTimer = null
     this.hideDropdownTimer = null
-    this.frameTarget.addEventListener("turbo:before-frame-render", () => this.attachDropdownHandlers())
+    this.handleMouseDown = this.handleMouseDown.bind(this)
+    this.frameTarget.addEventListener("mousedown", this.handleMouseDown)
   }
 
   disconnect() {
@@ -16,6 +17,11 @@ export default class extends Controller {
     if (this.hideDropdownTimer) {
       clearTimeout(this.hideDropdownTimer)
     }
+    this.frameTarget.removeEventListener("mousedown", this.handleMouseDown)
+  }
+
+  handleMouseDown(event) {
+    event.preventDefault()
   }
 
   search(event) {
@@ -40,15 +46,6 @@ export default class extends Controller {
     }, 300)
   }
 
-  attachDropdownHandlers() {
-    this.frameTarget.querySelectorAll("[data-expansion-code]").forEach(item => {
-      item.addEventListener("click", (e) => {
-        e.stopPropagation()
-        this.selectExpansion(e)
-      })
-    })
-  }
-
   selectExpansion(event) {
     event.stopPropagation()
     const item = event.currentTarget
@@ -59,6 +56,11 @@ export default class extends Controller {
     this.inputTarget.value = expansionCode
     this.frameTarget.src = ""
     this.frameTarget.style.display = "none"
+    this.selectTarget.dispatchEvent(new Event("change", { bubbles: true }))
+  }
+
+  stopChange(event) {
+    event.stopPropagation()
   }
 
   hideDropdown() {
