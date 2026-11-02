@@ -39,6 +39,10 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 # Rails is upgraded to a version compatible with json 3.x.
 gem "json", "~> 3.1"
 
+# 日本語ロケールの日付・曜日・月名・エラーメッセージを供給する [https://github.com/svenfuchs/rails-i18n]
+# これが無いと ja.date.formats.long などが未定義になり、本番（fallbacks = true）では l() が例外を投げる
+gem "rails-i18n"
+
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
