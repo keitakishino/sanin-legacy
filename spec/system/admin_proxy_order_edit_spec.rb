@@ -158,10 +158,18 @@ RSpec.describe "Admin Proxy Order Edit", type: :system do
     it "prevents a guest name that matches a registered username" do
       item = add_card("Test Card")
 
-      # addAsGuest option is still selectable in combobox, but server validation catches it
-      add_user(item, guest_name: "　ＴＡＮＡＫＡ　", quantity: "1")
+      within "#new_allocation_proxy_order_item_#{item.id}" do
+        find("input[role='combobox']").set("　ＴＡＮＡＫＡ　")
 
-      expect(page).to have_content("自由入力名 は登録ユーザー名と同じため使用できません")
+        # ゲスト行が disabled で、理由が表示される
+        guest_option = find("[role='option'][aria-disabled='true']", text: "『ＴＡＮＡＫＡ』をゲストとして追加")
+        expect(guest_option).to have_selector("[data-role='disabled-reason']", text: "登録ユーザー Tanaka と同じ名前のため、ゲストにはできません")
+
+        # ゲスト行をクリックしても追加ボタンは enabled にならない
+        guest_option.click
+        expect(page).to have_button("追加", disabled: true)
+      end
+
       expect(ProxyOrderParticipant.count).to eq(0)
       expect(ProxyOrderAllocation.count).to eq(0)
     end
