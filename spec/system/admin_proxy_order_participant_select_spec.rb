@@ -273,4 +273,155 @@ RSpec.describe "Admin Proxy Order Participant Select", type: :system do
       end
     end
   end
+
+  describe "Guest name conflicts with username" do
+    it "disables guest option and shows reason when input matches registered username" do
+      scope = "#new_allocation_proxy_order_item_#{item.id}"
+      within scope do
+        find("input[role='combobox']").set("buyer")
+
+        # ゲスト行が disabled で、理由が表示される
+        guest_option = find("[role='option'][aria-disabled='true']", text: "『buyer』をゲストとして追加")
+        expect(guest_option).to be_present
+        expect(guest_option).to have_selector("[data-role='disabled-reason']", text: "登録ユーザー buyer と同じ名前のため、ゲストにはできません")
+
+        # 登録ユーザーの buyer 行が出現して、disabled でない
+        # li の完全テキストは "buyer登録" になるので、部分マッチで検索
+        buyer_option = find("[role='option']", text: /\Abuyer/)
+        expect(buyer_option[:"aria-disabled"]).to be_nil
+
+        # 登録ユーザー行をクリックするとタグが表示され、hiddenUserId に値が入り、追加ボタンが enabled
+        buyer_option.click
+        expect(page).to have_selector("[data-participant-select-target='tag']:not([hidden])", visible: false)
+        expect(find("[data-participant-select-target='hiddenUserId']", visible: false).value).to eq(buyer.id.to_s)
+        expect(page).to have_button("追加", disabled: false)
+      end
+    end
+  end
+
+  describe "Guest name conflicts with existing guest" do
+    it "disables guest option and shows reason when input matches existing guest" do
+      scope = "#new_allocation_proxy_order_item_#{item.id}"
+      within scope do
+        find("input[role='combobox']").set("Taka Guest")
+
+        # ゲスト行が disabled で、理由が表示される
+        guest_option = find("[role='option'][aria-disabled='true']", text: "『Taka Guest』をゲストとして追加")
+        expect(guest_option).to be_present
+        expect(guest_option).to have_selector("[data-role='disabled-reason']", text: "この注文にすでに同じ名前のゲストがいます")
+      end
+    end
+  end
+
+  describe "Conflict detection is normalized" do
+    it "detects conflicts with full-width uppercase username" do
+      scope = "#new_allocation_proxy_order_item_#{item.id}"
+      within scope do
+        find("input[role='combobox']").set("ＢＵＹＥＲ")
+
+        # ゲスト行が disabled で、理由に「登録ユーザー buyer」が含まれる
+        guest_option = find("[role='option'][aria-disabled='true']", text: "『ＢＵＹＥＲ』をゲストとして追加")
+        reason = guest_option.find("[data-role='disabled-reason']")
+        expect(reason).to have_text("登録ユーザー buyer")
+      end
+    end
+
+    it "detects conflicts with full-width lowercase username" do
+      scope = "#new_allocation_proxy_order_item_#{item.id}"
+      within scope do
+        find("input[role='combobox']").set("ｔａｋａｇｉ")
+
+        # ゲスト行が disabled で、理由に「登録ユーザー Takagi」が含まれる
+        guest_option = find("[role='option'][aria-disabled='true']", text: "『ｔａｋａｇｉ』をゲストとして追加")
+        reason = guest_option.find("[data-role='disabled-reason']")
+        expect(reason).to have_text("登録ユーザー Takagi")
+      end
+    end
+
+    it "detects conflicts with full-width space in guest name" do
+      scope = "#new_allocation_proxy_order_item_#{item.id}"
+      within scope do
+        find("input[role='combobox']").set("ＴＡＫＡ　ＧＵＥＳＴ")
+
+        # ゲスト行が disabled で、理由に「この注文にすでに同じ名前のゲストがいます」が含まれる
+        guest_option = find("[role='option'][aria-disabled='true']", text: "『ＴＡＫＡ　ＧＵＥＳＴ』をゲストとして追加")
+        reason = guest_option.find("[data-role='disabled-reason']")
+        expect(reason).to have_text("この注文にすでに同じ名前のゲストがいます")
+      end
+    end
+
+    it "allows guest name when no conflict exists" do
+      scope = "#new_allocation_proxy_order_item_#{item.id}"
+      within scope do
+        find("input[role='combobox']").set("Brand New")
+
+        # ゲスト行が enabled で、aria-disabled が付かない
+        guest_option = find("[role='option']", text: "『Brand New』をゲストとして追加")
+        expect(guest_option[:"aria-disabled"]).to be_nil
+      end
+    end
+  end
+
+  describe "Basic flow still works after conflict detection" do
+    it "can select registered user, enter quantity, and create allocation (C4 unchanged)" do
+      scope = "#new_allocation_proxy_order_item_#{item.id}"
+      within scope do
+        find("input[role='combobox']").set("buy")
+        find("[role='option']", text: "buyer", match: :first).click
+        fill_in "proxy_order_allocation[quantity]", with: "2"
+        click_button "追加"
+      end
+
+      expect(page).to have_content("注文を追加しました")
+
+      buyer_participant = proxy_order.proxy_order_participants.find_by(user: buyer)
+      expect(buyer_participant).not_to be_nil
+      allocation = ProxyOrderAllocation.find_by(proxy_order_participant: buyer_participant, proxy_order_item: item)
+      expect(allocation).not_to be_nil
+      expect(allocation.quantity).to eq(2)
+    end
+
+    it "can click participant button, enter quantity, and create allocation (C4 unchanged)" do
+      scope = "#new_allocation_proxy_order_item_#{item.id}"
+      within scope do
+        find("button", text: "takahashi").click
+
+        # タグが表示される
+        expect(page).to have_selector("[data-participant-select-target='tag']:not([hidden])")
+
+        # 追加ボタンが enabled
+        expect(page).to have_button("追加", disabled: false)
+
+        # 数量を入力して追加
+        fill_in "proxy_order_allocation[quantity]", with: "1"
+        click_button "追加"
+      end
+
+      expect(page).to have_content("注文を追加しました")
+
+      # 既存の p_taka に新しい割り当てが作られた
+      expect(ProxyOrderParticipant.count).to eq(3)
+      allocation = ProxyOrderAllocation.find_by(proxy_order_participant: p_taka, proxy_order_item: item)
+      expect(allocation).not_to be_nil
+      expect(allocation.quantity).to eq(1)
+    end
+
+    it "can type non-conflicting name, select as guest, and create guest allocation (C5 unchanged)" do
+      scope = "#new_allocation_proxy_order_item_#{item.id}"
+      within scope do
+        find("input[role='combobox']").set("Brand New")
+        find("[role='option']", text: "『Brand New』をゲストとして追加").click
+        fill_in "proxy_order_allocation[quantity]", with: "1"
+        click_button "追加"
+      end
+
+      expect(page).to have_content("注文を追加しました")
+
+      guest_participant = proxy_order.proxy_order_participants.find_by(guest_name: "Brand New")
+      expect(guest_participant).not_to be_nil
+      allocation = ProxyOrderAllocation.find_by(proxy_order_participant: guest_participant, proxy_order_item: item)
+      expect(allocation).not_to be_nil
+      expect(allocation.quantity).to eq(1)
+    end
+  end
 end

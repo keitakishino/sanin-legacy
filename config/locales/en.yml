@@ -194,6 +194,8 @@ en:
         add_as_guest: "Add \"%{name}\" as a guest"
         no_match: "No matching registered users"
         already_in_item: "Already in this card"
+        conflict_with_username: "Same name as registered user %{name}; cannot add as a guest"
+        conflict_with_guest: "A guest with the same name is already in this order"
         clear: "Clear selection"
         kind_registered: "Registered"
         kind_guest: "Guest"
