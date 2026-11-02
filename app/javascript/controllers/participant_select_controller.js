@@ -124,7 +124,7 @@ export default class extends Controller {
     const li = document.createElement("li")
     li.setAttribute("role", "option")
     li.id = `${this.listTarget.id}-opt-${idx}`
-    li.className = "flex items-center justify-between gap-2 min-h-11 px-3 py-2 cursor-pointer hover:bg-stone-50"
+    li.className = "flex flex-wrap items-center justify-between gap-x-2 gap-y-1 min-h-11 px-3 py-2 cursor-pointer hover:bg-stone-50"
 
     let disabledReason = null
     if (candidate.kind === "participant" && candidate.assigned_item_ids.includes(this.itemIdValue)) {
@@ -137,11 +137,12 @@ export default class extends Controller {
 
     if (isDisabled) {
       li.setAttribute("aria-disabled", "true")
-      li.className = "flex items-center justify-between gap-2 min-h-11 px-3 py-2 text-stone-400 cursor-not-allowed"
+      li.className = "flex flex-wrap items-center justify-between gap-x-2 gap-y-1 min-h-11 px-3 py-2 text-stone-400 cursor-not-allowed"
     }
 
     // 左側：名前
     const label = document.createElement("span")
+    label.className = "min-w-0 break-all"
     let displayText
     if (candidate.kind === "guest") {
       displayText = this.labelsValue.addAsGuest.replace("%{name}", candidate.label)
@@ -153,12 +154,12 @@ export default class extends Controller {
 
     // 右側：種別ラベルと理由
     const rightContainer = document.createElement("span")
-    rightContainer.className = "flex items-center gap-2"
+    rightContainer.className = "ml-auto flex items-center gap-2 min-w-0"
 
     if (disabledReason) {
       const reason = document.createElement("span")
       reason.setAttribute("data-role", "disabled-reason")
-      reason.className = "text-[10px] text-stone-400"
+      reason.className = "text-[10px] text-stone-400 break-all"
       reason.textContent = disabledReason
       rightContainer.appendChild(reason)
     }
