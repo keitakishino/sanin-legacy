@@ -172,6 +172,18 @@ describe AuditLog do
         log = AuditLog.where(action: "event.create").last
         expect(log.status_code).to eq(302)
       end
+
+      it "record! で user_id を指定すると保存される" do
+        AuditLog.record!(
+          user_id: 42,
+          action: "system.error",
+          result: :failure,
+          status_code: 500
+        )
+
+        log = AuditLog.where(action: "system.error").last
+        expect(log.user_id).to eq(42)
+      end
     end
 
     it "user_id が nil の場合の出力" do
@@ -201,6 +213,164 @@ describe AuditLog do
 
       expect(AuditLog.count).to eq(0)
       expect(Event.where(title: "after record").count).to eq(1)
+    end
+  end
+
+  describe ".exception_details" do
+    it "formats message with line limit of 300 characters per line" do
+      # 各行 300 文字以上で複数行のメッセージ
+      msg = ("a" * 350) + "\n" + ("b" * 350)
+      exception = RuntimeError.new(msg)
+
+      details = AuditLog.exception_details(exception, path: "/test", http_method: "GET")
+
+      # 各行が 300 文字で切られるため、1行目は "a" * 300 + 省略記号
+      lines = details["message"].split("\n")
+      expect(lines[0].length).to be <= AuditLog::EXCEPTION_MESSAGE_LINE_LIMIT + AuditLog::TRUNCATION_MARK.length
+    end
+
+    it "limits total message length to 1000 characters" do
+      # 複数行で1000文字を超えるメッセージ
+      # 各行が400文字だと300文字に切られる（EXCEPTION_MESSAGE_LINE_LIMIT）
+      # 4行×300文字 + 3つの改行 = 1203文字なので、1000文字で truncation される
+      msg = ("x" * 400 + "\n") * 4
+      exception = RuntimeError.new(msg)
+
+      details = AuditLog.exception_details(exception, path: "/test", http_method: "GET")
+
+      expect(details["message"].length).to be <= AuditLog::EXCEPTION_MESSAGE_LIMIT + AuditLog::TRUNCATION_MARK.length
+      expect(details["message"]).to end_with(AuditLog::TRUNCATION_MARK)
+    end
+
+    it "limits backtrace to 200 lines" do
+      exception = RuntimeError.new("boom")
+      exception.set_backtrace(Array.new(500) { |i| "app/x.rb:#{i}" })
+
+      details = AuditLog.exception_details(exception, path: "/test", http_method: "GET")
+
+      backtrace_lines = details["backtrace"].split("\n")
+      # 200行 + TRUNCATION_MARK
+      expect(backtrace_lines.length).to be <= AuditLog::BACKTRACE_LINES_LIMIT + 1
+      expect(details["backtrace"]).to include(AuditLog::TRUNCATION_MARK)
+    end
+
+    it "limits total backtrace characters to 30000" do
+      exception = RuntimeError.new("boom")
+      # 200行 x 100文字 = 20000文字のバックトレース
+      exception.set_backtrace(Array.new(200) { |i| "a" * 100 })
+
+      # cause を追加
+      cause = RuntimeError.new("cause")
+      cause.set_backtrace(Array.new(200) { |i| "b" * 100 })
+      allow(exception).to receive(:cause).and_return(cause)
+
+      details = AuditLog.exception_details(exception, path: "/test", http_method: "GET")
+
+      total_backtrace_chars = details["backtrace"].bytesize
+      details["causes"].each { |c| total_backtrace_chars += c["backtrace"].bytesize }
+
+      # 30000文字以内
+      expect(total_backtrace_chars).to be <= AuditLog::BACKTRACE_CHARS_LIMIT + (AuditLog::TRUNCATION_MARK.bytesize * 2)
+    end
+
+    it "follows cause chain up to 5 levels" do
+      e1 = RuntimeError.new("e1")
+      e2 = RuntimeError.new("e2")
+      e3 = RuntimeError.new("e3")
+      e4 = RuntimeError.new("e4")
+      e5 = RuntimeError.new("e5")
+      e6 = RuntimeError.new("e6")
+      e7 = RuntimeError.new("e7")
+
+      allow(e1).to receive(:cause).and_return(e2)
+      allow(e2).to receive(:cause).and_return(e3)
+      allow(e3).to receive(:cause).and_return(e4)
+      allow(e4).to receive(:cause).and_return(e5)
+      allow(e5).to receive(:cause).and_return(e6)
+      allow(e6).to receive(:cause).and_return(e7)
+
+      details = AuditLog.exception_details(e1, path: "/test", http_method: "GET")
+
+      expect(details["causes"].length).to eq(5)
+      expect(details["causes"].map { |c| c["message"] }).to eq([ "e2", "e3", "e4", "e5", "e6" ])
+    end
+
+    it "detects circular cause references and stops" do
+      e1 = RuntimeError.new("e1")
+      e2 = RuntimeError.new("e2")
+      e3 = RuntimeError.new("e3")
+
+      # e1 -> e2 -> e3 -> e2（循環）
+      allow(e1).to receive(:cause).and_return(e2)
+      allow(e2).to receive(:cause).and_return(e3)
+      allow(e3).to receive(:cause).and_return(e2)
+
+      details = AuditLog.exception_details(e1, path: "/test", http_method: "GET")
+
+      # e2, e3, e2（重複で止まる）→ 最終的に 2 つ
+      expect(details["causes"].length).to eq(2)
+      expect(details["causes"][0]["message"]).to eq("e2")
+      expect(details["causes"][1]["message"]).to eq("e3")
+    end
+
+    it "handles nil exception without raising" do
+      details = AuditLog.exception_details(nil, path: "/test", http_method: "GET")
+
+      expect(details["reason"]).to eq("unknown error")
+      expect(details["path"]).to eq("/test")
+      expect(details["http_method"]).to eq("GET")
+    end
+
+    it "includes reason with class and first message line" do
+      exception = RuntimeError.new("boom\nsecond line")
+
+      details = AuditLog.exception_details(exception, path: "/test", http_method: "GET")
+
+      expect(details["reason"]).to eq("RuntimeError: boom")
+    end
+
+    it "preserves path and http_method parameters" do
+      exception = RuntimeError.new("boom")
+
+      details = AuditLog.exception_details(exception, path: "/admin/events?token=secret", http_method: "POST")
+
+      expect(details["path"]).to eq("/admin/events?token=secret")
+      expect(details["http_method"]).to eq("POST")
+    end
+  end
+
+  describe "#to_line with backtrace" do
+    it "outputs only reason for details with backtrace" do
+      log = create(:audit_log, details: {
+        "reason" => "RuntimeError: boom",
+        "error_class" => "RuntimeError",
+        "backtrace" => "app/foo.rb:1\napp/bar.rb:2",
+        "causes" => []
+      })
+
+      line = log.to_line
+      expect(line).to include("理由: RuntimeError: boom")
+      expect(line).not_to include("app/foo.rb")
+      expect(line).not_to include("details=")
+    end
+
+    it "does not output backtrace when error_class is reason" do
+      log = create(:audit_log, details: {
+        "error_class" => "RuntimeError",
+        "backtrace" => "app/foo.rb:1"
+      })
+
+      line = log.to_line
+      expect(line).not_to include("app/foo.rb")
+      expect(line).not_to include("details=")
+      expect(line).to include("理由: RuntimeError")
+    end
+
+    it "outputs details as JSON when no backtrace and no reason" do
+      log = create(:audit_log, details: { "key" => "value" })
+
+      line = log.to_line
+      expect(line).to include("details={")
     end
   end
 end

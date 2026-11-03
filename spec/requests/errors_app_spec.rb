@@ -138,5 +138,17 @@ RSpec.describe "ErrorsApp (config.exceptions_app)", type: :request do
       # Rails の failsafe 文言を含まない
       expect(response.body).not_to include("If you are the administrator of this website")
     end
+
+    it "returns static 500 page when internal_server_error render fails" do
+      allow_any_instance_of(EventsController).to receive(:index).and_raise(RuntimeError, "original error")
+      allow_any_instance_of(ErrorsController).to receive(:render).and_raise(RuntimeError, "render failed")
+
+      get "/events"
+
+      expect(response).to have_http_status(:internal_server_error)
+      expect(response.content_type).to include("text/html")
+      expect(response.body).to eq(File.read(Rails.public_path.join("500.html")))
+      expect(response.body).not_to include("If you are the administrator")
+    end
   end
 end

@@ -541,6 +541,7 @@ ja:
         proxy_order_price_line_update_lost: "価格行ロスト入力"
         proxy_order_allocation_update_lost: "ユーザー別ロスト入力"
         proxy_order_participant_hand_over: "手渡しチェック"
+        system_error: "サーバーエラー"
   errors:
     unauthorized:
       title: "認証が必要です"
@@ -551,4 +552,7 @@ ja:
     not_found:
       title: "ページが見つかりません"
       message: "お探しのページは見つかりませんでした"
+    internal_server_error:
+      title: "サーバーエラーが発生しました"
+      message: "しばらくしてからもう一度お試しください"
     button: "ホームに戻る"
