@@ -20,7 +20,7 @@ RSpec.describe "Hamburger Menu", type: :system do
       expect(nav).to be_visible
       expect(nav).to have_link("ダッシュボード")
       expect(nav).to have_link("イベント")
-      expect(nav).to have_link("トレード履歴")
+      expect(nav).to have_link("履歴", exact_text: true)
     end
 
     it "ドロワーメニューが非表示である" do
@@ -114,7 +114,7 @@ RSpec.describe "Hamburger Menu", type: :system do
 
         expect(drawer).to have_link("ダッシュボード")
         expect(drawer).to have_link("イベント")
-        expect(drawer).to have_link("トレード履歴")
+        expect(drawer).to have_link("履歴", exact_text: true)
         expect(drawer).to have_link("マイページ")
         expect(drawer).to have_button("Sign Out")
         expect(drawer).to have_content("testuser")

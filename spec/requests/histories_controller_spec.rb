@@ -283,6 +283,76 @@ RSpec.describe "HistoriesController", type: :request do
           expect(response.body).to include("完了またはキャンセルされたトレードはありません")
         end
       end
+
+      context "history tabs" do
+        it "displays navigation with history tabs" do
+          get "/histories"
+
+          html = Nokogiri::HTML(response.body)
+          nav = html.at('nav[aria-label="履歴の種類"]')
+          expect(nav).to be_present
+        end
+
+        it "displays trades and proxy orders tabs with correct links" do
+          get "/histories"
+
+          html = Nokogiri::HTML(response.body)
+          nav = html.at('nav[aria-label="履歴の種類"]')
+          trades_link = nav.at('a[href="/histories"]')
+          proxy_orders_link = nav.at('a[href="/histories/proxy_orders"]')
+
+          expect(trades_link).to be_present
+          expect(trades_link.text.strip).to eq("トレード")
+          expect(proxy_orders_link).to be_present
+          expect(proxy_orders_link.text.strip).to eq("代理通販")
+        end
+
+        it "highlights trades tab as active" do
+          get "/histories"
+
+          html = Nokogiri::HTML(response.body)
+          nav = html.at('nav[aria-label="履歴の種類"]')
+          trades_link = nav.at('a[href="/histories"]')
+
+          expect(trades_link["aria-current"]).to eq("page")
+          expect(trades_link["class"]).to include("border-accent")
+          expect(trades_link["class"]).to include("text-accent")
+        end
+
+        it "does not highlight proxy orders tab as active" do
+          get "/histories"
+
+          html = Nokogiri::HTML(response.body)
+          nav = html.at('nav[aria-label="履歴の種類"]')
+          proxy_orders_link = nav.at('a[href="/histories/proxy_orders"]')
+
+          expect(proxy_orders_link["aria-current"]).to be_nil
+          expect(proxy_orders_link["class"]).to include("border-transparent")
+        end
+      end
+
+      context "header navigation" do
+        it "displays history link with correct text in header" do
+          get "/histories"
+
+          html = Nokogiri::HTML(response.body)
+          header_links = html.css('header a[href="/histories"]')
+          link_texts = header_links.map(&:text).map(&:strip)
+
+          expect(link_texts.any? { |text| text == "履歴" }).to be true
+        end
+
+        it "highlights history link in desktop header when on histories page" do
+          get "/histories"
+
+          html = Nokogiri::HTML(response.body)
+          desktop_nav = html.at('nav:not([data-hamburger-menu-target])')
+          history_link = desktop_nav&.at('a[href="/histories"]')
+
+          expect(history_link).to be_present
+          expect(history_link["class"]).to include("text-accent")
+        end
+      end
     end
   end
 
@@ -541,6 +611,85 @@ RSpec.describe "HistoriesController", type: :request do
 
           expect(response.body.scan(/<tr id="history_proxy_order_\d+"/).count).to eq(10)
           expect(queries_for_ten).to eq(queries_for_three)
+        end
+      end
+
+      context "history tabs" do
+        it "displays page title for proxy orders" do
+          get "/histories/proxy_orders"
+
+          expect(response.body).to include("通販履歴")
+        end
+
+        it "displays navigation with history tabs" do
+          get "/histories/proxy_orders"
+
+          html = Nokogiri::HTML(response.body)
+          nav = html.at('nav[aria-label="履歴の種類"]')
+          expect(nav).to be_present
+        end
+
+        it "displays trades and proxy orders tabs with correct links" do
+          get "/histories/proxy_orders"
+
+          html = Nokogiri::HTML(response.body)
+          nav = html.at('nav[aria-label="履歴の種類"]')
+          trades_link = nav.at('a[href="/histories"]')
+          proxy_orders_link = nav.at('a[href="/histories/proxy_orders"]')
+
+          expect(trades_link).to be_present
+          expect(trades_link.text.strip).to eq("トレード")
+          expect(proxy_orders_link).to be_present
+          expect(proxy_orders_link.text.strip).to eq("代理通販")
+        end
+
+        it "highlights proxy orders tab as active" do
+          get "/histories/proxy_orders"
+
+          html = Nokogiri::HTML(response.body)
+          nav = html.at('nav[aria-label="履歴の種類"]')
+          proxy_orders_link = nav.at('a[href="/histories/proxy_orders"]')
+
+          expect(proxy_orders_link["aria-current"]).to eq("page")
+          expect(proxy_orders_link["class"]).to include("border-accent")
+          expect(proxy_orders_link["class"]).to include("text-accent")
+        end
+
+        it "does not highlight trades tab as active" do
+          get "/histories/proxy_orders"
+
+          html = Nokogiri::HTML(response.body)
+          nav = html.at('nav[aria-label="履歴の種類"]')
+          trades_link = nav.at('a[href="/histories"]')
+
+          expect(trades_link["aria-current"]).to be_nil
+          expect(trades_link["class"]).to include("border-transparent")
+        end
+      end
+
+      context "header navigation" do
+        it "displays history link with correct text in header" do
+          get "/histories/proxy_orders"
+
+          html = Nokogiri::HTML(response.body)
+          header_links = html.css('header a[href="/histories"]')
+          link_texts = header_links.map(&:text).map(&:strip)
+
+          expect(link_texts.any? { |text| text == "履歴" }).to be true
+        end
+
+        it "highlights history link in desktop header when on proxy orders page" do
+          get "/histories/proxy_orders"
+
+          html = Nokogiri::HTML(response.body)
+          desktop_nav = html.at('nav:not([data-hamburger-menu-target])')
+          history_link = desktop_nav&.at('a[href="/histories"]')
+
+          expect(history_link).to be_present
+          # Verify text-accent is present as a complete class, not just in "hover:text-accent"
+          classes = history_link["class"].split
+          expect(classes).to include("text-accent")
+          expect(classes).not_to include("text-stone-800")
         end
       end
     end

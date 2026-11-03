@@ -39,6 +39,11 @@ en:
     event_ended: "This event has ended"
     not_trade_event: "This event has no trades"
   histories:
+    title: "History"
+    tabs:
+      label: "History type"
+      trades: "Trades"
+      proxy_orders: "Proxy Orders"
     proxy_orders:
       title: "Proxy Order History"
       empty: "There are no completed proxy orders"
