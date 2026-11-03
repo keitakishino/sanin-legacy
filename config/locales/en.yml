@@ -313,6 +313,13 @@ en:
       audit_logs:
         actions:
           system_error: "Server error"
+        server_error:
+          error_class: "Exception class"
+          message: "Message"
+          backtrace: "Backtrace"
+          cause: "Cause %{number}"
+          path: "Path"
+          http_method: "HTTP method"
   errors:
     internal_server_error:
       title: "A server error occurred"

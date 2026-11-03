@@ -542,6 +542,13 @@ ja:
         proxy_order_allocation_update_lost: "ユーザー別ロスト入力"
         proxy_order_participant_hand_over: "手渡しチェック"
         system_error: "サーバーエラー"
+      server_error:
+        error_class: "例外クラス"
+        message: "メッセージ"
+        backtrace: "バックトレース"
+        cause: "原因%{number}"
+        path: "パス"
+        http_method: "HTTPメソッド"
   errors:
     unauthorized:
       title: "認証が必要です"

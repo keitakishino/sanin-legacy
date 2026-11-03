@@ -52,6 +52,23 @@ def wait_for_grid(url)
   raise "Selenium Grid at #{url} did not become ready within #{max_retries} seconds"
 end
 
+require "capybara/selenium/node"
+require "capybara/selenium/nodes/chrome_node"
+
+module DetachedNodeAsStaleElement
+  DETACHED_NODE_MESSAGE = "Node with given id does not belong to the document".freeze
+
+  def visible?
+    super
+  rescue ::Selenium::WebDriver::Error::UnknownError => e
+    raise unless e.message.include?(DETACHED_NODE_MESSAGE)
+
+    raise ::Selenium::WebDriver::Error::StaleElementReferenceError, e.message
+  end
+end
+
+Capybara::Selenium::ChromeNode.prepend(DetachedNodeAsStaleElement)
+
 Capybara.register_driver :chrome_headless do |app|
   if ENV["SELENIUM_REMOTE_URL"]
     wait_for_grid(ENV["SELENIUM_REMOTE_URL"])

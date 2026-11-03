@@ -97,15 +97,36 @@
               <% details_text = if log.details.present? && log.details.is_a?(Hash)
                 log.details['reason'].presence || log.details.to_json
               end %>
-              <td class="hidden md:table-cell px-6 py-4 text-sm" title="<%= h(details_text) %>">
-                <% if log.details.present? && log.details.is_a?(Hash) %>
-                  <% if log.details['reason'] %>
-                    <%= truncate(log.details['reason'], length: 60) %>
-                  <% else %>
-                    <%= truncate(log.details.to_json, length: 60) %>
-                  <% end %>
+              <% server_error = log.details.is_a?(Hash) && log.details.key?("backtrace") %>
+              <td class="hidden md:table-cell px-6 py-4 text-sm" title="<%= server_error ? h(log.details["reason"].presence || log.details["error_class"].to_s) : h(details_text) %>">
+                <% if server_error %>
+                  <details class="audit-log-server-error group">
+                    <summary class="cursor-pointer text-red-700 hover:underline"><%= truncate(log.details["reason"].presence || log.details["error_class"].to_s, length: 60) %></summary>
+                    <div class="mt-3 space-y-4 max-w-2xl">
+                      <%= render "exception_detail", heading: nil, error_class: log.details["error_class"], message: log.details["message"], backtrace: log.details["backtrace"] %>
+                      <% Array(log.details["causes"]).each_with_index do |cause, index| %>
+                        <% if cause.is_a?(Hash) %>
+                          <%= render "exception_detail", heading: t("admin.audit_logs.server_error.cause", number: index + 1), error_class: cause["error_class"], message: cause["message"], backtrace: cause["backtrace"] %>
+                        <% end %>
+                      <% end %>
+                      <dl class="text-xs text-stone-800 space-y-1">
+                        <dt class="font-bold text-stone-500"><%= t("admin.audit_logs.server_error.path") %></dt>
+                        <dd class="font-mono break-all"><%= log.details["path"] || "－" %></dd>
+                        <dt class="font-bold text-stone-500"><%= t("admin.audit_logs.server_error.http_method") %></dt>
+                        <dd class="font-mono break-all"><%= log.details["http_method"] || "－" %></dd>
+                      </dl>
+                    </div>
+                  </details>
                 <% else %>
-                  －
+                  <% if log.details.present? && log.details.is_a?(Hash) %>
+                    <% if log.details['reason'] %>
+                      <%= truncate(log.details['reason'], length: 60) %>
+                    <% else %>
+                      <%= truncate(log.details.to_json, length: 60) %>
+                    <% end %>
+                  <% else %>
+                    －
+                  <% end %>
                 <% end %>
               </td>
               <td class="hidden md:table-cell px-6 py-4 text-sm font-mono text-xs"><%= log.request_id || "－" %></td>
