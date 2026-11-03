@@ -23,6 +23,13 @@ RSpec.describe "admin.users の訳" do
       expect(I18n.exists?("admin.users.guest_link.success", :ja)).to be true
       expect(I18n.exists?("admin.users.guest_link.more_orders", :ja)).to be true
       expect(I18n.exists?("admin.users.guest_link.not_selectable", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.linked_title", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.linked_empty", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.column_action", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_button", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_modal_title", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_confirm", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_submit", :ja)).to be true
     end
   end
 
@@ -45,6 +52,13 @@ RSpec.describe "admin.users の訳" do
       expect(I18n.exists?("admin.users.guest_link.success", :en)).to be true
       expect(I18n.exists?("admin.users.guest_link.more_orders", :en)).to be true
       expect(I18n.exists?("admin.users.guest_link.not_selectable", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.linked_title", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.linked_empty", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.column_action", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_button", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_modal_title", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_confirm", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_submit", :en)).to be true
     end
   end
 

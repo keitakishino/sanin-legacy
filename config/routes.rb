@@ -58,6 +58,7 @@ Rails.application.routes.draw do
     resources :invitations, only: [ :index, :create ]
     resources :users, only: %i[ index show ] do
       resource :guest_link, only: %i[ new create ], controller: "user_guest_links"
+      resource :guest_unlink, only: %i[ new create ], controller: "user_guest_unlinks"
     end
     resources :events, only: [ :index, :new, :create, :edit, :update, :destroy ] do
       resources :trades, only: [ :show, :update ]

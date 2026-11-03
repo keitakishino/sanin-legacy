@@ -1,0 +1,47 @@
+<turbo-frame id="guest_link_modal">
+  <div class="fixed inset-0 bg-black/55 flex items-center justify-center p-4 z-50">
+    <div class="bg-white border border-stone-200 rounded-lg max-w-lg w-full flex flex-col">
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-stone-200 flex items-center justify-between">
+        <h2 class="text-xl font-bold text-stone-800"><%= t("admin.users.guest_link.unlink_modal_title") %></h2>
+        <button type="button" aria-label="<%= t("admin.users.guest_link.close") %>" onclick="document.getElementById('guest_link_modal').innerHTML = ''" class="text-stone-400 hover:text-stone-600 focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Error box -->
+      <% if @errors.present? %>
+        <div id="guest_unlink_errors" class="px-6 py-4 bg-red-50 border-b border-red-200">
+          <ul class="list-disc list-inside space-y-1 text-red-700 text-sm">
+            <% @errors.each do |error| %>
+              <li><%= error %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <!-- Confirmation text -->
+      <% if @group.present? %>
+        <p id="guest_unlink_confirm" class="px-6 py-4 text-sm text-stone-700">
+          <%= t("admin.users.guest_link.unlink_confirm", name: @group.guest_names.join(" / "), count: @group.count, username: @user.username) %>
+        </p>
+      <% end %>
+
+      <!-- Footer -->
+      <div class="px-6 py-4 border-t border-stone-200 flex justify-end gap-2">
+        <button type="button" onclick="document.getElementById('guest_link_modal').innerHTML = ''" class="px-3 py-1.5 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs">
+          <%= t("admin.users.guest_link.cancel") %>
+        </button>
+
+        <% if @group.present? %>
+          <%= form_with url: admin_user_guest_unlink_path(@user), method: :post, id: "guest_unlink_form", local: true do |f| %>
+            <%= hidden_field_tag :name_key, @name_key %>
+            <%= submit_tag t("admin.users.guest_link.unlink_submit"), id: "guest_unlink_submit", class: "px-3 py-1.5 bg-white text-red-700 border border-red-300 rounded-md hover:bg-red-50 font-bold text-xs" %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</turbo-frame>

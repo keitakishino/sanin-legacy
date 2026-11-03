@@ -5,6 +5,8 @@ class GuestParticipantUnlinker
     end
   end
 
+  LinkedGroup = Data.define(:normalized_name, :guest_names, :order_titles, :count)
+
   def initialize(user:, name_key:, actor: nil, request_id: nil)
     @user = user
     @name_key = name_key.present? ? self.class.normalize(name_key) : nil
@@ -160,6 +162,35 @@ class GuestParticipantUnlinker
   class << self
     def normalize(name)
       ProxyOrderParticipant.normalize_name(name)
+    end
+
+    def linked_groups(user)
+      participants = ProxyOrderParticipant.with_discarded
+        .where(user_id: user.id)
+        .where.not(linked_from_guest_name: nil)
+        .order(:proxy_order_id, :id)
+        .to_a
+
+      groups_by_normalized = participants.group_by { |p| normalize(p.linked_from_guest_name) }
+
+      proxy_order_ids = participants.map(&:proxy_order_id).uniq
+      orders_map = ProxyOrder.with_discarded.where(id: proxy_order_ids).index_by(&:id)
+      event_ids = orders_map.values.map(&:event_id).uniq
+      events_map = Event.unscoped.where(id: event_ids).pluck(:id, :title).to_h
+
+      groups_by_normalized.map do |normalized_name, group_participants|
+        guest_names = group_participants.map(&:linked_from_guest_name).uniq
+        count = group_participants.size
+        order_ids = group_participants.map(&:proxy_order_id).uniq.sort
+        order_titles = order_ids.map { |order_id| events_map[orders_map[order_id]&.event_id] }.compact
+
+        LinkedGroup.new(
+          normalized_name:,
+          guest_names:,
+          order_titles:,
+          count:
+        )
+      end.sort_by(&:normalized_name)
     end
   end
 end

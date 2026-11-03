@@ -1,0 +1,7 @@
+<%= turbo_stream.update "guest_link_modal", "" %>
+<%= turbo_stream.replace "guest_linked_list" do %>
+  <%= render(partial: "admin/users/guest_linked_list", locals: { user: @user, groups: @linked_groups }, formats: [:html]) %>
+<% end %>
+<%= turbo_stream.append "toast-container" do %>
+  <%= render(partial: "shared/toast", locals: { message: @message }, formats: [:html]) %>
+<% end %>
