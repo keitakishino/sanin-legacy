@@ -10,7 +10,7 @@ class AuditLog < ApplicationRecord
   scope :recent_first, -> { order(created_at: :desc, id: :desc) }
   scope :chronological, -> { order(created_at: :asc, id: :asc) }
 
-  def self.record!(user: nil, action:, target: nil, result:, details: {}, request_id: nil)
+  def self.record!(user: nil, action:, target: nil, result:, details: {}, request_id: nil, status_code: nil)
     begin
       purge_expired_if_needed
       transaction(requires_new: true) do
@@ -21,7 +21,8 @@ class AuditLog < ApplicationRecord
           target_id: target&.id,
           result: result,
           details: details || {},
-          request_id: request_id
+          request_id: request_id,
+          status_code: status_code
         )
       end
     rescue StandardError => e
@@ -40,6 +41,12 @@ class AuditLog < ApplicationRecord
     end
   end
 
+  def self.apply_status_code(ids, status_code)
+    return if ids.blank?
+
+    where(id: ids).update_all(status_code: status_code)
+  end
+
   def to_line
     parts = []
     parts << created_at.strftime("%Y-%m-%d %H:%M")
@@ -52,7 +59,9 @@ class AuditLog < ApplicationRecord
     end
 
     parts << action
-    parts << (result_success? ? "成功" : "失敗")
+    label = result_success? ? "成功" : "失敗"
+    label += "(#{status_code})" if status_code
+    parts << label
 
     if target_type
       parts << "#{target_type}##{target_id || '-'}"
