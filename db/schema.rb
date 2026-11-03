@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_000100) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_03_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -117,6 +117,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_000100) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "discarded_at"
+    t.string "linked_from_guest_name", comment: "紐づけ前の自由入力名（紐づけ解除で guest_name に戻す）"
     t.index ["discarded_at"], name: "index_proxy_order_participants_on_discarded_at"
     t.index ["proxy_order_id", "user_id"], name: "index_proxy_order_participants_on_proxy_order_id_and_user_id", unique: true, where: "(user_id IS NOT NULL)"
     t.index ["proxy_order_id"], name: "index_proxy_order_participants_on_proxy_order_id"

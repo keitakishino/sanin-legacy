@@ -4,11 +4,14 @@ class ProxyOrderParticipant < ApplicationRecord
   has_many :proxy_order_allocations, dependent: :destroy
 
   normalizes :guest_name, with: ->(v) { v.strip.presence }
+  normalizes :linked_from_guest_name, with: ->(v) { v.strip.presence }
 
   validate :user_or_guest_exclusive
   validates :user_id, uniqueness: { scope: :proxy_order_id }, allow_nil: true
   validate :guest_name_unique_in_order
   validate :guest_name_not_conflict_with_username
+  validate :linked_from_guest_name_requires_user
+  before_validation :clear_linked_from_guest_name_on_user_change
 
   default_scope { where(discarded_at: nil) }
   scope :with_discarded, -> { unscope(where: :discarded_at) }
@@ -31,6 +34,18 @@ class ProxyOrderParticipant < ApplicationRecord
       errors.add(:base, :user_or_guest_required)
     elsif user_id.present? && guest_name.present?
       errors.add(:base, :user_or_guest_required)
+    end
+  end
+
+  def linked_from_guest_name_requires_user
+    return if linked_from_guest_name.nil?
+    return if user_id.present?
+    errors.add(:linked_from_guest_name, :requires_user)
+  end
+
+  def clear_linked_from_guest_name_on_user_change
+    if persisted? && will_save_change_to_user_id? && !will_save_change_to_linked_from_guest_name?
+      self.linked_from_guest_name = nil
     end
   end
 

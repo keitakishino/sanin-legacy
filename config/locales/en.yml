@@ -54,6 +54,12 @@ en:
         conflicts_with_username: "conflicts with a registered username"
         exceeds_quantity: "must be less than or equal to the quantity"
         must_belong_to_same_order: "must be a participant from the same order"
+        requires_user: "can only be set for a registered user participant"
+        invalid_status_transition: "Cannot change to this status"
+        rate_required_for_arrival: "Please enter the USD/JPY rate"
+        quantity_mismatch_for_arrival: "Price line quantity total and order total do not match for these cards: %{cards}"
+        lost_mismatch_for_completion: "Price line lost total and user lost total do not match for these cards: %{cards}"
+        handover_required_for_completion: "The following participants have not been handed over: %{participants}"
     attributes:
       event:
         title: "Event Title"
@@ -87,6 +93,7 @@ en:
         guest_name: "Guest Name"
         user_id: "User"
         handed_over_at: "Handed Over"
+        linked_from_guest_name: "Original Guest Name"
       proxy_order_price_line:
         unit_price_usd: "Unit Price"
         quantity: "Quantity"
@@ -107,13 +114,6 @@ en:
           ordered: "Ordered"
           arrived: "Arrived"
           completed: "Completed"
-    errors:
-      messages:
-        invalid_status_transition: "Cannot change to this status"
-        rate_required_for_arrival: "Please enter the USD/JPY rate"
-        quantity_mismatch_for_arrival: "Price line quantity total and order total do not match for these cards: %{cards}"
-        lost_mismatch_for_completion: "Price line lost total and user lost total do not match for these cards: %{cards}"
-        handover_required_for_completion: "The following participants have not been handed over: %{participants}"
   admin:
     events:
       title: "Event Management"
@@ -262,3 +262,8 @@ en:
       created: "Invitation code issued successfully"
       creation_failed: "Failed to issue invitation code"
       expired_label: "(Expired)"
+    users:
+      guest_link:
+        conflict: "%{username} is already a participant in \"%{order}\"."
+        conflict_discarded: "A deleted participant of %{username} remains in \"%{order}\"."
+        not_found: "No matching guest participants"

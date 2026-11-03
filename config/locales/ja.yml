@@ -152,6 +152,7 @@ ja:
         guest_name: "自由入力名"
         user_id: "ユーザー"
         handed_over_at: "手渡し済み"
+        linked_from_guest_name: "紐づけ前の自由入力名"
       proxy_order_price_line:
         unit_price_usd: "単価"
         quantity: "数量"
@@ -247,6 +248,7 @@ ja:
         quantity_mismatch_for_arrival: "価格行の数量合計と注文数合計が一致しないカードがあります: %{cards}"
         lost_mismatch_for_completion: "価格行のロスト合計とユーザー別ロスト合計が一致しないカードがあります: %{cards}"
         handover_required_for_completion: "手渡しが完了していない参加者がいます: %{participants}"
+        requires_user: "は登録ユーザーの参加者にだけ設定できます"
       models:
         user:
           attributes:
@@ -435,6 +437,10 @@ ja:
       registered_info: "登録情報"
       no_external_accounts: "外部アカウント連携がありません"
       view_profile: "プロフィール"
+      guest_link:
+        conflict: "「%{order}」には %{username} がすでに参加しています。"
+        conflict_discarded: "「%{order}」には %{username} の削除済みの参加者が残っています。"
+        not_found: "該当する自由入力の参加者はいません"
     invitations:
       title: "招待コード発行"
       new_code_section: "新規コード発行"

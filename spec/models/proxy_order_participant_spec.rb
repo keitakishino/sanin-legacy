@@ -178,6 +178,56 @@ RSpec.describe ProxyOrderParticipant, type: :model do
     end
   end
 
+  describe "linked_from_guest_name validation" do
+    let(:proxy_order) { create(:proxy_order) }
+    let(:user) { create(:user) }
+
+    it "allows linked_from_guest_name when user_id is present" do
+      participant = build(:proxy_order_participant, proxy_order:, user:, guest_name: nil, linked_from_guest_name: "Alice")
+      expect(participant).to be_valid
+    end
+
+    it "rejects linked_from_guest_name when user_id is nil" do
+      participant = build(:proxy_order_participant, :guest, proxy_order:, guest_name: "Bob", linked_from_guest_name: "Alice")
+      expect(participant).not_to be_valid
+      expect(participant.errors.of_kind?(:linked_from_guest_name, :requires_user)).to be true
+    end
+
+    it "allows nil linked_from_guest_name for guest participants" do
+      participant = build(:proxy_order_participant, :guest, proxy_order:)
+      expect(participant).to be_valid
+    end
+
+    it "has linked_from_guest_name column" do
+      expect(ProxyOrderParticipant.column_names).to include("linked_from_guest_name")
+    end
+
+    it "clears linked_from_guest_name when updating user_id" do
+      participant = create(:proxy_order_participant, proxy_order:, user:, guest_name: nil, linked_from_guest_name: "Alice")
+      other_user = create(:user)
+      participant.update(user_id: other_user.id)
+      expect(participant.linked_from_guest_name).to be_nil
+    end
+
+    it "clears linked_from_guest_name when changing from user to guest" do
+      participant = create(:proxy_order_participant, proxy_order:, user:, guest_name: nil, linked_from_guest_name: "Alice")
+      participant.update(user_id: nil, guest_name: "Alice")
+      expect(participant.linked_from_guest_name).to be_nil
+    end
+
+    it "normalizes linked_from_guest_name (strips whitespace)" do
+      participant = build(:proxy_order_participant, proxy_order:, user:, guest_name: nil, linked_from_guest_name: "  Test  ")
+      participant.valid?
+      expect(participant.linked_from_guest_name).to eq("Test")
+    end
+
+    it "converts empty string linked_from_guest_name to nil" do
+      participant = build(:proxy_order_participant, proxy_order:, user:, guest_name: nil, linked_from_guest_name: "   ")
+      participant.valid?
+      expect(participant.linked_from_guest_name).to be_nil
+    end
+  end
+
   describe "logical deletion" do
     let(:proxy_order) { create(:proxy_order) }
     let(:participant) { create(:proxy_order_participant, proxy_order:) }
