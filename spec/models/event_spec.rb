@@ -309,4 +309,19 @@ RSpec.describe Event, type: :model do
       end
     end
   end
+
+  describe '#restore!' do
+    it 'restores the proxy order that discard! took down with it' do
+      event = create(:event, :proxy_order)
+      proxy_order = create(:proxy_order, event:)
+      item = create(:proxy_order_item, proxy_order:)
+
+      event.discard!
+      Event.only_discarded.find(event.id).restore!
+
+      expect(Event.find_by(id: event.id)).to be_present
+      expect(ProxyOrder.find_by(id: proxy_order.id)).to be_present, 'イベントは戻ったのに通販が論理削除のまま残っている'
+      expect(ProxyOrderItem.find_by(id: item.id)).to be_present
+    end
+  end
 end

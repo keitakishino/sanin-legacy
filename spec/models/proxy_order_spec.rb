@@ -336,4 +336,43 @@ RSpec.describe ProxyOrder, type: :model do
       end
     end
   end
+
+  describe "#restore!" do
+    let(:event) { create(:event, :proxy_order) }
+    let(:proxy_order) { create(:proxy_order, event:) }
+    let!(:item) { create(:proxy_order_item, proxy_order:) }
+    let!(:price_line) { create(:proxy_order_price_line, proxy_order_item: item, quantity: 2, unit_price_usd: 5) }
+    let!(:participant) { create(:proxy_order_participant, proxy_order:) }
+    let!(:allocation) { create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 2) }
+
+    it "restores the order and everything discard! took down with it" do
+      proxy_order.discard!
+
+      expect(ProxyOrder.find_by(id: proxy_order.id)).to be_nil
+
+      ProxyOrder.only_discarded.find(proxy_order.id).restore!
+
+      expect(ProxyOrder.find_by(id: proxy_order.id)).to be_present
+      expect(ProxyOrderItem.find_by(id: item.id)).to be_present
+      expect(ProxyOrderPriceLine.find_by(id: price_line.id)).to be_present
+      expect(ProxyOrderParticipant.find_by(id: participant.id)).to be_present
+      expect(ProxyOrderAllocation.find_by(id: allocation.id)).to be_present
+    end
+
+    it "leaves children that were discarded individually beforehand" do
+      item.update!(discarded_at: 1.day.ago)
+      proxy_order.discard!
+
+      ProxyOrder.only_discarded.find(proxy_order.id).restore!
+
+      expect(ProxyOrder.find_by(id: proxy_order.id)).to be_present
+      expect(ProxyOrderItem.find_by(id: item.id)).to be_nil, "個別に削除された明細まで復活している"
+      expect(ProxyOrderParticipant.find_by(id: participant.id)).to be_present
+    end
+
+    it "does nothing when the order is not discarded" do
+      expect(proxy_order.restore!).to be true
+      expect(proxy_order.reload.discarded_at).to be_nil
+    end
+  end
 end

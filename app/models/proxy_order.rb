@@ -39,6 +39,23 @@ class ProxyOrder < ApplicationRecord
     @discard_failures || []
   end
 
+  # discard! が道連れにした子だけを戻す。
+  # discard! は自分と子を同じ時刻で倒すので、それより古い discarded_at を持つ子
+  # （利用者が個別に削除した明細・価格行・注文）はしきい値で除外し、戻さない。
+  def restore!
+    return true if discarded_at.nil?
+
+    threshold = discarded_at
+    now = Time.current
+    item_ids = ProxyOrderItem.with_discarded.where(proxy_order_id: id).select(:id)
+    ProxyOrderPriceLine.with_discarded.where(proxy_order_item_id: item_ids, discarded_at: threshold..).update_all(discarded_at: nil, updated_at: now)
+    ProxyOrderAllocation.with_discarded.where(proxy_order_item_id: item_ids, discarded_at: threshold..).update_all(discarded_at: nil, updated_at: now)
+    ProxyOrderItem.with_discarded.where(proxy_order_id: id, discarded_at: threshold..).update_all(discarded_at: nil, updated_at: now)
+    ProxyOrderParticipant.with_discarded.where(proxy_order_id: id, discarded_at: threshold..).update_all(discarded_at: nil, updated_at: now)
+    update!(discarded_at: nil)
+    true
+  end
+
   def details_editable?
     ordered?
   end
