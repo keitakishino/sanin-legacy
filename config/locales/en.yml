@@ -267,3 +267,8 @@ en:
         conflict: "%{username} is already a participant in \"%{order}\"."
         conflict_discarded: "A deleted participant of %{username} remains in \"%{order}\"."
         not_found: "No matching guest participants"
+        unlink_success: "Restored %{count} participant(s) of \"%{name}\" to guest entries."
+        unlink_not_found: "No linked guest participants found"
+        unlink_conflict_name: "\"%{order}\" already has a participant named \"%{name}\"."
+        unlink_conflict_name_discarded: "A deleted participant named \"%{name}\" remains in \"%{order}\"."
+        unlink_conflict_username: "Cannot restore because a user with the same username as \"%{name}\" exists."

@@ -9,6 +9,11 @@ RSpec.describe "admin.users の訳" do
       expect(I18n.exists?("admin.users.guest_link.conflict", :ja)).to be true
       expect(I18n.exists?("admin.users.guest_link.conflict_discarded", :ja)).to be true
       expect(I18n.exists?("admin.users.guest_link.not_found", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_success", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_not_found", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_conflict_name", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_conflict_name_discarded", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_conflict_username", :ja)).to be true
     end
   end
 
@@ -17,6 +22,11 @@ RSpec.describe "admin.users の訳" do
       expect(I18n.exists?("admin.users.guest_link.conflict", :en)).to be true
       expect(I18n.exists?("admin.users.guest_link.conflict_discarded", :en)).to be true
       expect(I18n.exists?("admin.users.guest_link.not_found", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_success", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_not_found", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_conflict_name", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_conflict_name_discarded", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.unlink_conflict_username", :en)).to be true
     end
   end
 
