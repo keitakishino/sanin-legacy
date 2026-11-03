@@ -24,6 +24,11 @@ module SaninLegacy
     # Host Authorization configuration
     config.hosts << "www.example.com"
 
+    # Configure custom exception app for handling 404 and other errors
+    # lib/errors_app.rb is auto-loaded via config.autoload_lib
+    # Use a lambda to defer constant lookup until the app is fully initialized
+    config.exceptions_app = ->(env) { ErrorsApp.call(env) }
+
     # Set default locale to Japanese
     config.i18n.default_locale = :ja
 
