@@ -441,6 +441,11 @@ ja:
         conflict: "「%{order}」には %{username} がすでに参加しています。"
         conflict_discarded: "「%{order}」には %{username} の削除済みの参加者が残っています。"
         not_found: "該当する自由入力の参加者はいません"
+        unlink_success: "「%{name}」の %{count} 件を自由入力に戻しました。"
+        unlink_not_found: "紐づけ済みの自由入力が見つかりません"
+        unlink_conflict_name: "「%{order}」にはすでに「%{name}」の参加者がいます。"
+        unlink_conflict_name_discarded: "「%{order}」には「%{name}」の削除済みの参加者が残っています。"
+        unlink_conflict_username: "「%{name}」と同じユーザー名のユーザーがいるため戻せません。"
     invitations:
       title: "招待コード発行"
       new_code_section: "新規コード発行"
