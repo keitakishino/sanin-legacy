@@ -77,10 +77,21 @@
                 <% end %>
               </td>
               <td class="px-6 py-4 text-sm">
-                <% if log.result_success? %>
-                  <span class="text-sm text-stone-800"><%= t("admin.audit_logs.success") %></span>
+                <% result_label = log.result_success? ? t("admin.audit_logs.success") : t("admin.audit_logs.failure") %>
+                <% if log.status_code %>
+                  <% if log.status_code >= 500 %>
+                    <span class="audit-log-status-code audit-log-failure-badge bg-red-50 text-red-700 px-3 py-1 rounded text-xs font-semibold" title="<%= result_label %>"><%= log.status_code %></span>
+                  <% elsif log.status_code >= 400 %>
+                    <span class="audit-log-status-code audit-log-failure-badge bg-amber-50 text-amber-700 px-3 py-1 rounded text-xs font-semibold" title="<%= result_label %>"><%= log.status_code %></span>
+                  <% else %>
+                    <span class="audit-log-status-code text-sm text-stone-800" title="<%= result_label %>"><%= log.status_code %></span>
+                  <% end %>
                 <% else %>
-                  <span class="audit-log-failure-badge bg-red-50 text-red-700 px-3 py-1 rounded text-xs font-semibold"><%= t("admin.audit_logs.failure") %></span>
+                  <% if log.result_success? %>
+                    <span class="text-sm text-stone-800"><%= t("admin.audit_logs.success") %></span>
+                  <% else %>
+                    <span class="audit-log-failure-badge bg-red-50 text-red-700 px-3 py-1 rounded text-xs font-semibold"><%= t("admin.audit_logs.failure") %></span>
+                  <% end %>
                 <% end %>
               </td>
               <% details_text = if log.details.present? && log.details.is_a?(Hash)
