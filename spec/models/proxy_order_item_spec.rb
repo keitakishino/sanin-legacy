@@ -73,6 +73,62 @@ RSpec.describe ProxyOrderItem, type: :model do
       item = build(:proxy_order_item, proxy_order:, card_name: "Test Card", expansion:, foil: :foil, frame: :normal)
       expect(item).to be_valid
     end
+
+    it "rejects duplicate when card_name differs only in letter case" do
+      create(:proxy_order_item, proxy_order:, card_name: "Ponder", expansion:, foil: :foil, frame: :normal)
+      duplicate = build(:proxy_order_item, proxy_order:, card_name: "ponder", expansion:, foil: :foil, frame: :normal)
+      expect(duplicate).not_to be_valid
+      expect(duplicate.errors.of_kind?(:base, :duplicate_card_entry)).to be true
+      expect { duplicate.save }.not_to change { proxy_order.proxy_order_items.count }
+
+      uppercase_variant = build(:proxy_order_item, proxy_order:, card_name: "PONDER", expansion:, foil: :foil, frame: :normal)
+      expect(uppercase_variant).not_to be_valid
+      expect(uppercase_variant.errors.of_kind?(:base, :duplicate_card_entry)).to be true
+    end
+
+    it "rejects updating an item to a case-variant of another item's card_name" do
+      create(:proxy_order_item, proxy_order:, card_name: "Ponder", expansion:, foil: :foil, frame: :normal)
+      brainstorm_item = create(:proxy_order_item, proxy_order:, card_name: "Brainstorm", expansion:, foil: :foil, frame: :normal)
+
+      brainstorm_item.card_name = "ponder"
+      expect(brainstorm_item).not_to be_valid
+      expect(brainstorm_item.errors.of_kind?(:base, :duplicate_card_entry)).to be true
+    end
+
+    it "keeps the card_name as entered" do
+      item = create(:proxy_order_item, proxy_order:, card_name: "Ponder", expansion:, foil: :foil, frame: :normal)
+      expect(item.card_name).to eq("Ponder")
+
+      duplicate = build(:proxy_order_item, proxy_order:, card_name: "ponder", expansion:, foil: :foil, frame: :normal)
+      expect(duplicate.save).to be false
+
+      item.reload
+      expect(item.card_name).to eq("Ponder")
+
+      other_card = create(:proxy_order_item, proxy_order:, card_name: "Jace, the Mind Sculptor", expansion:, foil: :foil, frame: :extended)
+      other_card.reload
+      expect(other_card.card_name).to eq("Jace, the Mind Sculptor")
+    end
+
+    it "allows a case-variant card_name when expansion / foil / frame differ" do
+      create(:proxy_order_item, proxy_order:, card_name: "Ponder", expansion:, foil: :foil, frame: :normal)
+
+      different_expansion = create(:expansion)
+      item1 = build(:proxy_order_item, proxy_order:, card_name: "ponder", expansion: different_expansion, foil: :foil, frame: :normal)
+      expect(item1).to be_valid
+
+      item2 = build(:proxy_order_item, proxy_order:, card_name: "ponder", expansion:, foil: :non_foil, frame: :normal)
+      expect(item2).to be_valid
+
+      item3 = build(:proxy_order_item, proxy_order:, card_name: "ponder", expansion:, foil: :foil, frame: :extended)
+      expect(item3).to be_valid
+    end
+
+    it "excludes discarded items from case-insensitive duplicate check" do
+      create(:proxy_order_item, proxy_order:, card_name: "Ponder", expansion:, foil: :foil, frame: :normal, discarded_at: Time.current)
+      item = build(:proxy_order_item, proxy_order:, card_name: "ponder", expansion:, foil: :foil, frame: :normal)
+      expect(item).to be_valid
+    end
   end
 
   describe "logical deletion" do

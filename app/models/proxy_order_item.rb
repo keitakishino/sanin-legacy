@@ -48,12 +48,9 @@ class ProxyOrderItem < ApplicationRecord
   def no_duplicate_card_entry
     return if proxy_order.blank?
 
-    duplicates = proxy_order.proxy_order_items.where(
-      card_name:,
-      expansion_id:,
-      foil:,
-      frame:
-    )
+    duplicates = proxy_order.proxy_order_items
+      .where(expansion_id:, foil:, frame:)
+      .where("LOWER(proxy_order_items.card_name) = LOWER(?)", card_name)
     duplicates = duplicates.where.not(id:) if persisted?
 
     return if duplicates.empty?
