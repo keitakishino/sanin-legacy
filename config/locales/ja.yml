@@ -437,6 +437,10 @@ ja:
       registered_info: "登録情報"
       no_external_accounts: "外部アカウント連携がありません"
       view_profile: "プロフィール"
+      guest_link:
+        conflict: "「%{order}」には %{username} がすでに参加しています。"
+        conflict_discarded: "「%{order}」には %{username} の削除済みの参加者が残っています。"
+        not_found: "該当する自由入力の参加者はいません"
     invitations:
       title: "招待コード発行"
       new_code_section: "新規コード発行"
@@ -494,11 +498,6 @@ ja:
         proxy_order_price_line_update_lost: "価格行ロスト入力"
         proxy_order_allocation_update_lost: "ユーザー別ロスト入力"
         proxy_order_participant_hand_over: "手渡しチェック"
-    users:
-      guest_link:
-        conflict: "「%{order}」には %{username} がすでに参加しています。"
-        conflict_discarded: "「%{order}」には %{username} の削除済みの参加者が残っています。"
-        not_found: "該当する自由入力の参加者はいません"
   errors:
     unauthorized:
       title: "認証が必要です"
