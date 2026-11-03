@@ -13,7 +13,6 @@
         <thead class="bg-stone-100 border-b border-stone-200">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.title") %></th>
-            <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.event_type") %></th>
             <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.description") %></th>
             <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.event_date") %></th>
             <th class="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-stone-500"><%= t("activerecord.attributes.event.created_by_id") %></th>
@@ -24,8 +23,12 @@
         <tbody id="events">
           <% @events.each do |event| %>
             <tr class="border-b border-stone-200 hover:bg-stone-50">
-              <td class="px-6 py-4 text-sm"><%= event.title %></td>
-              <td class="hidden md:table-cell px-6 py-4 text-sm"><%= t("activerecord.attributes.event.event_types.#{event.event_type}") %></td>
+              <td class="px-6 py-4 text-sm">
+                <div class="flex flex-wrap items-center gap-2">
+                  <%= render "shared/event_type_label", event_type: event.event_type %>
+                  <span><%= event.title %></span>
+                </div>
+              </td>
               <td class="hidden md:table-cell px-6 py-4 text-sm"><%= truncate(event.description, length: 50) %></td>
               <td class="hidden md:table-cell px-6 py-4 text-sm"><%= event.event_date.strftime("%Y年%m月%d日") %></td>
               <td class="hidden md:table-cell px-6 py-4 text-sm"><%= event.created_by&.email %></td>
