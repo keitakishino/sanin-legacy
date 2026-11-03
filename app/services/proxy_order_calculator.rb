@@ -2,7 +2,9 @@ class ProxyOrderCalculator
   # 計算: 設計書「金額計算ルール」に従い、カード単価・参加者別合計・手数料・円換算を計算
   def initialize(proxy_order)
     @proxy_order = proxy_order
-    @items = proxy_order.proxy_order_items.includes(:proxy_order_price_lines, :proxy_order_allocations).to_a
+    # 呼び出し側が preload 済みならそれを使い、そうでなければ従来どおり読み込む
+    assoc = proxy_order.proxy_order_items
+    @items = (assoc.loaded? ? assoc : assoc.includes(:proxy_order_price_lines, :proxy_order_allocations)).to_a
     @participants = proxy_order.proxy_order_participants.to_a
     @unit_prices = {}
   end

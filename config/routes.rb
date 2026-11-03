@@ -52,6 +52,7 @@ Rails.application.routes.draw do
 
   # User-facing trade history
   get "/histories", to: "histories#index", as: :histories
+  get "/histories/proxy_orders", to: "histories#proxy_orders", as: :proxy_order_histories
 
   namespace :admin do
     resources :audit_logs, only: [ :index ]

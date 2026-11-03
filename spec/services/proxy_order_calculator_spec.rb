@@ -169,4 +169,29 @@ RSpec.describe ProxyOrderCalculator do
       expect(calculator.payment_jpy(participant)).to be_nil
     end
   end
+
+  describe 'preload 済みの明細' do
+    it '明細・価格行・割り当てが読み込み済みなら追加のクエリを出さない' do
+      proxy_order = create(:proxy_order, tax_usd: 0, customs_usd: 0, shipping_usd: 0, usd_jpy_rate: 150)
+      item = create(:proxy_order_item, proxy_order:)
+      create(:proxy_order_price_line, proxy_order_item: item, unit_price_usd: 30, quantity: 1)
+      participant = create(:proxy_order_participant, proxy_order:)
+      create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 1)
+
+      loaded = ProxyOrder.preload(:proxy_order_participants,
+                                  proxy_order_items: [ :proxy_order_price_lines, :proxy_order_allocations ])
+                         .find(proxy_order.id)
+      loaded_participant = loaded.proxy_order_participants.to_a.first
+      calculator = nil
+      queries = []
+      counter = ->(*, payload) { queries << payload[:sql] unless %w[SCHEMA CACHE].include?(payload[:name]) || payload[:cached] }
+
+      ActiveSupport::Notifications.subscribed(counter, 'sql.active_record') do
+        calculator = ProxyOrderCalculator.new(loaded)
+        expect(calculator.payment_jpy(loaded_participant)).to eq(5000)
+      end
+
+      expect(queries).to be_empty
+    end
+  end
 end

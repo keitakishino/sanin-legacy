@@ -8,6 +8,15 @@ ja:
   trades:
     event_ended: "このイベントは終了しています"
     not_trade_event: "このイベントにはトレードがありません"
+  histories:
+    proxy_orders:
+      title: "通販履歴"
+      empty: "完了した代理通販はありません"
+      event_name: "イベント名"
+      event_date: "開催日"
+      status: "ステータス"
+      payment_amount: "支払い金額"
+      view_details: "詳細を表示"
   proxy_orders:
     show:
       back_to_dashboard: "← ダッシュボードへ戻る"
