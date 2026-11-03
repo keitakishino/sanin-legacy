@@ -55,10 +55,10 @@ Rails.application.configure do
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
 
-  # Set default locale to English for tests to match expected validation error messages
-  # The application uses Japanese as default in other environments,
-  # but tests expect English error messages from Rails validations.
-  config.i18n.default_locale = :en
+  # 画面は ApplicationController#set_i18n_locale で常に :ja になるため、テストも :ja に揃える。
+  # :en のままだとモデル層のテストだけ英語で回り、日本語文言の不具合を検出できない。
+  # フォールバック（config/application.rb の [:en]）は本番と同じ条件で効く。
+  config.i18n.default_locale = :ja
 
   # Disable Discord error notifications in test environment to prevent accidental HTTP requests
   config.x.discord_error_webhook_url = nil

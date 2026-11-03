@@ -70,9 +70,10 @@ Rails.application.configure do
   #   authentication: :plain
   # }
 
-  # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
-  # the I18n.default_locale when a translation cannot be found).
-  config.i18n.fallbacks = true
+  # ロケールのフォールバックは config/application.rb で [:en] を設定している。
+  # ここで `= true` を書くと「I18n.default_locale（= :ja）に落ちる」という意味になり、
+  # :ja 自身へのフォールバックになるため実質無効化され、未定義キーで l() が例外を投げて 500 になる。
+  # （2026-11-03、ja.date.formats.long の欠落で staging の代理通販画面が 500 になった）
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false

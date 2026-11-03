@@ -25,8 +25,6 @@ class ProxyOrderAllocation < ApplicationRecord
     self.lost_quantity ||= 0
   end
 
-  private
-
   def lost_quantity_not_exceed_quantity
     return if quantity.blank? || lost_quantity.blank?
     return if lost_quantity <= quantity

@@ -14,10 +14,29 @@ module AdminProxyOrderLoadable
   end
 
   def set_proxy_order
-    @proxy_order = @event.proxy_order || @event.create_proxy_order!
+    @proxy_order = @event.proxy_order || restore_discarded_proxy_order || create_proxy_order_for_event
+  end
+
+  # イベントは生きているのに通販だけ論理削除されている不整合を直してから進む。
+  # proxy_orders には default_scope（discarded_at: nil）があるため、この状態だと
+  # @event.proxy_order は nil になり、作り直そうとすると event_id の一意制約に当たる。
+  # 以前はそれを rescue しても nil のままで、@proxy_order.reload が NoMethodError になり
+  # この画面が永久に 500 になっていた（自己修復しない）。
+  def restore_discarded_proxy_order
+    discarded = ProxyOrder.only_discarded.find_by(event_id: @event.id)
+    return nil if discarded.nil?
+
+    discarded.restore!
+    record_audit("proxy_order.restore", target: discarded, details: { reason: "event_alive_but_proxy_order_discarded" })
+    @event.reload.proxy_order
+  end
+
+  def create_proxy_order_for_event
+    @event.create_proxy_order!
   rescue ActiveRecord::RecordNotUnique
+    # 同時に開かれて先に作られた場合
     @event.reload
-    @proxy_order = @event.proxy_order
+    @event.proxy_order || restore_discarded_proxy_order
   end
 
   def load_editor_state(open_item_ids: [])

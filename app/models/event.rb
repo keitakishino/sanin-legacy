@@ -50,8 +50,17 @@ class Event < ApplicationRecord
     @discard_failures || []
   end
 
+  # discard! が道連れにした代理通販も一緒に戻す。
+  # これを戻さないと「イベントは生きているのに通販だけ論理削除」という
+  # 不整合ができ、その通販の管理画面が開けなくなる。
+  # トレードは Trade#restore! が浅いまま（子の offers / wants を戻さない）なので、
+  # ここでも戻していない。揃えるかどうかは別途判断する。
   def restore!
-    update(discarded_at: nil)
+    transaction do
+      update(discarded_at: nil)
+      ProxyOrder.only_discarded.find_by(event_id: id)&.restore!
+    end
+    true
   end
 
   def discarded?
