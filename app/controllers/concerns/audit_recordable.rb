@@ -1,10 +1,14 @@
 module AuditRecordable
   extend ActiveSupport::Concern
 
+  included do
+    around_action :apply_audit_status_code
+  end
+
   private
 
   def record_audit(action, target: nil, result: :success, details: {})
-    AuditLog.record!(
+    log = AuditLog.record!(
       user: current_user,
       action: action,
       target: target,
@@ -12,6 +16,8 @@ module AuditRecordable
       details: details || {},
       request_id: request.request_id
     )
+    @audit_log_ids << log.id if log && @audit_log_ids
+    log
   rescue StandardError => e
     Rails.logger.error("[AuditLog] record failed: #{e.class}: #{e.message}")
     nil
@@ -35,5 +41,24 @@ module AuditRecordable
     end
 
     record_audit(action, target: record, result: :failure, details: failure_details)
+  end
+
+  def apply_audit_status_code
+    @audit_log_ids = []
+    raised = false
+    begin
+      yield
+    rescue Exception
+      raised = true
+      raise
+    ensure
+      if @audit_log_ids.present?
+        begin
+          AuditLog.apply_status_code(@audit_log_ids, raised ? 500 : response.status)
+        rescue StandardError => e
+          Rails.logger.error("[AuditLog] status_code update failed: #{e.class}: #{e.message}")
+        end
+      end
+    end
   end
 end
