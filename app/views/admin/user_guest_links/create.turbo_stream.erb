@@ -1,0 +1,4 @@
+<%= turbo_stream.update "guest_link_modal", "" %>
+<%= turbo_stream.append "toast-container" do %>
+  <%= render(partial: "shared/toast", locals: { message: @message }, formats: [:html]) %>
+<% end %>

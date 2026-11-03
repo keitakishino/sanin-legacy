@@ -58,6 +58,15 @@
     <% end %>
   </div>
 
+  <!-- Section: Guest link -->
+  <div id="guest-link" class="bg-white border border-stone-200 rounded-lg p-6 mb-8">
+    <h3 class="text-xl font-semibold mb-4 border-b border-stone-200 pb-2 text-stone-800"><%= t("admin.users.guest_link.section_title") %></h3>
+    <p class="text-sm text-stone-600 mb-4"><%= t("admin.users.guest_link.description") %></p>
+    <%= link_to t("admin.users.guest_link.open_button"), new_admin_user_guest_link_path(@user),
+        data: { turbo_frame: "guest_link_modal" },
+        class: "inline-block bg-indigo-700 text-white px-4 py-2 rounded hover:bg-indigo-800 font-medium text-sm" %>
+  </div>
+
   <!-- Section 3: Trades -->
   <div class="bg-white border border-stone-200 rounded-lg p-6">
     <h3 class="text-xl font-semibold mb-4 border-b border-stone-200 pb-2 text-stone-800"><%= t("admin.users.trades") %></h3>
@@ -104,4 +113,6 @@
       </div>
     <% end %>
   </div>
+
+  <turbo-frame id="guest_link_modal"></turbo-frame>
 </div>

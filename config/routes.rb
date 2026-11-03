@@ -56,7 +56,9 @@ Rails.application.routes.draw do
   namespace :admin do
     resources :audit_logs, only: [ :index ]
     resources :invitations, only: [ :index, :create ]
-    resources :users, only: %i[ index show ]
+    resources :users, only: %i[ index show ] do
+      resource :guest_link, only: %i[ new create ], controller: "user_guest_links"
+    end
     resources :events, only: [ :index, :new, :create, :edit, :update, :destroy ] do
       resources :trades, only: [ :show, :update ]
       resource :proxy_order, only: [ :show, :update ] do
