@@ -126,7 +126,7 @@
   <% end %>
 </div>
 
-<script>
+<script nonce="<%= content_security_policy_nonce %>">
   // Mobile accordion expansion
   document.querySelectorAll('[data-toggle-expand]').forEach(button => {
     button.addEventListener('click', function(e) {

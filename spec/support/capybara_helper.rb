@@ -29,6 +29,7 @@ def chrome_options
   options.add_argument("--password-store=basic")
   options.add_argument("--use-mock-keychain")
   options.add_argument("--window-size=1400,1400")
+  options.add_option("goog:loggingPrefs", { "browser" => "ALL" })
   options
 end
 

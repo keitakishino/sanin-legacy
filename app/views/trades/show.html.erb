@@ -73,7 +73,7 @@
     <% end %>
   </div>
 
-  <script>
+  <script nonce="<%= content_security_policy_nonce %>">
     // Toggle add form buttons
     const addOfferBtn = document.getElementById('add_offer_btn');
     if (addOfferBtn) {

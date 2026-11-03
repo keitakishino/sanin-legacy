@@ -6,4 +6,12 @@ export default class extends Controller {
   submit() {
     this.element.requestSubmit()
   }
+
+  // select など、フォームの「中の」要素に付けたときはそのフォームを送る。
+  // もとは select の onchange に書いていたが、インラインのイベントハンドラは
+  // CSP（script-src-attr）で実行できないためこちらに寄せている。
+  submitForm() {
+    const form = this.element.form
+    if (form) form.requestSubmit()
+  }
 }

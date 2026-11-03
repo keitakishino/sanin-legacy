@@ -16,7 +16,7 @@
     </div>
 
     <div class="flex gap-2 items-center">
-      <%= select_tag "#{list.prefix}_sort", options_for_select([["ソートなし", ""], ["カード名 昇順", "card_name_asc"], ["カード名 降順", "card_name_desc"], ["数量 昇順", "quantity_asc"], ["数量 降順", "quantity_desc"], ["単価 昇順", "amount_asc"], ["単価 降順", "amount_desc"]], list.sort.to_s), id: "#{list.prefix}_sort", onchange: "this.form.requestSubmit()", class: "px-2 py-1 text-xs border border-stone-200 rounded md:hidden" %>
+      <%= select_tag "#{list.prefix}_sort", options_for_select([["ソートなし", ""], ["カード名 昇順", "card_name_asc"], ["カード名 降順", "card_name_desc"], ["数量 昇順", "quantity_asc"], ["数量 降順", "quantity_desc"], ["単価 昇順", "amount_asc"], ["単価 降順", "amount_desc"]], list.sort.to_s), id: "#{list.prefix}_sort", data: { controller: "auto-submit", action: "change->auto-submit#submitForm" }, class: "px-2 py-1 text-xs border border-stone-200 rounded md:hidden" %>
     </div>
 
     <% if list.all_count > 0 %>
