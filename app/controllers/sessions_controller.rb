@@ -1,4 +1,11 @@
 class SessionsController < ApplicationController
+  include RateLimitable
+
+  # パスワードの総当たり・パスワードスプレー対策。
+  # ロックアウトは用意していないので、同一 IP からの試行回数だけで絞る。
+  rate_limit_auth to: 10, within: 5.minutes, name: "signin",
+                  only: :create, with: :rate_limited_response
+
   def new
   end
 
@@ -21,5 +28,11 @@ class SessionsController < ApplicationController
   def destroy
     log_out
     redirect_to signin_path
+  end
+
+  private
+
+  def rate_limited_response
+    render_rate_limited(:new)
   end
 end

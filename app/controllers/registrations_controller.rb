@@ -1,4 +1,11 @@
 class RegistrationsController < ApplicationController
+  include RateLimitable
+
+  # 招待コードを握った攻撃者が、ユーザー名やメールアドレスを総当たりして
+  # 既存アカウントの有無を調べるのを防ぐ。
+  rate_limit_auth to: 10, within: 10.minutes, name: "signup",
+                  only: :create, with: :rate_limited_response
+
   def new
     token = params[:token]
 
@@ -99,5 +106,9 @@ class RegistrationsController < ApplicationController
 
   def render_forbidden
     raise ForbiddenError
+  end
+
+  def rate_limited_response
+    render_rate_limited(:new)
   end
 end
