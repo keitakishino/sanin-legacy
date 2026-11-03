@@ -1,6 +1,7 @@
 module ErrorNotification
   class Subscriber
     DEFAULT_SOURCE = "application"
+    ACTION_DISPATCH_SOURCE = "application.action_dispatch"
 
     def initialize
       @throttle = Throttle.new
@@ -14,8 +15,13 @@ module ErrorNotification
       return if handled && source != DEFAULT_SOURCE
 
       fingerprint = "#{error.class.name}|#{error.backtrace&.first || error.message}"
-      notify, suppressed = @throttle.check(fingerprint)
-      return unless notify
+
+      if !handled && source == ACTION_DISPATCH_SOURCE
+        suppressed = 0
+      else
+        notify, suppressed = @throttle.check(fingerprint)
+        return unless notify
+      end
 
       begin
         controller = context&.dig(:controller)
