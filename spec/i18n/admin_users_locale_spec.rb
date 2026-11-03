@@ -14,6 +14,15 @@ RSpec.describe "admin.users の訳" do
       expect(I18n.exists?("admin.users.guest_link.unlink_conflict_name", :ja)).to be true
       expect(I18n.exists?("admin.users.guest_link.unlink_conflict_name_discarded", :ja)).to be true
       expect(I18n.exists?("admin.users.guest_link.unlink_conflict_username", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.section_title", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.open_button", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.search_label", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.search_button", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.too_many", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.submit", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.success", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.more_orders", :ja)).to be true
+      expect(I18n.exists?("admin.users.guest_link.not_selectable", :ja)).to be true
     end
   end
 
@@ -27,6 +36,15 @@ RSpec.describe "admin.users の訳" do
       expect(I18n.exists?("admin.users.guest_link.unlink_conflict_name", :en)).to be true
       expect(I18n.exists?("admin.users.guest_link.unlink_conflict_name_discarded", :en)).to be true
       expect(I18n.exists?("admin.users.guest_link.unlink_conflict_username", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.section_title", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.open_button", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.search_label", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.search_button", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.too_many", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.submit", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.success", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.more_orders", :en)).to be true
+      expect(I18n.exists?("admin.users.guest_link.not_selectable", :en)).to be true
     end
   end
 
