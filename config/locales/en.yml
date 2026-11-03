@@ -310,3 +310,10 @@ en:
         not_selectable: "Not selectable"
         success: "Linked %{count} participant(s) of \"%{name}\" to %{username}."
         conflict_hint: "Delete one of the participants in that proxy order, then link again."
+      audit_logs:
+        actions:
+          system_error: "Server error"
+  errors:
+    internal_server_error:
+      title: "A server error occurred"
+      message: "Please try again later"

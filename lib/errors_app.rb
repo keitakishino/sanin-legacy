@@ -11,8 +11,9 @@ class ErrorsApp
 
   def call
     status = extract_status_from_path_info
+    action = { 404 => :not_found, 500 => :internal_server_error }[status]
 
-    return public_exceptions_response unless status == 404
+    return public_exceptions_response unless action
 
     case request_format
     when :json
@@ -21,10 +22,10 @@ class ErrorsApp
       public_exceptions_response
     when :head
       # HEAD リクエストは本文なし
-      head_response
+      head_response(status)
     else
       # HTML・turbo_stream・その他は ErrorsController で描画
-      render_with_fallback { ErrorsController.action(:not_found).call(@env) }
+      render_with_fallback { ErrorsController.action(action).call(@env) }
     end
   end
 
@@ -52,8 +53,8 @@ class ErrorsApp
     :html
   end
 
-  def head_response
-    [ 404, { "content-type" => "text/html; charset=utf-8" }, [] ]
+  def head_response(status)
+    [ status, { "content-type" => "text/html; charset=utf-8" }, [] ]
   end
 
   def public_exceptions_response
