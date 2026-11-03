@@ -144,6 +144,18 @@ RSpec.describe "User Proxy Order View", type: :system do
       main_area = find("main") rescue find("div.container")
       expect(main_area).to have_content("暫定")
     end
+
+    it "does not show the lost-zero parenthetical in the provisional notice" do
+      within "#proxy_order_provisional" do
+        expect(page).to have_content("注文中のため暫定の金額です")
+        expect(page).not_to have_content("ロスト 0 として計算")
+      end
+      expect(page).not_to have_content("（ロスト 0 として計算）")
+    end
+
+    it "keeps the provisional note under the card list" do
+      expect(page).to have_content(I18n.t("proxy_orders.show.note_provisional"))
+    end
   end
 
   describe "Arrived state with rate set" do

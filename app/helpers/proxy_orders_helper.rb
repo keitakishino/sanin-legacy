@@ -10,11 +10,7 @@ module ProxyOrdersHelper
   end
 
   def participant_display_name(participant)
-    if participant.user.present?
-      participant.user.username
-    else
-      "#{participant.guest_name}（自由入力）"
-    end
+    participant.user&.username || participant.guest_name
   end
 
   # カード明細の見出しに出す「セット ／ フォイル ／ フレーム」

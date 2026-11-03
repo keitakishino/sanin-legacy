@@ -13,7 +13,7 @@ ja:
       back_to_dashboard: "← ダッシュボードへ戻る"
       status: "ステータス"
       provisional: "暫定"
-      provisional_notice: "注文中のため暫定の金額です（ロスト 0 として計算）"
+      provisional_notice: "注文中のため暫定の金額です"
       my_items: "自分の明細"
       card_name: "カード名"
       expansion: "セット"
