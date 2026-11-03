@@ -38,6 +38,15 @@ en:
   trades:
     event_ended: "This event has ended"
     not_trade_event: "This event has no trades"
+  histories:
+    proxy_orders:
+      title: "Proxy Order History"
+      empty: "There are no completed proxy orders"
+      event_name: "Event"
+      event_date: "Event Date"
+      status: "Status"
+      payment_amount: "Payment Amount"
+      view_details: "View details"
   activerecord:
     errors:
       messages:

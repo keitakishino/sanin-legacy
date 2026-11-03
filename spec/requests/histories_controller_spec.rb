@@ -285,4 +285,264 @@ RSpec.describe "HistoriesController", type: :request do
       end
     end
   end
+
+  describe "GET /histories/proxy_orders" do
+    def row_id_for(proxy_order)
+      "id=\"history_proxy_order_#{proxy_order.id}\""
+    end
+
+    def row_html_for(proxy_order)
+      response.body[/<tr #{Regexp.escape(row_id_for(proxy_order))}.*?<\/tr>/m]
+    end
+
+    def create_proxy_order_for(participant_user, status: :completed, event_date: Date.current - 3.days, usd_jpy_rate: 150)
+      event = create(:event, :proxy_order)
+      event.update_column(:event_date, event_date)
+      proxy_order = create(:proxy_order, event:, status:, usd_jpy_rate:,
+                                         tax_usd: 0, customs_usd: 0, shipping_usd: 0)
+      create(:proxy_order_participant, proxy_order:, user: participant_user)
+      proxy_order
+    end
+
+    def add_card_to(proxy_order, participant, unit_price_usd: 30, quantity: 1, lost_quantity: 0)
+      item = create(:proxy_order_item, proxy_order:)
+      create(:proxy_order_price_line, proxy_order_item: item, unit_price_usd:, quantity:, lost_quantity:)
+      create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant,
+                                      quantity:, lost_quantity:)
+      item
+    end
+
+    def count_sql_queries
+      count = 0
+      counter = lambda do |*, payload|
+        count += 1 unless %w[SCHEMA CACHE].include?(payload[:name]) || payload[:cached]
+      end
+      ActiveSupport::Notifications.subscribed(counter, "sql.active_record") { yield }
+      count
+    end
+
+    context "when user is not authenticated" do
+      it "redirects to signin page" do
+        get "/histories/proxy_orders"
+
+        expect(response).to have_http_status(:found)
+        expect(response).to redirect_to("/signin")
+      end
+    end
+
+    context "when user is authenticated" do
+      let(:user) { create(:user, password: "password123") }
+      let(:other_user) { create(:user, password: "password123") }
+
+      before do
+        post "/signin", params: { email: user.email, password: "password123" }
+        follow_redirect!
+      end
+
+      context "with no proxy orders" do
+        it "returns 200 and shows empty state message" do
+          get "/histories/proxy_orders"
+
+          expect(response).to have_http_status(:ok)
+          expect(response.body).to include("完了した代理通販はありません")
+        end
+      end
+
+      context "with a completed proxy order the user participates in" do
+        let!(:proxy_order) { create_proxy_order_for(user) }
+
+        it "displays the event title, completed badge, and link to the detail page" do
+          get "/histories/proxy_orders"
+
+          row = row_html_for(proxy_order)
+          expect(row).to be_present
+          expect(row).to include(proxy_order.event.title)
+          expect(row).to include(I18n.t("activerecord.enums.proxy_order.status.completed"))
+          expect(row).to include("href=\"/proxy_orders/#{proxy_order.event_id}\"")
+          expect(row).to include(I18n.t("histories.proxy_orders.view_details"))
+        end
+
+        it "displays the event date in long format" do
+          get "/histories/proxy_orders"
+
+          expect(response.body).to include(I18n.l(proxy_order.event.event_date, format: :long))
+        end
+      end
+
+      context "with proxy orders that must not be listed" do
+        it "does not list ordered proxy orders" do
+          ordered = create_proxy_order_for(user, status: :ordered)
+
+          get "/histories/proxy_orders"
+
+          expect(response.body).not_to include(row_id_for(ordered))
+        end
+
+        it "does not list arrived proxy orders" do
+          arrived = create_proxy_order_for(user, status: :arrived)
+
+          get "/histories/proxy_orders"
+
+          expect(response.body).not_to include(row_id_for(arrived))
+        end
+
+        it "does not list completed proxy orders the user does not participate in" do
+          others = create_proxy_order_for(other_user)
+
+          get "/histories/proxy_orders"
+
+          expect(response.body).not_to include(row_id_for(others))
+        end
+
+        it "does not list discarded proxy orders" do
+          discarded = create_proxy_order_for(user)
+          discarded.update_column(:discarded_at, Time.current)
+
+          get "/histories/proxy_orders"
+
+          expect(response.body).not_to include(row_id_for(discarded))
+        end
+
+        it "does not list proxy orders whose event is discarded" do
+          discarded_event_order = create_proxy_order_for(user)
+          discarded_event_order.event.update_column(:discarded_at, Time.current)
+
+          get "/histories/proxy_orders"
+
+          expect(response.body).not_to include(row_id_for(discarded_event_order))
+        end
+
+        it "does not list proxy orders where the user's participation is discarded" do
+          discarded_participation = create_proxy_order_for(user)
+          ProxyOrderParticipant.with_discarded.find_by!(proxy_order: discarded_participation, user:)
+                               .update_column(:discarded_at, Time.current)
+
+          get "/histories/proxy_orders"
+
+          expect(response.body).not_to include(row_id_for(discarded_participation))
+        end
+
+        it "does not list proxy orders where the user only appears as a guest" do
+          guest_only = create(:proxy_order, event: create(:event, :proxy_order), status: :completed,
+                                            tax_usd: 0, customs_usd: 0, shipping_usd: 0, usd_jpy_rate: 150)
+          create(:proxy_order_participant, :guest, proxy_order: guest_only, guest_name: "ゲスト参加者")
+
+          get "/histories/proxy_orders"
+
+          expect(response.body).not_to include(row_id_for(guest_only))
+        end
+      end
+
+      context "with multiple completed proxy orders" do
+        it "sorts by event date descending, then by proxy order id descending" do
+          older_event = create_proxy_order_for(user, event_date: Date.current - 10.days)
+          newer_event = create_proxy_order_for(user, event_date: Date.current - 1.day)
+          same_date_later = create_proxy_order_for(user, event_date: Date.current - 1.day)
+
+          get "/histories/proxy_orders"
+
+          positions = [ same_date_later, newer_event, older_event ].map do |po|
+            response.body.index(row_id_for(po))
+          end
+          expect(positions).to all(be_present)
+          expect(positions).to eq(positions.sort)
+        end
+      end
+
+      context "with pagination" do
+        before do
+          @proxy_orders = Array.new(21) do |i|
+            create_proxy_order_for(user, event_date: Date.current - i.days)
+          end
+        end
+
+        it "shows 20 proxy orders on the first page" do
+          get "/histories/proxy_orders"
+
+          rows = response.body.scan(/<tr id="history_proxy_order_\d+"/).count
+          expect(rows).to eq(20)
+          expect(response.body).to include("pagination")
+        end
+
+        it "shows the 21st proxy order on the second page" do
+          get "/histories/proxy_orders", params: { page: 2 }
+
+          expect(response).to have_http_status(:ok)
+          expect(response.body.scan(/<tr id="history_proxy_order_\d+"/).count).to eq(1)
+          expect(response.body).to include(row_id_for(@proxy_orders.last))
+        end
+      end
+
+      context "with payment amounts" do
+        it "displays the payment in yen" do
+          proxy_order = create_proxy_order_for(user)
+          participant = proxy_order.proxy_order_participants.find_by!(user:)
+          add_card_to(proxy_order, participant, unit_price_usd: 30)
+
+          get "/histories/proxy_orders"
+
+          expect(row_html_for(proxy_order)).to include("¥5,000")
+        end
+
+        it "displays ¥0 when the user lost all cards" do
+          proxy_order = create_proxy_order_for(user)
+          participant = proxy_order.proxy_order_participants.find_by!(user:)
+          add_card_to(proxy_order, participant, quantity: 1, lost_quantity: 1)
+
+          get "/histories/proxy_orders"
+
+          expect(row_html_for(proxy_order)).to include("¥0")
+        end
+
+        it "displays pending when the exchange rate is not set" do
+          proxy_order = create_proxy_order_for(user, usd_jpy_rate: nil)
+          participant = proxy_order.proxy_order_participants.find_by!(user:)
+          add_card_to(proxy_order, participant, unit_price_usd: 30)
+
+          get "/histories/proxy_orders"
+
+          expect(row_html_for(proxy_order)).to include(I18n.t("common.pending"))
+        end
+
+        it "shows the same amount for the user as the calculator on the detail page" do
+          proxy_order = create_proxy_order_for(user)
+          participant = proxy_order.proxy_order_participants.find_by!(user:)
+          other_participant = create(:proxy_order_participant, :guest, proxy_order:)
+          add_card_to(proxy_order, participant, unit_price_usd: 30, quantity: 2)
+          create(:proxy_order_allocation, proxy_order_item: proxy_order.proxy_order_items.first,
+                                          proxy_order_participant: other_participant, quantity: 1)
+          expected = ProxyOrderCalculator.new(proxy_order.reload).payment_jpy(participant.reload)
+
+          get "/histories/proxy_orders"
+
+          expect(row_html_for(proxy_order)).to include(ActiveSupport::NumberHelper.number_to_currency(expected, unit: "¥", precision: 0, format: "%u%n"))
+        end
+      end
+
+      context "with query count" do
+        def create_orders(count)
+          Array.new(count) do |i|
+            proxy_order = create_proxy_order_for(user, event_date: Date.current - i.days)
+            participant = proxy_order.proxy_order_participants.find_by!(user:)
+            guest = create(:proxy_order_participant, :guest, proxy_order:)
+            add_card_to(proxy_order, participant, unit_price_usd: 10, quantity: 2)
+            create(:proxy_order_allocation, proxy_order_item: proxy_order.proxy_order_items.first,
+                                            proxy_order_participant: guest, quantity: 1)
+            proxy_order
+          end
+        end
+
+        it "does not increase the number of queries as proxy orders grow" do
+          create_orders(3)
+          queries_for_three = count_sql_queries { get "/histories/proxy_orders" }
+
+          create_orders(7)
+          queries_for_ten = count_sql_queries { get "/histories/proxy_orders" }
+
+          expect(response.body.scan(/<tr id="history_proxy_order_\d+"/).count).to eq(10)
+          expect(queries_for_ten).to eq(queries_for_three)
+        end
+      end
+    end
+  end
 end

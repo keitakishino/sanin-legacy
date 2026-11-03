@@ -1,0 +1,45 @@
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+  <h1 class="text-3xl font-bold text-stone-800 mb-6"><%= t("histories.proxy_orders.title") %></h1>
+
+  <% if @proxy_orders.any? %>
+    <div class="overflow-x-auto border border-stone-200 rounded-lg">
+      <table class="w-full">
+        <thead class="bg-neutral-soft border-b border-stone-200">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-bold text-stone-500 uppercase"><%= t("histories.proxy_orders.event_name") %></th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-stone-500 uppercase"><%= t("histories.proxy_orders.event_date") %></th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-stone-500 uppercase"><%= t("histories.proxy_orders.status") %></th>
+            <th class="px-4 py-3 text-left text-xs font-bold text-stone-500 uppercase"><%= t("histories.proxy_orders.payment_amount") %></th>
+            <th class="px-4 py-3 text-right text-xs font-bold text-stone-500"></th>
+          </tr>
+        </thead>
+        <tbody id="proxy_orders">
+          <% @proxy_orders.each do |proxy_order| %>
+            <tr id="<%= dom_id(proxy_order, :history) %>" class="border-b border-stone-200 hover:bg-stone-50">
+              <td class="px-4 py-3 text-xs text-stone-800"><%= proxy_order.event.title %></td>
+              <td class="px-4 py-3 text-xs text-stone-800"><%= l(proxy_order.event.event_date, format: :long) %></td>
+              <td class="px-4 py-3 text-xs">
+                <span class="px-3 py-1 rounded-full font-bold text-xs bg-success-soft text-success">
+                  <%= I18n.t("activerecord.enums.proxy_order.status.completed") %>
+                </span>
+              </td>
+              <td class="px-4 py-3 text-xs text-stone-800 tabular-nums font-bold"><%= jpy_or_pending(@my_payments[proxy_order.id]) %></td>
+              <td class="px-4 py-3 text-right">
+                <%= link_to t("histories.proxy_orders.view_details"), proxy_order_path(proxy_order.event_id),
+                    class: "text-xs font-bold text-accent hover:text-accent-hover" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-6">
+      <%= paginate @proxy_orders %>
+    </div>
+  <% else %>
+    <div class="bg-stone-50 rounded-lg p-6 text-center">
+      <p class="text-stone-500 text-lg"><%= t("histories.proxy_orders.empty") %></p>
+    </div>
+  <% end %>
+</div>
