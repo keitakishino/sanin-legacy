@@ -17,6 +17,7 @@ class Admin::UsersController < Admin::BaseController
 
   def show
     @trades = @user.trades.includes(:event).order(created_at: :desc)
+    @linked_groups = GuestParticipantUnlinker.linked_groups(@user)
   end
 
   private

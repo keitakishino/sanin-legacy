@@ -17,6 +17,7 @@ class Admin::UserGuestLinksController < Admin::BaseController
 
     if result.success?
       @message = t("admin.users.guest_link.success", name: result.guest_names.uniq.join(" / "), count: result.count, username: @user.username)
+      @linked_groups = GuestParticipantUnlinker.linked_groups(@user)
       respond_to do |format|
         format.turbo_stream
         format.html { redirect_to admin_user_path(@user), notice: @message }

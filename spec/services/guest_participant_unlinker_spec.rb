@@ -245,4 +245,84 @@ RSpec.describe GuestParticipantUnlinker do
       end
     end
   end
+
+  describe ".linked_groups" do
+    context "with linked participants across multiple orders" do
+      it "groups by normalized name and includes all variations" do
+        # Create linked participants with different text representations
+        create(:proxy_order_participant, proxy_order: order_a, user: target_user, linked_from_guest_name: "Yamada")
+        create(:proxy_order_participant, proxy_order: order_b, user: target_user, linked_from_guest_name: "yamada")
+        discarded = create(:proxy_order_participant, proxy_order: order_c, user: target_user, linked_from_guest_name: "YAMADA")
+        discarded.update_column(:discarded_at, Time.current)
+
+        # Create a different linked name in a different order
+        order_d = create(:proxy_order, event: create(:event, :proxy_order, title: "Event D"))
+        create(:proxy_order_participant, proxy_order: order_d, user: target_user, linked_from_guest_name: "Suzuki")
+
+        groups = GuestParticipantUnlinker.linked_groups(target_user)
+
+        expect(groups.size).to eq(2)
+
+        # Find yamada group
+        yamada_group = groups.find { |g| g.normalized_name == "yamada" }
+        expect(yamada_group).to be_present
+        expect(yamada_group.guest_names).to match_array([ "Yamada", "yamada", "YAMADA" ])
+        expect(yamada_group.count).to eq(3)
+        expect(yamada_group.order_titles).to match_array([ "Event A", "Event B", "Event C" ])
+
+        # Find suzuki group
+        suzuki_group = groups.find { |g| g.normalized_name == "suzuki" }
+        expect(suzuki_group).to be_present
+        expect(suzuki_group.guest_names).to match_array([ "Suzuki" ])
+        expect(suzuki_group.count).to eq(1)
+        expect(suzuki_group.order_titles).to match_array([ "Event D" ])
+      end
+    end
+
+    context "when user has no linked participants" do
+      it "returns empty array" do
+        groups = GuestParticipantUnlinker.linked_groups(target_user)
+        expect(groups).to eq([])
+      end
+    end
+
+    context "with non-linked and linked participants" do
+      it "excludes non-linked participants" do
+        # Create non-linked participant
+        create(:proxy_order_participant, proxy_order: order_a, user: target_user, linked_from_guest_name: nil)
+        # Create linked participant
+        create(:proxy_order_participant, proxy_order: order_b, user: target_user, linked_from_guest_name: "Yamada")
+
+        groups = GuestParticipantUnlinker.linked_groups(target_user)
+
+        expect(groups.size).to eq(1)
+        expect(groups.first.guest_names).to match_array([ "Yamada" ])
+      end
+    end
+
+    context "with another user's linked participants" do
+      it "excludes participants from other users" do
+        other_user = create(:user, username: "other_user")
+        create(:proxy_order_participant, proxy_order: order_a, user: target_user, linked_from_guest_name: "Yamada")
+        create(:proxy_order_participant, proxy_order: order_b, user: other_user, linked_from_guest_name: "Yamada")
+
+        groups = GuestParticipantUnlinker.linked_groups(target_user)
+
+        expect(groups.size).to eq(1)
+        expect(groups.first.count).to eq(1)
+      end
+    end
+
+    context "ordering" do
+      it "returns groups sorted by normalized name" do
+        create(:proxy_order_participant, proxy_order: order_a, user: target_user, linked_from_guest_name: "Yamada")
+        create(:proxy_order_participant, proxy_order: order_b, user: target_user, linked_from_guest_name: "Alice")
+        create(:proxy_order_participant, proxy_order: order_c, user: target_user, linked_from_guest_name: "Zoe")
+
+        groups = GuestParticipantUnlinker.linked_groups(target_user)
+
+        expect(groups.map(&:normalized_name)).to eq([ "alice", "yamada", "zoe" ])
+      end
+    end
+  end
 end

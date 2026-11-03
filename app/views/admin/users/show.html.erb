@@ -65,6 +65,7 @@
     <%= link_to t("admin.users.guest_link.open_button"), new_admin_user_guest_link_path(@user),
         data: { turbo_frame: "guest_link_modal" },
         class: "inline-block bg-indigo-700 text-white px-4 py-2 rounded hover:bg-indigo-800 font-medium text-sm" %>
+    <%= render "admin/users/guest_linked_list", user: @user, groups: @linked_groups %>
   </div>
 
   <!-- Section 3: Trades -->
