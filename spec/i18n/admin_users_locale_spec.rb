@@ -30,7 +30,7 @@ RSpec.describe "admin.users の訳" do
 
       node.children.each_slice(2) do |key_node, value_node|
         key = key_node.is_a?(Psych::Nodes::Scalar) ? key_node.value : key_node.to_s
-        current_path = path + [key]
+        current_path = path + [ key ]
 
         if seen_keys[key]
           duplicates << current_path.join(".")
