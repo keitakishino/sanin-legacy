@@ -91,15 +91,7 @@
         <% end %>
       </div>
     <% else %>
-      <div class="bg-stone-50 rounded-lg p-8 text-center">
-        <p class="text-stone-500 text-lg mb-4"><%= t("dashboards.show.no_trades_message") %></p>
-        <p class="text-stone-500 text-sm mb-6">
-          <%= t("dashboards.show.no_trades_guidance") %>
-        </p>
-        <%= link_to t("dashboards.show.view_events"), events_path,
-            class: "text-accent hover:text-accent-hover font-bold text-sm",
-            data: { turbo_frame: "_top" } %>
-      </div>
+      <%= render "dashboards/empty_state", message: t("dashboards.show.no_trades_message"), guidance: t("dashboards.show.no_trades_guidance") %>
     <% end %>
   </div>
 </turbo-frame>

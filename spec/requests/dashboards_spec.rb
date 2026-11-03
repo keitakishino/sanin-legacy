@@ -55,6 +55,23 @@ RSpec.describe "Dashboards", type: :request do
         end
       end
 
+      context "when user has no proxy orders" do
+        it "displays empty state with new message" do
+          get "/"
+          expect(response.body).to include("代理通販はまだありません")
+          expect(response.body).to include("管理者があなたを参加者に追加すると、ここに表示されます。")
+          expect(response.body).not_to include("参加している代理通販はありません")
+        end
+
+        it "has exactly one events link in main content" do
+          get "/"
+          doc = Nokogiri::HTML.parse(response.body)
+          main_content = doc.css("main").first
+          events_links = main_content.css('a[href="/events"]')
+          expect(events_links.size).to eq(1)
+        end
+      end
+
       context "when user has incomplete trades" do
         let(:event2) { create(:event) }
         let!(:pending_trade) { create(:trade, user:, event:, status: :pending) }
@@ -64,6 +81,14 @@ RSpec.describe "Dashboards", type: :request do
           get "/"
           # Main dashboard should be empty, content loaded via turbo-frame
           expect(response.body).not_to include(event.title)
+        end
+
+        it "has exactly one events link in main content" do
+          get "/"
+          doc = Nokogiri::HTML.parse(response.body)
+          main_content = doc.css("main").first
+          events_links = main_content.css('a[href="/events"]')
+          expect(events_links.size).to eq(1)
         end
 
         it "displays pending trade with status badge via incomplete_trades endpoint" do
@@ -231,6 +256,19 @@ RSpec.describe "Dashboards", type: :request do
         end
       end
 
+      context "when user has proxy orders" do
+        let!(:proxy_order) { create(:proxy_order, event: create(:event, :proxy_order)) }
+        let!(:participant) { create(:proxy_order_participant, proxy_order:, user:) }
+
+        it "has exactly one events link in main content" do
+          get "/"
+          doc = Nokogiri::HTML.parse(response.body)
+          main_content = doc.css("main").first
+          events_links = main_content.css('a[href="/events"]')
+          expect(events_links.size).to eq(1)
+        end
+      end
+
       context "when other user has incomplete trades" do
         let!(:other_user_trade) { create(:trade, user: other_user, event:, status: :pending) }
 
@@ -308,13 +346,9 @@ RSpec.describe "Dashboards", type: :request do
           expect(response.body).to include("トレードはまだありません")
         end
 
-        it "includes turbo_frame=\"_top\" attribute on view_events link" do
+        it "does not include a link to events" do
           get "/dashboards/incomplete_trades"
-          doc = Nokogiri::HTML.parse(response.body)
-          # Find the link with href matching events_path
-          events_link = doc.css("a[href='#{events_path}']").first
-          expect(events_link).not_to be_nil, "Events link with href '#{events_path}' not found"
-          expect(events_link["data-turbo-frame"]).to eq("_top")
+          expect(response.body).not_to include('href="/events"')
         end
       end
 
