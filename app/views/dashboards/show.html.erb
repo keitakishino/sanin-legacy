@@ -38,9 +38,7 @@
         <% end %>
       </div>
     <% else %>
-      <p class="text-stone-600 bg-white border border-stone-200 rounded-[10px] p-4">
-        <%= t("dashboards.show.no_proxy_orders_message") %>
-      </p>
+      <%= render "dashboards/empty_state", message: t("dashboards.show.no_proxy_orders_message"), guidance: t("dashboards.show.no_proxy_orders_guidance") %>
     <% end %>
   </section>
 
