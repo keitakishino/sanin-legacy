@@ -137,6 +137,43 @@ describe AuditLog do
       expect(line).to include("理由: past date")
     end
 
+    describe "#to_line の status_code" do
+      it "status_code がある場合は末尾に付加される" do
+        log = create(:audit_log, result: :success, status_code: 302)
+        line = log.to_line
+        expect(line).to include("成功(302)")
+      end
+
+      it "status_code が 422 の失敗行は失敗(422) を含む" do
+        log = create(:audit_log, result: :failure, status_code: 422)
+        line = log.to_line
+        expect(line).to include("失敗(422)")
+      end
+
+      it "status_code が nil の場合は付加されない" do
+        log = create(:audit_log, result: :success, status_code: nil)
+        line = log.to_line
+        expect(line).to include("成功")
+        expect(line).not_to match(/成功\(\d/)
+      end
+
+      it "record! で status_code を指定すると保存される" do
+        user = create(:admin_user)
+        event = create(:event)
+
+        AuditLog.record!(
+          user: user,
+          action: "event.create",
+          target: event,
+          result: :success,
+          status_code: 302
+        )
+
+        log = AuditLog.where(action: "event.create").last
+        expect(log.status_code).to eq(302)
+      end
+    end
+
     it "user_id が nil の場合の出力" do
       log = create(:audit_log, user: nil)
       line = log.to_line

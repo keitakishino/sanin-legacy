@@ -157,6 +157,37 @@ RSpec.describe "Admin::AuditLogs", type: :request do
 
         expect(body).to include("－")
       end
+
+      it "displays result text for logs without status_code" do
+        success_log = create(:audit_log, result: :success, status_code: nil)
+        failure_log = create(:audit_log, result: :failure, status_code: nil)
+
+        get admin_audit_logs_path
+        doc = Nokogiri::HTML(response.body)
+
+        success_row = doc.css("tbody tr[data-audit-log-id='#{success_log.id}']")
+        expect(success_row.css("span.audit-log-failure-badge")).to be_empty
+        expect(success_row.text).to include("成功")
+
+        failure_row = doc.css("tbody tr[data-audit-log-id='#{failure_log.id}']")
+        expect(failure_row.css("span.audit-log-failure-badge")).not_to be_empty
+        expect(failure_row.text).to include("失敗")
+      end
+
+      it "preserves filtering and pagination with status_code logs" do
+        create_list(:audit_log, 3, result: :success, status_code: 302)
+        create_list(:audit_log, 2, result: :failure, status_code: 422)
+
+        get admin_audit_logs_path(result: "failure")
+        doc = Nokogiri::HTML(response.body)
+        rows = doc.css("tbody tr[data-audit-log-id]")
+
+        expect(rows.length).to eq(2)
+        rows.each do |row|
+          span = row.css("span.audit-log-status-code").first
+          expect(span["title"]).to eq("失敗")
+        end
+      end
     end
   end
 end
