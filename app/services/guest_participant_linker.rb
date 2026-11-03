@@ -73,7 +73,11 @@ class GuestParticipantLinker
       end
 
       valid_proxy_orders = orders.select { |o| data[:valid_proxy_orders].include?(o.id) }
-        .sort_by { |o| [ -(Event.unscoped.find(o.event_id).event_date.to_i rescue 0), -o.id ] }
+        .sort_by do |o|
+          event = Event.unscoped.find_by(id: o.event_id)
+          event_timestamp = event&.event_date&.to_time&.to_i || 0
+          [ -event_timestamp, -o.id ]
+        end
 
       Candidate.new(
         normalized_name:,
@@ -92,7 +96,7 @@ class GuestParticipantLinker
   end
 
   def call
-    normalized_key = @guest_name_key || self.class.normalize(@guest_name_key || "")
+    normalized_key = @guest_name_key
 
     guest_names = []
     participant_ids = []
