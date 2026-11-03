@@ -6,7 +6,6 @@ RSpec.describe "Error Notification", type: :request do
   shared_context "with mocked HTTP and config" do
     before do
       @sent = []
-      @threads = []
       @original_webhook_url = Rails.configuration.x.discord_error_webhook_url
       @original_release = Rails.configuration.x.release
       @subscriber = ErrorNotification::Subscriber.new
@@ -22,12 +21,7 @@ RSpec.describe "Error Notification", type: :request do
         Net::HTTPNoContent.new("1.1", "204", "No Content")
       end
 
-      # Wrap deliver_later to allow controlling Thread joining
-      allow(ErrorNotification::DiscordSender).to receive(:deliver_later).and_wrap_original do |m, *a, **k|
-        thread = m.call(*a, **k)
-        @threads << thread
-        thread
-      end
+      allow(ErrorNotification::DiscordSender).to receive(:pause)
     end
 
     after do
@@ -37,9 +31,6 @@ RSpec.describe "Error Notification", type: :request do
 
       # Unsubscribe the test subscriber to avoid affecting other tests
       Rails.error.unsubscribe(@subscriber) if defined?(@subscriber)
-
-      # Clear the mock to prevent carry-over to other specs
-      allow(ErrorNotification::DiscordSender).to receive(:deliver_later).and_call_original
     end
   end
 
@@ -82,7 +73,7 @@ RSpec.describe "Error Notification", type: :request do
         )
       end
 
-      @threads.each(&:join)
+      expect(ErrorNotification::DiscordSender.wait_until_idle).to be(true)
 
       expect(@sent.size).to eq(1)
       req = @sent.first
@@ -134,20 +125,21 @@ RSpec.describe "Error Notification", type: :request do
         source: "application.action_dispatch"
       )
 
-      @threads.each(&:join)
+      expect(ErrorNotification::DiscordSender.wait_until_idle).to be(true)
 
-      # Verify that HTTP was attempted even though it failed
       expect(Net::HTTP).to have_received(:start)
     end
 
     it "returns response before delivery completes" do
       gate = Queue.new
+      http = double("Net::HTTP")
       allow(Net::HTTP).to receive(:start) do
         gate.pop
         raise Net::ReadTimeout
       end
 
       error = RuntimeError.new("boom")
+      start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       @subscriber.report(
         error,
         handled: false,
@@ -155,11 +147,15 @@ RSpec.describe "Error Notification", type: :request do
         context: {},
         source: "application.action_dispatch"
       )
+      end_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 
-      expect(@threads.first.alive?).to be true
+      expect(end_time - start_time).to be < 1
+
+      worker = ErrorNotification::DiscordSender.worker_thread
+      expect(worker).to be_alive
 
       gate << true
-      @threads.each(&:join)
+      expect(ErrorNotification::DiscordSender.wait_until_idle).to be(true)
     end
   end
 
