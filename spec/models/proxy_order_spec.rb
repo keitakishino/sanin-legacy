@@ -260,6 +260,21 @@ RSpec.describe ProxyOrder, type: :model do
         end
       end
 
+      context "when usd_jpy_rate is cleared after all participants are handed over" do
+        before do
+          create(:proxy_order_price_line, proxy_order_item: item, quantity: 3, lost_quantity: 0, unit_price_usd: 10)
+          create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 3, lost_quantity: 0)
+          participant.update(handed_over_at: Time.current)
+          proxy_order.update(usd_jpy_rate: nil)
+        end
+
+        it "returns false and adds error" do
+          expect(proxy_order.transition_to("completed")).to be false
+          expect(proxy_order.reload.status).to eq("arrived")
+          expect(proxy_order.errors[:base]).to include(match(/rate|レート/))
+        end
+      end
+
       context "when participant is total loss" do
         before do
           create(:proxy_order_price_line, proxy_order_item: item, quantity: 3, lost_quantity: 3, unit_price_usd: 10)
