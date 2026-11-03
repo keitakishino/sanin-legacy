@@ -34,8 +34,9 @@ RSpec.describe "Hamburger Menu", type: :system do
         visit root_path
       end
 
-      it "PC ナビに「イベント管理」「ユーザー管理」「招待コード管理」のリンクがあり、「イベント管理」をクリックすると admin_events_path に移る" do
+      it "PC ナビに「履歴」「イベント管理」「ユーザー管理」「招待コード管理」のリンクがあり、「イベント管理」をクリックすると admin_events_path に移る" do
         nav = find("nav:not([data-hamburger-menu-target])")
+        expect(nav).to have_link("履歴", exact_text: true)
         expect(nav).to have_link("イベント管理")
         expect(nav).to have_link("ユーザー管理")
         expect(nav).to have_link("招待コード管理")
@@ -146,6 +147,7 @@ RSpec.describe "Hamburger Menu", type: :system do
         hamburger_button.click
 
         expect(drawer).to have_link("ダッシュボード")
+        expect(drawer).to have_link("履歴", exact_text: true)
         expect(drawer).to have_link("イベント管理")
         expect(drawer).to have_link("ユーザー管理")
         expect(drawer).to have_link("招待コード管理")
