@@ -6,6 +6,10 @@
   <%= render "admin/proxy_orders/summary" %>
 <% end %>
 
+<%= turbo_stream.replace "proxy_order_fee_tiles" do %>
+  <%= render "admin/proxy_orders/fee_tiles" %>
+<% end %>
+
 <%= turbo_stream.append "toast-container" do %>
   <%= render(partial: "shared/toast", locals: { message: t(".deleted") }, formats: [:html]) %>
 <% end %>
