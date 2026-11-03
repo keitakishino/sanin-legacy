@@ -40,12 +40,19 @@ class ApplicationController < ActionController::Base
     redirect_to signin_path unless user_signed_in?
   end
 
+  # ログイン前のセッションをそのまま認証済みセッションに昇格させない（セッション固定対策）。
+  # reset_session はセッションを作り直し、CSRF トークンも再発行するため、
+  # ログイン直前に攻撃者が仕込んだセッション ID は認証後には使えなくなる。
+  # 呼び出し側がセッションに入れた値（signup_token など）もここで消えるので、
+  # log_in より前に読み終えておくこと。
   def log_in(user)
+    reset_session
     session[:user_id] = user.id
+    @current_user = user
   end
 
   def log_out
-    session.delete(:user_id)
+    reset_session
     @current_user = nil
   end
 
