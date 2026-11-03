@@ -9,6 +9,11 @@ ja:
     event_ended: "このイベントは終了しています"
     not_trade_event: "このイベントにはトレードがありません"
   histories:
+    title: "履歴"
+    tabs:
+      label: "履歴の種類"
+      trades: "トレード"
+      proxy_orders: "代理通販"
     proxy_orders:
       title: "通販履歴"
       empty: "完了した代理通販はありません"
