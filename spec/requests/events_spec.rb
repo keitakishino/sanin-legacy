@@ -149,6 +149,48 @@ RSpec.describe "Events", type: :request do
           expect(response.body).not_to include("Past Event")
         end
       end
+
+      it "shows the event type label above the title in each card" do
+        trade_event = create(:event, :trade, title: "Trade Event", event_date: Event.current_date + 5.days)
+        tournament_event = create(:event, :tournament, title: "Tournament Event", event_date: Event.current_date + 7.days)
+        proxy_event = create(:event, :proxy_order, title: "Proxy Event", event_date: Event.current_date + 10.days)
+
+        get "/events"
+        doc = Nokogiri::HTML.parse(response.body)
+
+        # Check trade event
+        trade_link = doc.at_css("a[href='#{event_path(trade_event)}']")
+        expect(trade_link).not_to be_nil
+        trade_label = trade_link.at_css("span.rounded-full")
+        expect(trade_label).not_to be_nil
+        expect(trade_label.text.strip).to eq("トレード")
+        expect(trade_label[:class]).to include("bg-want-soft")
+        trade_link_text_index = trade_link.text.index("トレード")
+        trade_title_index = trade_link.text.index("Trade Event")
+        expect(trade_link_text_index).to be < trade_title_index
+
+        # Check tournament event
+        tournament_link = doc.at_css("a[href='#{event_path(tournament_event)}']")
+        expect(tournament_link).not_to be_nil
+        tournament_label = tournament_link.at_css("span.rounded-full")
+        expect(tournament_label).not_to be_nil
+        expect(tournament_label.text.strip).to eq("大会")
+        expect(tournament_label[:class]).to include("bg-warning-soft")
+        tournament_link_text_index = tournament_link.text.index("大会")
+        tournament_title_index = tournament_link.text.index("Tournament Event")
+        expect(tournament_link_text_index).to be < tournament_title_index
+
+        # Check proxy event
+        proxy_link = doc.at_css("a[href='#{event_path(proxy_event)}']")
+        expect(proxy_link).not_to be_nil
+        proxy_label = proxy_link.at_css("span.rounded-full")
+        expect(proxy_label).not_to be_nil
+        expect(proxy_label.text.strip).to eq("代理通販")
+        expect(proxy_label[:class]).to include("bg-accent-soft")
+        proxy_link_text_index = proxy_link.text.index("代理通販")
+        proxy_title_index = proxy_link.text.index("Proxy Event")
+        expect(proxy_link_text_index).to be < proxy_title_index
+      end
     end
   end
 

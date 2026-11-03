@@ -1,0 +1,10 @@
+<%
+  tone = {
+    "trade"       => "bg-want-soft text-want-text",
+    "tournament"  => "bg-warning-soft text-warning",
+    "proxy_order" => "bg-accent-soft text-accent"
+  }.fetch(event_type.to_s, "bg-neutral-soft text-stone-500")
+%>
+<span class="inline-block px-[10px] py-0.5 rounded-full text-xs font-bold whitespace-nowrap <%= tone %>">
+  <%= t("activerecord.attributes.event.event_types.#{event_type}") %>
+</span>

@@ -65,6 +65,76 @@ RSpec.describe "Admin::Events", type: :request do
         get admin_events_path
         expect(response.body).to include(admin_user.email)
       end
+
+      it "does not have a 種類 column header" do
+        create(:event, created_by: admin_user)
+        get admin_events_path
+        headers = Nokogiri::HTML(response.body).css("thead th").map { _1.text.strip }
+        expect(headers).not_to include(I18n.t("activerecord.attributes.event.event_type"))
+      end
+
+      it "shows the event type label before the title in the title cell" do
+        trade_event = create(:event, :trade, created_by: admin_user, title: "Trade Event")
+        tournament_event = create(:event, :tournament, created_by: admin_user, title: "Tournament Event")
+        proxy_event = create(:event, :proxy_order, created_by: admin_user, title: "Proxy Event")
+
+        get admin_events_path
+        doc = Nokogiri::HTML(response.body)
+
+        # Check trade event
+        trade_row = doc.css("tbody#events tr").find { |row| row.text.include?(trade_event.title) }
+        expect(trade_row).not_to be_nil
+        trade_label = trade_row.css("td:first span.rounded-full").first
+        expect(trade_label).not_to be_nil
+        expect(trade_label.text.strip).to eq("トレード")
+        expect(trade_label[:class]).to include("bg-want-soft")
+        expect(trade_row.text.index("トレード")).to be < trade_row.text.index(trade_event.title)
+
+        # Check tournament event
+        tournament_row = doc.css("tbody#events tr").find { |row| row.text.include?(tournament_event.title) }
+        expect(tournament_row).not_to be_nil
+        tournament_label = tournament_row.css("td:first span.rounded-full").first
+        expect(tournament_label).not_to be_nil
+        expect(tournament_label.text.strip).to eq("大会")
+        expect(tournament_label[:class]).to include("bg-warning-soft")
+        expect(tournament_row.text.index("大会")).to be < tournament_row.text.index(tournament_event.title)
+
+        # Check proxy event
+        proxy_row = doc.css("tbody#events tr").find { |row| row.text.include?(proxy_event.title) }
+        expect(proxy_row).not_to be_nil
+        proxy_label = proxy_row.css("td:first span.rounded-full").first
+        expect(proxy_label).not_to be_nil
+        expect(proxy_label.text.strip).to eq("代理通販")
+        expect(proxy_label[:class]).to include("bg-accent-soft")
+        expect(proxy_row.text.index("代理通販")).to be < proxy_row.text.index(proxy_event.title)
+
+        # Check that title cell doesn't have hidden class
+        expect(trade_row.css("td:first").first["class"]).not_to include("hidden")
+      end
+
+      it "keeps proxy order details, edit and delete with confirm" do
+        proxy_event = create(:event, :proxy_order, created_by: admin_user, title: "Proxy Event")
+        trade_event = create(:event, :trade, created_by: admin_user, title: "Trade Event")
+
+        get admin_events_path
+        doc = Nokogiri::HTML(response.body)
+
+        proxy_row = doc.css("tbody#events tr").find { |row| row.text.include?(proxy_event.title) }
+        trade_row = doc.css("tbody#events tr").find { |row| row.text.include?(trade_event.title) }
+
+        # Check proxy event has the details link
+        expect(proxy_row.css("a").map { |a| a["href"] }).to include(admin_event_proxy_order_path(proxy_event))
+        # Check proxy event has edit and delete
+        expect(proxy_row.css("a").map { |a| a["href"] }).to include(edit_admin_event_path(proxy_event))
+        delete_button = proxy_row.css("button[data-turbo-confirm]").first
+        expect(delete_button).not_to be_nil
+        expect(delete_button["data-turbo-confirm"]).to eq(I18n.t("admin.events.confirm_delete"))
+
+        # Check trade event doesn't have proxy order details link
+        expect(trade_row.css("a").map { |a| a["href"] }).not_to include(admin_event_proxy_order_path(trade_event))
+        # But has edit
+        expect(trade_row.css("a").map { |a| a["href"] }).to include(edit_admin_event_path(trade_event))
+      end
     end
   end
 

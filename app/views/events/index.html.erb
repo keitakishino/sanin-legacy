@@ -10,6 +10,7 @@
               data: { turbo_frame: "event_modal" } do %>
             <div class="flex items-start justify-between">
               <div>
+                <p class="mb-2"><%= render "shared/event_type_label", event_type: event.event_type %></p>
                 <p class="text-lg font-bold text-stone-800"><%= event.title %></p>
                 <p class="text-xs text-stone-500 mt-2">
                   <%= event.event_date.strftime("%Y年%m月%d日") %>
