@@ -960,15 +960,18 @@ RSpec.describe "TradeCardOffers", type: :request do
   end
 
   describe "GET /trades/:event_id (show trade with offers and edit toggle)" do
-    it "renders edit button with toggleEditForm onclick handler" do
+    it "renders edit button wired to the edit-form-toggle Stimulus controller" do
       trade_card_offer = create(:trade_card_offer, trade: trade)
       get trade_path(event)
 
       expect(response).to have_http_status(:ok)
-      # Check that the onclick handler is present with correct form and expand IDs
+      # インラインの onclick は CSP で動かないため data 属性で渡している
       form_id = "edit_form_trade_card_offer_#{trade_card_offer.id}"
       expand_id = "expand_trade_card_offer_#{trade_card_offer.id}"
-      expect(response.body).to include(%Q{onclick="toggleEditForm('#{form_id}', '#{expand_id}')"})
+      expect(response.body).to include(%Q(data-edit-form-toggle-form-value="#{form_id}"))
+      expect(response.body).to include(%Q(data-edit-form-toggle-expand-value="#{expand_id}"))
+      expect(response.body).to include(%Q(data-action="click->edit-form-toggle#toggle"))
+      expect(response.body).not_to include("onclick=")
     end
 
     it "renders edit form row with display:none style by default" do
@@ -990,7 +993,8 @@ RSpec.describe "TradeCardOffers", type: :request do
       offers.each do |offer|
         form_id = "edit_form_trade_card_offer_#{offer.id}"
         expand_id = "expand_trade_card_offer_#{offer.id}"
-        expect(response.body).to include(%Q{onclick="toggleEditForm('#{form_id}', '#{expand_id}')"})
+        expect(response.body).to include(%Q(data-edit-form-toggle-form-value="#{form_id}"))
+        expect(response.body).to include(%Q(data-edit-form-toggle-expand-value="#{expand_id}"))
         expect(response.body).to include(%Q(id="#{form_id}"))
       end
     end

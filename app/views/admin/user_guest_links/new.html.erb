@@ -7,7 +7,7 @@
           <h2 class="text-xl font-bold text-stone-800"><%= t("admin.users.guest_link.modal_title") %></h2>
           <p class="text-xs text-stone-500"><%= t("admin.users.guest_link.target_user", username: @user.username) %></p>
         </div>
-        <button type="button" aria-label="<%= t("admin.users.guest_link.close") %>" onclick="document.getElementById('guest_link_modal').innerHTML = ''" class="text-stone-400 hover:text-stone-600 focus:outline-none">
+        <button type="button" aria-label="<%= t("admin.users.guest_link.close") %>" data-controller="modal" data-modal-frame-value="guest_link_modal" data-action="click->modal#close" class="text-stone-400 hover:text-stone-600 focus:outline-none">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
@@ -48,7 +48,7 @@
         <% else %>
           <p class="text-xs text-stone-500 mb-4"><%= t("admin.users.guest_link.results_count", count: @candidates.size) %></p>
 
-          <%= form_with url: admin_user_guest_link_path(@user), method: :post, id: "guest_link_form", local: true, html: { class: "group", onchange: "document.getElementById('guest_link_submit').disabled = !this.querySelector('input[name=guest_name_key]:checked')" } do |f| %>
+          <%= form_with url: admin_user_guest_link_path(@user), method: :post, id: "guest_link_form", local: true, html: { class: "group", data: { controller: "radio-required", action: "change->radio-required#refresh", radio_required_name_value: "guest_name_key" } } do |f| %>
             <%= hidden_field_tag :q, @q %>
 
             <div class="overflow-x-auto">
@@ -94,10 +94,10 @@
 
             <!-- Footer -->
             <div class="px-6 py-4 border-t border-stone-200 flex justify-end gap-2 -mx-6 -mb-4">
-              <button type="button" onclick="document.getElementById('guest_link_modal').innerHTML = ''" class="px-3 py-1.5 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs">
+              <button type="button" data-controller="modal" data-modal-frame-value="guest_link_modal" data-action="click->modal#close" class="px-3 py-1.5 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs">
                 <%= t("admin.users.guest_link.cancel") %>
               </button>
-              <%= submit_tag t("admin.users.guest_link.submit"), id: "guest_link_submit", disabled: true, class: "bg-indigo-700 text-white px-4 py-2 rounded hover:bg-indigo-800 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed" %>
+              <%= submit_tag t("admin.users.guest_link.submit"), id: "guest_link_submit", disabled: true, data: { radio_required_target: "submit" }, class: "bg-indigo-700 text-white px-4 py-2 rounded hover:bg-indigo-800 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed" %>
             </div>
           <% end %>
         <% end %>

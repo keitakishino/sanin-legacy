@@ -32,6 +32,9 @@ module Users
       end
 
       if @user.update(user_params)
+        # パスワードを変えると session_auth_token が変わり、発行済みのセッションは
+        # すべて失効する。操作中の本人まで締め出さないよう、ここで発行し直す。
+        log_in(@user) if @user.saved_change_to_password_digest?
         redirect_to mypage_path, notice: "プロフィールが更新されました"
       else
         render :edit, status: :unprocessable_entity

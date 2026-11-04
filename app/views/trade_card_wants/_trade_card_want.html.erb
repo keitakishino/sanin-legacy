@@ -24,7 +24,10 @@
         <button
           type="button"
           class="px-2 py-1 text-emerald-700 hover:bg-emerald-50 text-xs rounded hover:opacity-90 font-bold max-md:whitespace-nowrap"
-          onclick="toggleEditForm('edit_form_<%= dom_id(trade_card_want) %>', 'expand_<%= dom_id(trade_card_want) %>')">
+          data-controller="edit-form-toggle"
+          data-edit-form-toggle-form-value="edit_form_<%= dom_id(trade_card_want) %>"
+          data-edit-form-toggle-expand-value="expand_<%= dom_id(trade_card_want) %>"
+          data-action="click->edit-form-toggle#toggle">
           編集
         </button>
         <%= button_to "削除", trade_card_want_path(@trade.event, trade_card_want), method: :delete, form: { local: true, data: { turbo: true } }, class: "px-2 py-1 text-red-700 hover:bg-red-50 text-xs rounded hover:opacity-90 font-bold max-md:whitespace-nowrap" %>

@@ -100,7 +100,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="<%= content_security_policy_nonce %>">
   (() => {
     const statusSelect = document.getElementById('trade_status');
     const cancelledReasonSection = document.getElementById('cancelled_reason_section');

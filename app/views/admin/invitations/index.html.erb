@@ -39,7 +39,7 @@
     </div>
   </div>
 
-  <script>
+  <script nonce="<%= content_security_policy_nonce %>">
     // Mobile accordion expansion
     function setupExpandButtons() {
       document.querySelectorAll('[data-toggle-expand]').forEach(button => {

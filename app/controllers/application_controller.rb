@@ -8,8 +8,15 @@ class ApplicationController < ActionController::Base
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
 
+  # セッションの絶対的な上限。
+  # クッキー側の expire_after（config/initializers/session_store.rb）はリクエストの
+  # たびに延びるため、使われ続けている限り期限が来ない。盗まれたクッキーが
+  # いつまでも通ることがないよう、発行時刻からの経過でも打ち切る。
+  SESSION_MAX_AGE = 14.days
+
   helper_method :current_user, :user_signed_in?
 
+  before_action :discard_invalid_session
   before_action :set_i18n_locale
 
   rescue_from ForbiddenError, with: :handle_forbidden
@@ -28,8 +35,46 @@ class ApplicationController < ActionController::Base
     render "errors/show", status: :forbidden, layout: "error", formats: [ :html ]
   end
 
+  # 失効したセッションのクッキーをリクエストの入口で捨てる。
+  # 捨てておかないと、同じクッキーが次のリクエストでも送られ続ける。
+  def discard_invalid_session
+    return if session[:user_id].blank?
+    return if current_user.present?
+
+    reset_session
+  end
+
   def current_user
-    @current_user ||= session[:user_id] ? User.find_by(id: session[:user_id]) : nil
+    return @current_user if defined?(@current_user)
+
+    @current_user = authenticate_from_session
+  end
+
+  def authenticate_from_session
+    return nil if session[:user_id].blank?
+    return nil unless session_within_max_age?
+
+    user = User.find_by(id: session[:user_id])
+    return nil if user.nil?
+    return nil unless session_credentials_current?(user)
+
+    user
+  end
+
+  def session_within_max_age?
+    issued_at = session[:issued_at]
+    return false if issued_at.blank?
+
+    Time.zone.at(issued_at.to_i) > SESSION_MAX_AGE.ago
+  end
+
+  # パスワード変更やユーザー削除のあとに発行済みだったセッションを通さない。
+  # 値そのものは User#session_auth_token が作る。
+  def session_credentials_current?(user)
+    ActiveSupport::SecurityUtils.secure_compare(
+      session[:auth_token].to_s,
+      user.session_auth_token
+    )
   end
 
   def user_signed_in?
@@ -40,12 +85,21 @@ class ApplicationController < ActionController::Base
     redirect_to signin_path unless user_signed_in?
   end
 
+  # ログイン前のセッションをそのまま認証済みセッションに昇格させない（セッション固定対策）。
+  # reset_session はセッションを作り直し、CSRF トークンも再発行するため、
+  # ログイン直前に攻撃者が仕込んだセッション ID は認証後には使えなくなる。
+  # 呼び出し側がセッションに入れた値（signup_token など）もここで消えるので、
+  # log_in より前に読み終えておくこと。
   def log_in(user)
+    reset_session
     session[:user_id] = user.id
+    session[:issued_at] = Time.current.to_i
+    session[:auth_token] = user.session_auth_token
+    @current_user = user
   end
 
   def log_out
-    session.delete(:user_id)
+    reset_session
     @current_user = nil
   end
 

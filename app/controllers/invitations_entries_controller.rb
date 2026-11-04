@@ -1,4 +1,11 @@
 class InvitationsEntriesController < ApplicationController
+  include RateLimitable
+
+  # 招待コードの総当たり対策。コード自体は 12 桁の英数字で総当たりは現実的でないが、
+  # 招待制の入口なので試行回数そのものを絞っておく。
+  rate_limit_auth to: 10, within: 10.minutes, name: "invitation-code",
+                  only: :create, with: :rate_limited_response
+
   def new
     @invitation = Invitation.new
   end
@@ -51,5 +58,12 @@ class InvitationsEntriesController < ApplicationController
     end
 
     redirect_to signup_path(token: token)
+  end
+
+  private
+
+  def rate_limited_response
+    @invitation = Invitation.new
+    render_rate_limited(:new)
   end
 end

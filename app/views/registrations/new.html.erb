@@ -1,5 +1,5 @@
 <div class="bg-stone-50 min-h-screen flex items-center justify-center -mx-4 py-8">
-  <div class="bg-white border border-stone-200 rounded-lg p-8 max-w-xs w-full">
+  <div class="bg-white border border-stone-200 rounded-lg p-8 max-w-xs w-full" data-controller="email-signup-form">
     <h2 class="text-2xl font-bold text-stone-800 mb-6">サインアップ</h2>
 
     <% if flash[:alert] %>
@@ -12,7 +12,7 @@
       <h3 class="text-lg font-bold text-stone-800 mb-4">認証方式を選択</h3>
 
       <div class="space-y-3">
-        <button type="button" class="w-full px-4 py-2 bg-white border border-stone-300 text-stone-800 rounded-md hover:bg-stone-50 font-bold text-xs" onclick="showEmailForm()">
+        <button type="button" class="w-full px-4 py-2 bg-white border border-stone-300 text-stone-800 rounded-md hover:bg-stone-50 font-bold text-xs" data-action="click->email-signup-form#show">
           メール＆パスワード
         </button>
 
@@ -26,7 +26,7 @@
       </div>
     </div>
 
-    <div id="email-form" class="mt-6<%= ' hidden' unless @show_email_form %>">
+    <div id="email-form" data-email-signup-form-target="form" class="mt-6<%= ' hidden' unless @show_email_form %>">
       <hr class="mb-6 border-stone-200">
       <h3 class="text-lg font-bold text-stone-800 mb-4">メール＆パスワード登録</h3>
 
@@ -55,19 +55,9 @@
 
         <div class="flex items-center gap-2">
           <%= f.submit "アカウント作成", class: "px-4 py-2 bg-accent text-white rounded-md hover:bg-accent-hover font-bold text-xs" %>
-          <button type="button" class="text-stone-500 hover:text-stone-700 text-xs font-semibold" onclick="hideEmailForm()">キャンセル</button>
+          <button type="button" class="text-stone-500 hover:text-stone-700 text-xs font-semibold" data-action="click->email-signup-form#hide">キャンセル</button>
         </div>
       <% end %>
     </div>
   </div>
 </div>
-
-<script>
-  function showEmailForm() {
-    document.getElementById('email-form').classList.remove('hidden');
-  }
-
-  function hideEmailForm() {
-    document.getElementById('email-form').classList.add('hidden');
-  }
-</script>

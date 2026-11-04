@@ -331,3 +331,4 @@ en:
     internal_server_error:
       title: "A server error occurred"
       message: "Please try again later"
+    rate_limited: "Too many attempts. Please wait a while and try again."
