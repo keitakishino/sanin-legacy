@@ -44,6 +44,8 @@ en:
       label: "History type"
       trades: "Trades"
       proxy_orders: "Proxy Orders"
+    trades:
+      view_details: "View details"
     proxy_orders:
       title: "Proxy Order History"
       empty: "There are no completed proxy orders"

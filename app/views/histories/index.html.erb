@@ -9,9 +9,6 @@
           <tr>
             <th class="px-4 py-3 text-left text-xs font-bold text-stone-500 uppercase">イベント名</th>
             <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500 uppercase">日時</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500 uppercase">出す枚数</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500 uppercase">ほしい枚数</th>
-            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500 uppercase">差額</th>
             <th class="px-4 py-3 text-left text-xs font-bold text-stone-500 uppercase">ステータス</th>
             <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500 uppercase">完了/キャンセル日時</th>
             <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-bold text-stone-500 uppercase">キャンセル理由</th>
@@ -23,9 +20,6 @@
             <tr class="border-b border-stone-200 hover:bg-stone-50">
               <td class="px-4 py-3 text-xs text-stone-800"><%= trade.event&.title || "（イベント情報不可）" %></td>
               <td class="hidden md:table-cell px-4 py-3 text-xs text-stone-800"><%= trade.event&.event_date&.strftime("%Y年%m月%d日") || "—" %></td>
-              <td class="hidden md:table-cell px-4 py-3 text-xs text-stone-800"><%= trade.trade_card_offers.sum(:quantity) %></td>
-              <td class="hidden md:table-cell px-4 py-3 text-xs text-stone-800"><%= trade.trade_card_wants.sum(:quantity) %></td>
-              <td class="hidden md:table-cell px-4 py-3 text-xs text-stone-800"><%= number_with_delimiter(trade.net_amount) %></td>
               <td class="px-4 py-3 text-xs">
                 <% case trade.status
                    when "pending"
@@ -65,13 +59,20 @@
                 <% end %>
               </td>
               <td class="px-4 py-3 text-right">
-                <button
-                  type="button"
-                  class="px-2 py-1 text-stone-500 hover:bg-stone-100 text-xs expand-btn"
-                  data-toggle-expand="<%= dom_id(trade) %>"
-                  aria-expanded="false">
-                  ▼
-                </button>
+                <div class="flex items-center justify-end gap-2">
+                  <%# イベントが論理削除されているとトレード画面を開けないので、その行はリンクを出さない %>
+                  <% if trade.event.present? %>
+                    <%= link_to t("histories.trades.view_details"), trade_path(trade.event_id),
+                        class: "text-xs font-bold text-accent hover:text-accent-hover" %>
+                  <% end %>
+                  <button
+                    type="button"
+                    class="px-2 py-1 text-stone-500 hover:bg-stone-100 text-xs expand-btn"
+                    data-toggle-expand="<%= dom_id(trade) %>"
+                    aria-expanded="false">
+                    ▼
+                  </button>
+                </div>
               </td>
             </tr>
             <tr id="expand_<%= dom_id(trade) %>" class="border-b border-stone-200 md:hidden" style="display: none;">
@@ -79,15 +80,6 @@
                 <div class="space-y-2 text-sm">
                   <div>
                     <strong>日時:</strong> <%= trade.event&.event_date&.strftime("%Y年%m月%d日") || "—" %>
-                  </div>
-                  <div>
-                    <strong>出す枚数:</strong> <%= trade.trade_card_offers.sum(:quantity) %>
-                  </div>
-                  <div>
-                    <strong>ほしい枚数:</strong> <%= trade.trade_card_wants.sum(:quantity) %>
-                  </div>
-                  <div>
-                    <strong>差額:</strong> <%= number_with_delimiter(trade.net_amount) %>
                   </div>
                   <div>
                     <strong>完了/キャンセル日時:</strong>
