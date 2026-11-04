@@ -178,6 +178,33 @@ RSpec.describe "HistoriesController", type: :request do
         end
       end
 
+      context "一覧の列" do
+        let!(:completed_trade) do
+          create(:trade, user:, event:, status: :completed, completed_at: 1.day.ago,
+                         offers_total_amount: 1000, wants_total_amount: 900, net_amount: 100)
+        end
+
+        before do
+          create(:trade_card_offer, trade: completed_trade, quantity: 3)
+          create(:trade_card_want, trade: completed_trade, quantity: 2)
+        end
+
+        it "出す枚数・ほしい枚数・差額を出さない" do
+          get "/histories"
+
+          expect(response.body).not_to include("出す枚数")
+          expect(response.body).not_to include("ほしい枚数")
+          expect(response.body).not_to include("差額")
+        end
+
+        it "行末にトレード詳細へのリンクを出す" do
+          get "/histories"
+
+          expect(response.body).to include("詳細を表示")
+          expect(response.body).to include(%(href="#{trade_path(event.id)}"))
+        end
+      end
+
       context "with discarded event" do
         let!(:discarded_event) { create(:event, discarded_at: 1.day.ago) }
         let!(:trade) do
@@ -194,6 +221,13 @@ RSpec.describe "HistoriesController", type: :request do
           get "/histories"
 
           expect(response.body).not_to include(discarded_event.title)
+        end
+
+        it "トレード詳細へのリンクを出さない" do
+          get "/histories"
+
+          expect(response.body).not_to include("詳細を表示")
+          expect(response.body).not_to include(%(href="#{trade_path(discarded_event.id)}"))
         end
       end
 
