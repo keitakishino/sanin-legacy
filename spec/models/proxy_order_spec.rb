@@ -289,6 +289,21 @@ RSpec.describe ProxyOrder, type: :model do
           expect(proxy_order.reload.status).to eq("completed")
         end
       end
+
+      context "when participant with small payment is not handed over" do
+        before do
+          proxy_order.update(usd_jpy_rate: 150)
+          create(:proxy_order_price_line, proxy_order_item: item, quantity: 1, lost_quantity: 0, unit_price_usd: 3)
+          create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 1, lost_quantity: 0)
+          participant.update(handed_over_at: nil)
+        end
+
+        it "[C4] 換算額が 500 円未満の参加者も手渡し未チェックなら完了にできない" do
+          expect(proxy_order.transition_to("completed")).to be false
+          expect(proxy_order.status).to eq("arrived")
+          expect(proxy_order.errors[:base]).to include(match(/handed|手渡し/))
+        end
+      end
     end
 
     describe "completed -> arrived" do

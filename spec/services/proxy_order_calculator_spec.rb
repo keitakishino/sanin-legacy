@@ -74,7 +74,7 @@ RSpec.describe ProxyOrderCalculator do
       expect(calculator.fee_per_person).to eq(BigDecimal("8.34"))
     end
 
-    it '全損の参加者は手数料なし・N に含めない' do
+    it '[C3] 全損の参加者は手数料なし・N に含めない' do
       proxy_order = create(:proxy_order, tax_usd: 20, customs_usd: 10, shipping_usd: 20, usd_jpy_rate: 150)
       item = create(:proxy_order_item, proxy_order:)
       create(:proxy_order_price_line, proxy_order_item: item, unit_price_usd: 10, quantity: 1)
@@ -127,11 +127,15 @@ RSpec.describe ProxyOrderCalculator do
     end
   end
 
-  describe '.round_1000' do
-    it '1,000 円単位に四捨五入し 500 円は切り上げ' do
-      expect(ProxyOrderCalculator.round_1000(4125)).to eq(4000)
-      expect(ProxyOrderCalculator.round_1000(4500)).to eq(5000)
-      expect(ProxyOrderCalculator.round_1000(4499)).to eq(4000)
+  describe '.ceil_100' do
+    it '[C1] 100 円単位に切り上げる' do
+      expect(ProxyOrderCalculator.ceil_100(4125)).to eq(4200)
+      expect(ProxyOrderCalculator.ceil_100(4500)).to eq(4500)
+      expect(ProxyOrderCalculator.ceil_100(4501)).to eq(4600)
+      expect(ProxyOrderCalculator.ceil_100(1)).to eq(100)
+      expect(ProxyOrderCalculator.ceil_100(400)).to eq(400)
+      expect(ProxyOrderCalculator.ceil_100(0)).to eq(0)
+      expect(ProxyOrderCalculator.ceil_100(BigDecimal("1612.5"))).to eq(1700)
     end
   end
 
@@ -146,9 +150,9 @@ RSpec.describe ProxyOrderCalculator do
 
       calculator = ProxyOrderCalculator.new(proxy_order)
 
-      # payment_usd = $30.00、rate 137.5 → 4125 → 4000
+      # payment_usd = $30.00、rate 137.5 → 4125 → 4200
       expect(calculator.payment_usd(participant)).to eq(BigDecimal("30"))
-      expect(calculator.payment_jpy(participant)).to eq(4000)
+      expect(calculator.payment_jpy(participant)).to eq(4200)
     end
 
     it 'payment_usd × レート（150）を丸める' do
@@ -161,9 +165,9 @@ RSpec.describe ProxyOrderCalculator do
 
       calculator = ProxyOrderCalculator.new(proxy_order)
 
-      # payment_usd = $30.00、rate 150 → 4500 → 5000
+      # payment_usd = $30.00、rate 150 → 4500 → 4500
       expect(calculator.payment_usd(participant)).to eq(BigDecimal("30"))
-      expect(calculator.payment_jpy(participant)).to eq(5000)
+      expect(calculator.payment_jpy(participant)).to eq(4500)
     end
 
     it 'レート未設定なら nil' do
@@ -177,6 +181,34 @@ RSpec.describe ProxyOrderCalculator do
       calculator = ProxyOrderCalculator.new(proxy_order)
 
       expect(calculator.payment_jpy(participant)).to be_nil
+    end
+
+    it '[C2] 換算額が 500 円未満でも 0 円にならず 100 円単位に切り上げる' do
+      proxy_order = create(:proxy_order, tax_usd: 0, customs_usd: 0, shipping_usd: 0, usd_jpy_rate: 150)
+      item = create(:proxy_order_item, proxy_order:)
+      create(:proxy_order_price_line, proxy_order_item: item, unit_price_usd: 3, quantity: 1)
+
+      participant = create(:proxy_order_participant, proxy_order:)
+      create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 1)
+
+      calculator = ProxyOrderCalculator.new(proxy_order)
+
+      # $3 × 150 = 450 → 500
+      expect(calculator.payment_jpy(participant)).to eq(500)
+    end
+
+    it '[C2] $4 × 100 円/$ は 400 円' do
+      proxy_order = create(:proxy_order, tax_usd: 0, customs_usd: 0, shipping_usd: 0, usd_jpy_rate: 100)
+      item = create(:proxy_order_item, proxy_order:)
+      create(:proxy_order_price_line, proxy_order_item: item, unit_price_usd: 4, quantity: 1)
+
+      participant = create(:proxy_order_participant, proxy_order:)
+      create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 1)
+
+      calculator = ProxyOrderCalculator.new(proxy_order)
+
+      # $4 × 100 = 400 → 400（100 の倍数なのでそのまま）
+      expect(calculator.payment_jpy(participant)).to eq(400)
     end
   end
 
@@ -198,7 +230,7 @@ RSpec.describe ProxyOrderCalculator do
 
       ActiveSupport::Notifications.subscribed(counter, 'sql.active_record') do
         calculator = ProxyOrderCalculator.new(loaded)
-        expect(calculator.payment_jpy(loaded_participant)).to eq(5000)
+        expect(calculator.payment_jpy(loaded_participant)).to eq(4500)
       end
 
       expect(queries).to be_empty

@@ -70,11 +70,11 @@ class ProxyOrderCalculator
     return 0 if total_loss?(participant)
     return nil if @proxy_order.usd_jpy_rate.nil?
 
-    self.class.round_1000(payment_usd(participant) * @proxy_order.usd_jpy_rate)
+    self.class.ceil_100(payment_usd(participant) * @proxy_order.usd_jpy_rate)
   end
 
-  def self.round_1000(yen)
-    (BigDecimal(yen.to_s) / 1000).round(0, half: :up).to_i * 1000
+  def self.ceil_100(yen)
+    (BigDecimal(yen.to_s) / 100).ceil.to_i * 100
   end
 
   private
