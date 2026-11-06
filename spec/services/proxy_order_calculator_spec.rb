@@ -46,6 +46,16 @@ RSpec.describe ProxyOrderCalculator do
     end
   end
 
+  describe '#fee_total' do
+    it '[C4] 税 20 + 関税 10 + 送料 20 + 決済手数料 5 = $55' do
+      proxy_order = create(:proxy_order, tax_usd: 20, customs_usd: 10, shipping_usd: 20, payment_fee_usd: 5)
+
+      calculator = ProxyOrderCalculator.new(proxy_order)
+
+      expect(calculator.fee_total).to eq(BigDecimal("55"))
+    end
+  end
+
   describe '#fee_per_person' do
     it '手数料総額 $50・N=6 で $8.34' do
       proxy_order = create(:proxy_order, tax_usd: 20, customs_usd: 10, shipping_usd: 20)

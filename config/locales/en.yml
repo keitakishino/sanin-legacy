@@ -123,6 +123,7 @@ en:
         tax_usd: "Tax"
         customs_usd: "Customs"
         shipping_usd: "Shipping"
+        payment_fee_usd: "Payment Fee"
         usd_jpy_rate: "USD/JPY Rate"
     enums:
       proxy_order:
@@ -184,6 +185,7 @@ en:
       label_tax: "Tax ($)"
       label_customs: "Customs ($)"
       label_shipping: "Shipping ($)"
+      label_payment_fee: "Payment Fee ($)"
       label_rate: "USD/JPY Rate (JPY/$)"
       tile_fee_total: "Total Fees"
       tile_fee_per_person: "Fee Per Person (%{count} participants)"
@@ -236,11 +238,11 @@ en:
       locked:
         details: "Details can only be changed in the ordered state"
         arrival_inputs: "Lost and handover can only be entered in the arrived state"
-        fees: "Tax, customs, shipping, and rate cannot be changed in the completed state"
+        fees: "Tax, customs, shipping, payment fee, and rate cannot be changed in the completed state"
         completed: "Changes cannot be made in the completed state"
     proxy_orders:
       update:
-        updated: "Tax, shipping, and rate updated"
+        updated: "Tax, shipping, payment fee, and rate updated"
         status_changed: "Status changed to \"%{status}\""
     proxy_order_items:
       create:

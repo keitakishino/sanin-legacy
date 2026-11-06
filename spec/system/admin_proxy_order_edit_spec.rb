@@ -185,7 +185,7 @@ RSpec.describe "Admin Proxy Order Edit", type: :system do
     end
   end
 
-  describe "C8: Update tax, shipping, rate" do
+  describe "[C6] C8: Update tax, shipping, rate" do
     it "updates fee calculations without reload" do
       item = add_card("Test")
       add_price_line(item, unit_price: "10.00", quantity: "1")
@@ -199,7 +199,7 @@ RSpec.describe "Admin Proxy Order Edit", type: :system do
         click_button "保存"
       end
 
-      expect(page).to have_content("税・送料・レートを更新しました")
+      expect(page).to have_content("税・送料・決済手数料・レートを更新しました")
       expect(page.evaluate_script("window.__marker")).to eq(1)
       expect(page).to have_content("未確定").or have_text("¥")
     end

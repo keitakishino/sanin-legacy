@@ -182,6 +182,7 @@ ja:
         tax_usd: "消費税"
         customs_usd: "関税"
         shipping_usd: "送料"
+        payment_fee_usd: "決済手数料"
         usd_jpy_rate: "ドル円レート"
     enums:
       proxy_order:
@@ -346,6 +347,7 @@ ja:
       label_tax: "消費税（$）"
       label_customs: "関税（$）"
       label_shipping: "送料（$）"
+      label_payment_fee: "決済手数料（$）"
       label_rate: "ドル円レート（円/$）"
       tile_fee_total: "手数料合計"
       tile_fee_per_person: "一人あたり手数料（参加者%{count}人）"
@@ -398,11 +400,11 @@ ja:
       locked:
         details: "注文状態でのみ明細を変更できます"
         arrival_inputs: "到着状態でのみロスト・手渡しを入力できます"
-        fees: "完了状態では税・関税・送料・レートを変更できません"
+        fees: "完了状態では税・関税・送料・決済手数料・レートを変更できません"
         completed: "完了状態では変更できません"
     proxy_orders:
       update:
-        updated: "税・送料・レートを更新しました"
+        updated: "税・送料・決済手数料・レートを更新しました"
         status_changed: "ステータスを「%{status}」に変更しました"
     proxy_order_items:
       create:
