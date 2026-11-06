@@ -51,7 +51,7 @@ ja:
       note_provisional: "注文の間は「暫定」として、ロスト 0 で計算した金額を表示します。レートが未設定の場合、円は「未確定」と表示します。"
       tile_goods: "商品合計"
       tile_fee: "手数料（%{total} ÷ %{count}人）"
-      tile_payment: "支払い金額（1,000円単位に四捨五入）"
+      tile_payment: "支払い金額（100円単位に切り上げ）"
       calc_line: "%{usd} × %{rate} 円/$ ＝ %{raw} → %{rounded}"
       no_items: "明細はまだありません"
   toasts:
@@ -385,7 +385,7 @@ ja:
       payment_summary_arrived: "ユーザー別の支払いと手渡し"
       summary_note_ordered: "入力に合わせてその場で更新されます。ロストは 0 として計算しています。"
       summary_note_arrived: "手渡しはユーザー単位でまとめて記録します。"
-      rounding_note: "円換算後に 1,000 円単位で四捨五入します。"
+      rounding_note: "円換算後に 100 円単位で切り上げます。"
       breakdown: "商品 %{goods} ＋ 手数料 %{fee} ＝ %{total}"
       registered: "登録"
       guest: "自由入力"

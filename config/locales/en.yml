@@ -223,7 +223,7 @@ en:
       payment_summary_arrived: "Payment and Handover by User"
       summary_note_ordered: "Updates as you type. Lost is counted as 0."
       summary_note_arrived: "Handover is recorded per user."
-      rounding_note: "Rounded to the nearest 1,000 yen after conversion."
+      rounding_note: "Rounded up to the nearest 100 yen after conversion."
       breakdown: "Goods %{goods} + Fee %{fee} = %{total}"
       registered: "Registered"
       guest: "Guest"

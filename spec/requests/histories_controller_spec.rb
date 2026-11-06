@@ -585,7 +585,7 @@ RSpec.describe "HistoriesController", type: :request do
 
           get "/histories/proxy_orders"
 
-          expect(row_html_for(proxy_order)).to include("¥5,000")
+          expect(row_html_for(proxy_order)).to include("¥4,500")
         end
 
         it "displays ¥0 when the user lost all cards" do
