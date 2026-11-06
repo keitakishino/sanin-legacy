@@ -72,7 +72,7 @@ end
         fill_in "proxy_order[tax_usd]", with: "10.00"
         click_button "保存"
       end
-      expect(page).to have_content("税・送料・レートを更新しました")
+      expect(page).to have_content("税・送料・決済手数料・レートを更新しました")
 
       item = add_card("Test Card")
       add_price_line(item, unit_price: "3.00", quantity: "1")

@@ -43,7 +43,7 @@ class ProxyOrderCalculator
   end
 
   def fee_total
-    @proxy_order.tax_usd + @proxy_order.customs_usd + @proxy_order.shipping_usd
+    @proxy_order.tax_usd + @proxy_order.customs_usd + @proxy_order.shipping_usd + @proxy_order.payment_fee_usd
   end
 
   def fee_payer_count

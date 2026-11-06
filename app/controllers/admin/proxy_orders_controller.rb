@@ -19,7 +19,7 @@ class Admin::ProxyOrdersController < Admin::BaseController
       return
     end
 
-    params_to_update = params.require(:proxy_order).permit(:tax_usd, :customs_usd, :shipping_usd, :usd_jpy_rate)
+    params_to_update = params.require(:proxy_order).permit(:tax_usd, :customs_usd, :shipping_usd, :payment_fee_usd, :usd_jpy_rate)
     params_to_update[:usd_jpy_rate] = nil if params_to_update[:usd_jpy_rate].blank?
 
     if @proxy_order.update(params_to_update)

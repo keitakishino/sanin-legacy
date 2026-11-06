@@ -19,8 +19,8 @@
       </div>
     <% end %>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <% [[:tax_usd, "label_tax", 0.01], [:customs_usd, "label_customs", 0.01], [:shipping_usd, "label_shipping", 0.01], [:usd_jpy_rate, "label_rate", 0.0001]].each do |attr, key, step| %>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <% [[:tax_usd, "label_tax", 0.01], [:customs_usd, "label_customs", 0.01], [:shipping_usd, "label_shipping", 0.01], [:payment_fee_usd, "label_payment_fee", 0.01], [:usd_jpy_rate, "label_rate", 0.0001]].each do |attr, key, step| %>
         <label class="block">
           <span class="block text-xs font-bold text-stone-500 mb-1"><%= t("admin.proxy_order.#{key}") %></span>
           <%= f.number_field attr, step: step, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs tabular-nums bg-white focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-stone-100 disabled:text-stone-500", disabled: !@proxy_order.fees_editable? %>
