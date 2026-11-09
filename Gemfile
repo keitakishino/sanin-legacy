@@ -20,7 +20,7 @@ gem "jbuilder"
 
 gem "tailwindcss-rails"
 gem "foreman"
-gem "kaminari", "~> 1.3.0"
+gem "kaminari", "~> 1.3.3"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 gem "bcrypt", "~> 3.1.7"
