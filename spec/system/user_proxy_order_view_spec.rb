@@ -184,4 +184,30 @@ RSpec.describe "User Proxy Order View", type: :system do
       expect(payment_jpy_element.text).not_to include("未確定")
     end
   end
+
+  describe "[C5] Items with blank foil and frame" do
+    before do
+      expansion = create(:expansion)
+      blank_foil_frame_item = create(:proxy_order_item, proxy_order:, card_name: "Blank Foil Frame Card", expansion:, foil: nil, frame: nil)
+      create(:proxy_order_price_line, proxy_order_item: blank_foil_frame_item, quantity: 1, unit_price_usd: 2.50)
+      create(:proxy_order_allocation, proxy_order_item: blank_foil_frame_item, proxy_order_participant: me, quantity: 1, lost_quantity: 0)
+      visit proxy_order_path(event.id)
+    end
+
+    it "[C5] displays card with blank foil and frame without error" do
+      expect(page).to have_content("Blank Foil Frame Card")
+      expect(page).not_to have_selector("div.error-message")
+    end
+
+    it "[C5] does not display foil and frame values for blank item" do
+      within "#proxy_order_my_items" do
+        rows = page.all("tr")
+        blank_card_row = rows.find { |row| row.text.include?("Blank Foil Frame Card") }
+        cells = blank_card_row.all("td")
+        # foil column (index 2) and frame column (index 3) should be empty
+        expect(cells[2].text).to be_empty
+        expect(cells[3].text).to be_empty
+      end
+    end
+  end
 end
