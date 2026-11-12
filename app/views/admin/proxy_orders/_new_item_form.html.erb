@@ -13,9 +13,10 @@
         </div>
       <% end %>
 
-      <div class="mb-4">
-        <%= f.label :card_name, class: "block text-xs font-bold text-stone-500 mb-1" %>
-        <%= f.text_field :card_name, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+      <div class="mb-4 relative" data-controller="expansion-select" data-expansion-select-url-value="<%= card_names_path %>">
+        <%= f.label :card_name, class: "block text-xs font-bold text-stone-500 mb-1", for: "new_proxy_order_item_card_name_input" %>
+        <%= f.text_field :card_name, id: "new_proxy_order_item_card_name_input", autocomplete: "off", data: { "expansion-select-target": "input", action: "keyup->expansion-select#search blur->expansion-select#hideDropdown" }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-accent" %>
+        <turbo-frame id="new_proxy_order_item_card_name_suggestions" data-expansion-select-target="frame" class="absolute w-full mt-1 bg-white border border-stone-300 rounded-md shadow-lg z-10" style="display: none;"></turbo-frame>
       </div>
 
       <div class="mb-4 relative" data-controller="expansion-select">
