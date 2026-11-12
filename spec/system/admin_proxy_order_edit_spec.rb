@@ -206,13 +206,19 @@ RSpec.describe "Admin Proxy Order Edit", type: :system do
   end
 
   describe "C9: Card collapse and expand" do
-    it "shows the card name, set/foil/frame and totals in the summary" do
-      add_card("Collapsed Card")
+    it "[C7] shows the card name, set/foil/frame and totals in the summary" do
+      within "#new_proxy_order_item_form" do
+        fill_in "proxy_order_item[card_name]", with: "Collapsed Card"
+        select "non-foil", from: "proxy_order_item[foil]"
+        select "通常", from: "proxy_order_item[frame]"
+        click_button "カード明細を追加"
+      end
+      expect(page).to have_content("カードを追加しました")
 
       within first("details") do
         within "summary" do
           expect(page).to have_selector("[data-role='card-name']", text: "Collapsed Card")
-          expect(page).to have_selector("[data-role='card-meta']")
+          expect(page).to have_selector("[data-role='card-meta']", text: "non-foil ／ 通常")
           expect(page).to have_selector("[data-role='ordered-quantity']", text: "0")
           expect(page).to have_selector("[data-role='unit-price']", text: "$0.00")
         end

@@ -64,8 +64,8 @@
                 <tr id="<%= dom_id(allocation) %>" class="border-t border-stone-200 border-l-[3px] border-l-offer">
                   <td class="px-4 py-3"><%= allocation.proxy_order_item.card_name %></td>
                   <td class="px-4 py-3"><%= allocation.proxy_order_item.expansion&.scryfall_set_code&.upcase %></td>
-                  <td class="px-4 py-3"><%= t("activerecord.enums.trade_card_offer.foil.#{allocation.proxy_order_item.foil}") %></td>
-                  <td class="px-4 py-3"><%= t("activerecord.enums.trade_card_offer.frame.#{allocation.proxy_order_item.frame}") %></td>
+                  <td class="px-4 py-3"><%= foil_label(allocation.proxy_order_item) %></td>
+                  <td class="px-4 py-3"><%= frame_label(allocation.proxy_order_item) %></td>
                   <td class="px-4 py-3 text-right"><%= allocation.quantity %></td>
                   <td class="px-4 py-3 text-right"><%= allocation.lost_quantity %></td>
                   <td class="px-4 py-3 text-right"><%= usd(@calculator.unit_price(allocation.proxy_order_item)) %></td>
