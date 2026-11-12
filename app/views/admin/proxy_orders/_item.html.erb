@@ -65,12 +65,12 @@
 
         <label class="block w-32">
           <span class="block text-xs font-bold text-stone-500 mb-1"><%= t("activerecord.attributes.proxy_order_item.foil") %></span>
-          <%= f.select :foil, ProxyOrderItem.foils.keys.map { |k| [t("activerecord.enums.trade_card_offer.foil.#{k}"), k] }, {}, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs bg-white focus:outline-none focus:ring-2 focus:ring-accent" %>
+          <%= f.select :foil, ProxyOrderItem.foils.keys.map { |k| [t("activerecord.enums.trade_card_offer.foil.#{k}"), k] }, { include_blank: true }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs bg-white focus:outline-none focus:ring-2 focus:ring-accent" %>
         </label>
 
         <label class="block w-32">
           <span class="block text-xs font-bold text-stone-500 mb-1"><%= t("activerecord.attributes.proxy_order_item.frame") %></span>
-          <%= f.select :frame, ProxyOrderItem.frames.keys.map { |k| [t("activerecord.enums.trade_card_offer.frame.#{k}"), k] }, {}, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs bg-white focus:outline-none focus:ring-2 focus:ring-accent" %>
+          <%= f.select :frame, ProxyOrderItem.frames.keys.map { |k| [t("activerecord.enums.trade_card_offer.frame.#{k}"), k] }, { include_blank: true }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs bg-white focus:outline-none focus:ring-2 focus:ring-accent" %>
         </label>
 
         <%= f.submit t("common.update"), class: "px-3 py-2 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs cursor-pointer" %>

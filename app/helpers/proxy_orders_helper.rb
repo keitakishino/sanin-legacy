@@ -13,12 +13,22 @@ module ProxyOrdersHelper
     participant.user&.username || participant.guest_name
   end
 
+  def foil_label(item)
+    return nil if item.foil.blank?
+    t("activerecord.enums.trade_card_offer.foil.#{item.foil}")
+  end
+
+  def frame_label(item)
+    return nil if item.frame.blank?
+    t("activerecord.enums.trade_card_offer.frame.#{item.frame}")
+  end
+
   # カード明細の見出しに出す「セット ／ フォイル ／ フレーム」
   def card_meta(item)
     [
       item.expansion&.scryfall_set_code&.upcase,
-      t("activerecord.enums.trade_card_offer.foil.#{item.foil}"),
-      t("activerecord.enums.trade_card_offer.frame.#{item.frame}")
+      foil_label(item),
+      frame_label(item)
     ].compact_blank.join(t("admin.proxy_order.card_meta_separator"))
   end
 
