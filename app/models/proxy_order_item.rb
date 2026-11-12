@@ -27,6 +27,11 @@ class ProxyOrderItem < ApplicationRecord
     proxy_order_allocations.sum(&:quantity)
   end
 
+  def remaining_allocation_quantity
+    remaining = ordered_quantity - allocated_quantity
+    remaining.positive? ? remaining : 1
+  end
+
   def quantity_mismatch?
     ordered_quantity != allocated_quantity
   end

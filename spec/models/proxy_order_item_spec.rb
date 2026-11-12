@@ -201,5 +201,23 @@ RSpec.describe ProxyOrderItem, type: :model do
         expect(item.quantity_mismatch?).to be false
       end
     end
+
+    describe "#remaining_allocation_quantity" do
+      it "returns remaining quantity when price lines > allocations" do
+        create(:proxy_order_price_line, proxy_order_item: item, quantity: 5)
+        create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 2)
+        expect(item.remaining_allocation_quantity).to eq(3)
+      end
+
+      it "returns 1 when allocations >= price lines" do
+        create(:proxy_order_price_line, proxy_order_item: item, quantity: 2)
+        create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 3)
+        expect(item.remaining_allocation_quantity).to eq(1)
+      end
+
+      it "returns 1 when no price lines exist" do
+        expect(item.remaining_allocation_quantity).to eq(1)
+      end
+    end
   end
 end

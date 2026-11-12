@@ -2,6 +2,7 @@
   details_editable = @proxy_order.details_editable?
   arrival_inputs_editable = @proxy_order.arrival_inputs_editable?
   show_lost = !@proxy_order.ordered?
+  focus_id = local_assigns[:focus_id]
   cell = "w-full px-2 py-2 border border-stone-300 rounded-md text-xs tabular-nums text-right bg-white focus:outline-none focus:ring-2 focus:ring-accent disabled:bg-stone-100 disabled:text-stone-500"
   loss_cell = "#{cell} border-warning bg-warning-soft"
   head = "bg-stone-100 px-3 py-3 text-xs font-bold text-stone-500 text-left"
@@ -72,8 +73,6 @@
           <span class="block text-xs font-bold text-stone-500 mb-1"><%= t("activerecord.attributes.proxy_order_item.frame") %></span>
           <%= f.select :frame, ProxyOrderItem.frames.keys.map { |k| [t("activerecord.enums.trade_card_offer.frame.#{k}"), k] }, {}, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs bg-white focus:outline-none focus:ring-2 focus:ring-accent" %>
         </label>
-
-        <%= f.submit t("common.update"), class: "px-3 py-2 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs cursor-pointer" %>
       <% end %>
 
       <div id="<%= dom_id(item, :delete) %>">
@@ -92,10 +91,13 @@
 
         <% item.proxy_order_price_lines.each do |line| %>
           <%= form_with model: line, url: admin_event_proxy_order_item_price_line_path(@event, item, line), method: :patch, local: true, data: auto, id: dom_id(line), class: "contents" do |f| %>
-            <div class="<%= row_cell %>"><%= f.number_field :unit_price_usd, step: 0.01, class: cell, disabled: !details_editable, "aria-label": t("admin.proxy_order.col_unit_price") %></div>
-            <div class="<%= row_cell %>"><%= f.number_field :quantity, class: cell, disabled: !details_editable, "aria-label": t("admin.proxy_order.col_quantity") %></div>
+            <div class="<%= row_cell %>"><%= f.number_field :unit_price_usd, step: 0.01, id: dom_id(line, :unit_price), autofocus: (focus_id == dom_id(line, :unit_price)), class: cell, disabled: !details_editable, "aria-label": t("admin.proxy_order.col_unit_price") %></div>
+            <div class="<%= row_cell %>"><%= f.number_field :quantity, id: nil, class: cell, disabled: !details_editable, "aria-label": t("admin.proxy_order.col_quantity") %></div>
             <% if show_lost %>
               <div class="<%= row_cell %>"><%= f.number_field :lost_quantity, class: line.lost_quantity.to_i.positive? ? loss_cell : cell, disabled: !arrival_inputs_editable, "aria-label": t("admin.proxy_order.col_lost") %></div>
+            <% end %>
+            <% if details_editable %>
+              <button type="submit" name="focus_next" value="1" hidden tabindex="-1" aria-hidden="true"></button>
             <% end %>
           <% end %>
           <% unless show_lost %>
@@ -110,14 +112,14 @@
 
       <% if details_editable %>
         <div id="<%= dom_id(item, :new_price_line) %>" class="border-t border-stone-200 p-3">
-          <%= form_with model: ProxyOrderPriceLine.new(proxy_order_item: item), scope: :proxy_order_price_line, url: admin_event_proxy_order_item_price_lines_path(@event, item), local: true, class: "flex flex-wrap items-end gap-2" do |f| %>
+          <%= form_with model: ProxyOrderPriceLine.new(proxy_order_item: item, quantity: 1), scope: :proxy_order_price_line, url: admin_event_proxy_order_item_price_lines_path(@event, item), local: true, class: "flex flex-wrap items-end gap-2" do |f| %>
             <label class="block flex-1 min-w-24">
               <span class="block text-xs font-bold text-stone-500 mb-1"><%= t("admin.proxy_order.col_unit_price") %></span>
-              <%= f.number_field :unit_price_usd, step: 0.01, class: cell %>
+              <%= f.number_field :unit_price_usd, step: 0.01, id: dom_id(item, :new_price_line_unit_price), autofocus: (focus_id == dom_id(item, :new_price_line_unit_price)), class: cell %>
             </label>
             <label class="block w-20">
               <span class="block text-xs font-bold text-stone-500 mb-1"><%= t("admin.proxy_order.col_quantity") %></span>
-              <%= f.number_field :quantity, class: cell %>
+              <%= f.number_field :quantity, id: nil, class: cell %>
             </label>
             <%= f.submit t("admin.proxy_order.add_price_line_link"), class: "px-3 py-2 text-accent hover:text-accent-hover font-bold text-xs cursor-pointer bg-transparent" %>
           <% end %>
@@ -177,7 +179,7 @@
           <% end %>
 
           <%# フォーム %>
-          <%= form_with model: ProxyOrderAllocation.new, scope: :proxy_order_allocation, url: admin_event_proxy_order_item_allocations_path(@event, item), local: true, class: "flex flex-wrap items-end gap-2" do |f| %>
+          <%= form_with model: ProxyOrderAllocation.new(quantity: item.remaining_allocation_quantity), scope: :proxy_order_allocation, url: admin_event_proxy_order_item_allocations_path(@event, item), local: true, class: "flex flex-wrap items-end gap-2" do |f| %>
             <%# コンボボックス %>
             <div class="relative w-full sm:w-auto sm:flex-1 sm:min-w-48">
               <div data-participant-select-target="combobox" class="flex items-center">
