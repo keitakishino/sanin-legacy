@@ -47,10 +47,11 @@
   <% if details_editable %>
     <div class="flex flex-wrap gap-3 items-end p-4 border-b border-stone-200">
       <%= form_with model: item, url: admin_event_proxy_order_item_path(@event, item), method: :patch, id: dom_id(item, :edit_form), local: true, data: auto, class: "contents" do |f| %>
-        <label class="block flex-[2_1_0%] min-w-40">
-          <span class="block text-xs font-bold text-stone-500 mb-1"><%= t("activerecord.attributes.proxy_order_item.card_name") %></span>
-          <%= f.text_field :card_name, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs bg-white focus:outline-none focus:ring-2 focus:ring-accent" %>
-        </label>
+        <div class="block flex-[2_1_0%] min-w-40 relative" data-controller="expansion-select" data-expansion-select-url-value="<%= card_names_path %>">
+          <label class="block text-xs font-bold text-stone-500 mb-1" for="<%= dom_id(item, :card_name_input) %>"><%= t("activerecord.attributes.proxy_order_item.card_name") %></label>
+          <%= f.text_field :card_name, id: dom_id(item, :card_name_input), autocomplete: "off", data: { "expansion-select-target": "input", action: "keyup->expansion-select#search blur->expansion-select#hideDropdown" }, class: "w-full px-3 py-2 border border-stone-300 rounded-md text-xs bg-white focus:outline-none focus:ring-2 focus:ring-accent" %>
+          <turbo-frame id="<%= dom_id(item, :card_name_suggestions) %>" data-expansion-select-target="frame" class="absolute w-full mt-1 bg-white border border-stone-300 rounded-md shadow-lg z-10" style="display: none;"></turbo-frame>
+        </div>
 
         <div class="block w-36 relative" data-controller="expansion-select">
           <label class="block text-xs font-bold text-stone-500 mb-1" for="<%= dom_id(item, :expansion_input) %>"><%= t("activerecord.attributes.proxy_order_item.expansion_id") %></label>

@@ -1,4 +1,3 @@
-require "net/http"
 require "json"
 
 # Service for importing Magic: The Gathering expansions from Scryfall API
@@ -8,7 +7,6 @@ class ScryfallExpansionImporter
   class ProcessingError < StandardError; end
 
   SCRYFALL_SETS_URL = "https://api.scryfall.com/sets"
-  API_TIMEOUT_SECONDS = 30
   SKIPPED_SET_TYPES = %w[promo token].freeze
 
   def call
@@ -58,14 +56,7 @@ class ScryfallExpansionImporter
   def fetch_sets_from_scryfall
     Rails.logger.info("Fetching sets from Scryfall API: #{SCRYFALL_SETS_URL}")
 
-    uri = URI(SCRYFALL_SETS_URL)
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.read_timeout = API_TIMEOUT_SECONDS
-    http.open_timeout = API_TIMEOUT_SECONDS
-
-    request = Net::HTTP::Get.new(uri)
-    response = http.request(request)
+    response = ScryfallHttp.get(SCRYFALL_SETS_URL)
 
     case response.code.to_i
     when 200

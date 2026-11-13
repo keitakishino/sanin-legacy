@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_000100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -26,6 +26,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_000000) do
     t.integer "status_code", comment: "HTTP レスポンスのステータスコード（記録前の既存行は null）"
     t.index ["created_at"], name: "index_audit_logs_on_created_at"
     t.index ["target_type", "target_id"], name: "index_audit_logs_on_target_type_and_target_id"
+  end
+
+  create_table "card_names", force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index "lower((name)::text) text_pattern_ops", name: "index_card_names_on_lower_name_pattern"
+    t.index ["name"], name: "index_card_names_on_name", unique: true
   end
 
   create_table "events", force: :cascade do |t|

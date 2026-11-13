@@ -1,0 +1,13 @@
+<turbo-frame id="<%= @frame_id %>">
+  <% if @card_names.any? %>
+    <div class="divide-y divide-stone-200">
+      <% @card_names.each do |card_name| %>
+        <div class="px-4 py-3 hover:bg-stone-50 cursor-pointer transition"
+             data-expansion-code="<%= card_name.name %>"
+             data-action="click->expansion-select#selectExpansion">
+          <span class="text-stone-700"><%= card_name.name %></span>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</turbo-frame>

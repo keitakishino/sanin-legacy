@@ -36,6 +36,9 @@ Rails.application.routes.draw do
   # Expansion search endpoint for autocomplete
   get "/expansions", to: "expansions#index"
 
+  # Card name search endpoint for autocomplete
+  get "/card_names", to: "card_names#index"
+
   # User trade view and editing
   get "/trades/:event_id", to: "trades#show", as: :trade
   post "/trades/:event_id/card_offers", to: "trade_card_offers#create", as: :trade_card_offers

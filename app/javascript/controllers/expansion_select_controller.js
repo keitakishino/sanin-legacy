@@ -2,6 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["input", "frame", "select"]
+  static values = { url: { type: String, default: "/expansions" } }
 
   connect() {
     this.debounceTimer = null
@@ -41,7 +42,7 @@ export default class extends Controller {
 
     // Debounce API request by 300ms
     this.debounceTimer = setTimeout(() => {
-      this.frameTarget.src = `/expansions?q=${encodeURIComponent(query)}&frame=${encodeURIComponent(this.frameTarget.id)}`
+      this.frameTarget.src = `${this.urlValue}?q=${encodeURIComponent(query)}&frame=${encodeURIComponent(this.frameTarget.id)}`
       this.frameTarget.style.display = "block"
     }, 300)
   }
@@ -49,14 +50,18 @@ export default class extends Controller {
   selectExpansion(event) {
     event.stopPropagation()
     const item = event.currentTarget
-    const expansionId = item.dataset.expansionId
     const expansionCode = item.dataset.expansionCode
 
-    this.selectTarget.value = expansionId
     this.inputTarget.value = expansionCode
     this.frameTarget.src = ""
     this.frameTarget.style.display = "none"
-    this.selectTarget.dispatchEvent(new Event("change", { bubbles: true }))
+
+    if (this.hasSelectTarget) {
+      this.selectTarget.value = item.dataset.expansionId
+      this.selectTarget.dispatchEvent(new Event("change", { bubbles: true }))
+    } else {
+      this.inputTarget.dispatchEvent(new Event("change", { bubbles: true }))
+    }
   }
 
   stopChange(event) {

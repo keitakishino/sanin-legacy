@@ -593,6 +593,24 @@ RSpec.describe ScryfallExpansionImporter, type: :service do
       end
     end
 
+    context 'HTTP headers' do
+      it "[C5] Scryfall へのリクエストに User-Agent と Accept が付く" do
+        captured_request = nil
+        allow_any_instance_of(Net::HTTP).to receive(:request) do |_http, req|
+          captured_request = req
+          response = instance_double(Net::HTTPResponse)
+          allow(response).to receive(:code).and_return('200')
+          allow(response).to receive(:body).and_return(sample_sets_response.to_json)
+          response
+        end
+
+        importer.call
+
+        expect(captured_request["User-Agent"]).to eq(ScryfallHttp::USER_AGENT)
+        expect(captured_request["Accept"]).to eq(ScryfallHttp::ACCEPT)
+      end
+    end
+
     private
 
     def stub_scryfall_api_response(response_data)
