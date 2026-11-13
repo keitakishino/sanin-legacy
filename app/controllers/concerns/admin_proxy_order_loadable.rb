@@ -59,7 +59,7 @@ module AdminProxyOrderLoadable
   private
 
   def list_conditions
-    if request.get?
+    if request.get? || request.head?
       params.permit(:q, :sort).to_h.symbolize_keys
     else
       extract_conditions_from_referer
