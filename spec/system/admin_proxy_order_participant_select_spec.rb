@@ -30,10 +30,9 @@ RSpec.describe "Admin Proxy Order Participant Select", type: :system do
     sign_in(admin)
     resize_window_to(1280, 900)
     visit admin_event_proxy_order_path(event)
-    # カード明細が割り当てで open になる想定だが、念のため開く
-    unless find("#proxy_order_item_#{item.id}")[:open]
-      find("#proxy_order_item_#{item.id} summary").click
-    end
+    # 明細は初期表示で閉じているので開く
+    find("#proxy_order_item_#{item.id} summary").click
+    expect(page).to have_selector("#proxy_order_item_#{item.id}[open]")
   end
 
   describe "C1: Single input field only" do

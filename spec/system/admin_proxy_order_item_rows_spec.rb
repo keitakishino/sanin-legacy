@@ -26,9 +26,8 @@ RSpec.describe "Admin Proxy Order Item Rows", type: :system do
 
       visit admin_event_proxy_order_path(event)
 
-      # details element が open されるまで待つ
-      details = find("#proxy_order_item_#{item.id}")
-      find("#proxy_order_item_#{item.id} summary").click unless details[:open]
+      # 明細は初期表示で閉じているので開く
+      find("#proxy_order_item_#{item.id} summary").click
       expect(page).to have_selector("#proxy_order_item_#{item.id}[open]", visible: :all, wait: 5)
 
       # Add new price line
@@ -58,9 +57,8 @@ RSpec.describe "Admin Proxy Order Item Rows", type: :system do
 
       visit admin_event_proxy_order_path(event)
 
-      # details element を開く
-      details = find("#proxy_order_item_#{item.id}")
-      find("#proxy_order_item_#{item.id} summary").click unless details[:open]
+      # 明細は初期表示で閉じているので開く
+      find("#proxy_order_item_#{item.id} summary").click
       expect(page).to have_selector("#proxy_order_item_#{item.id}[open]", visible: :all, wait: 5)
 
       # Update lost quantity: form の中の lost_quantity input を探す

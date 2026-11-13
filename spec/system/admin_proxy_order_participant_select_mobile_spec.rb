@@ -24,10 +24,9 @@ RSpec.describe "Admin Proxy Order Participant Select Mobile", type: :system do
     sign_in(admin)
     resize_window_to(390, 844)
     visit admin_event_proxy_order_path(event)
-    # Open the item details if not already open
-    unless find("#proxy_order_item_#{item.id}")[:open]
-      find("#proxy_order_item_#{item.id} summary").click
-    end
+    # 明細は初期表示で閉じているので開く
+    find("#proxy_order_item_#{item.id} summary").click
+    expect(page).to have_selector("#proxy_order_item_#{item.id}[open]")
   end
 
   describe "C1: Participant button wrapping on mobile" do
