@@ -46,7 +46,8 @@ class Admin::ProxyOrdersController < Admin::BaseController
 
     if @proxy_order.transition_to(new_status)
       record_audit("proxy_order.status_change", target: @proxy_order, details: { from: from_status, to: new_status })
-      redirect_to admin_event_proxy_order_path(@event), notice: t(".status_changed", status: t("activerecord.enums.proxy_order.status.#{new_status}")), status: :see_other
+      conditions = list_conditions
+      redirect_to admin_event_proxy_order_path(@event, **conditions.slice(:q, :sort).compact_blank), notice: t(".status_changed", status: t("activerecord.enums.proxy_order.status.#{new_status}")), status: :see_other
     else
       @transition_errors = @proxy_order.errors.full_messages
       record_audit("proxy_order.status_change", target: @proxy_order, result: :failure, details: { from: from_status, to: new_status, reason: @transition_errors.join(", ") })

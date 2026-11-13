@@ -1,7 +1,4 @@
-<%# replace だと <details> ごと入れ替わり、フォーカスが外れてスクロール位置も飛ぶため %>
-<%= turbo_stream.replace dom_id(@item), method: :morph do %>
-  <%= render "admin/proxy_orders/item", item: @item %>
-<% end %>
+<%= render "admin/proxy_orders/item_list_stream", notify_hidden: true %>
 
 <%= turbo_stream.replace "proxy_order_summary" do %>
   <%= render "admin/proxy_orders/summary" %>

@@ -1,0 +1,13 @@
+<%= form_with url: admin_event_proxy_order_path(@event), method: :get, id: "proxy_order_list_bar", data: { turbo_frame: "proxy_order_item_list", turbo_action: "advance" }, local: true do |f| %>
+  <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+    <div class="relative flex-1">
+      <%= f.search_field :q, placeholder: t("admin.proxy_order.search_placeholder"), "aria-label": t("admin.proxy_order.search_label"), autocomplete: "off", autofocus: (turbo_frame_request? && @item_list.filtering?), value: @item_list.query, id: "proxy_order_item_search", class: "w-full min-h-11 sm:min-h-0 pl-3 pr-10 py-2 border border-stone-300 rounded-md text-xs bg-white focus:outline-none focus:ring-2 focus:ring-accent" %>
+      <% if @item_list.filtering? %>
+        <%= link_to "×", admin_event_proxy_order_path(@event, **@item_list.to_params.except(:q)), data: { role: "clear-search", turbo_frame: "proxy_order_item_list", turbo_action: "advance" }, "aria-label": t("admin.proxy_order.clear_search_icon"), class: "absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded text-stone-400 hover:text-stone-600 hover:bg-stone-100 font-bold" %>
+      <% end %>
+    </div>
+    <button type="submit" class="sr-only"><%= t("admin.proxy_order.search_submit") %></button>
+    <%= f.select :sort, options_for_select(ProxyOrderItemList::SORTS.map { |s| [t("admin.proxy_order.sort_options.#{s}"), s] }, @item_list.sort), { include_blank: false }, id: "proxy_order_item_sort", "aria-label": t("admin.proxy_order.sort_label"), data: { controller: "auto-submit", action: "change->auto-submit#submitForm" }, class: "w-full sm:w-56 min-h-11 sm:min-h-0 px-3 py-2 border border-stone-300 rounded-md text-xs bg-white focus:outline-none focus:ring-2 focus:ring-accent" %>
+    <%= render "admin/proxy_orders/item_count" %>
+  </div>
+<% end %>

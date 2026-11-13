@@ -1,4 +1,4 @@
-<%= turbo_stream.remove dom_id(@item) %>
+<%= render "admin/proxy_orders/item_list_stream" %>
 
 <%= turbo_stream.replace "proxy_order_summary" do %>
   <%= render "admin/proxy_orders/summary" %>

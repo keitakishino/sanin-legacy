@@ -1,5 +1,14 @@
 <div id="proxy_order_items" class="space-y-4 mb-6">
-  <% @items.each do |item| %>
-    <%= render "admin/proxy_orders/item", item: item %>
+  <% if @item_list.filtering? && @item_list.items.empty? %>
+    <div id="proxy_order_items_empty" class="bg-white border border-stone-200 rounded-lg p-6 text-center">
+      <p class="text-sm text-stone-500">
+        <%= t("admin.proxy_order.no_search_results", query: @item_list.query) %>
+      </p>
+      <%= link_to t("admin.proxy_order.clear_search"), admin_event_proxy_order_path(@event, **@item_list.to_params.except(:q)), data: { turbo_frame: "proxy_order_item_list", turbo_action: "advance" }, class: "inline-block mt-3 px-3 py-1.5 bg-white text-stone-800 border border-stone-300 rounded-md hover:bg-stone-50 font-bold text-xs" %>
+    </div>
+  <% else %>
+    <% @item_list.items.each do |item| %>
+      <%= render "admin/proxy_orders/item", item: item %>
+    <% end %>
   <% end %>
 </div>

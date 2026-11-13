@@ -1,0 +1,13 @@
+<%= turbo_stream.replace "proxy_order_items", method: :morph do %>
+  <%= render "admin/proxy_orders/items" %>
+<% end %>
+
+<%= turbo_stream.replace "proxy_order_item_count" do %>
+  <%= render "admin/proxy_orders/item_count" %>
+<% end %>
+
+<% if local_assigns[:notify_hidden] && @item&.persisted? && @item.discarded_at.nil? && @item_list.filtering? && !@item_list.include?(@item) %>
+  <%= turbo_stream.append "toast-container" do %>
+    <%= render(partial: "shared/toast", locals: { message: t("admin.proxy_order.hidden_by_search", name: @item.card_name, query: @item_list.query) }, formats: [:html]) %>
+  <% end %>
+<% end %>

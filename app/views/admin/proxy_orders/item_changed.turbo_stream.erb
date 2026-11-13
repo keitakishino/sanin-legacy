@@ -1,21 +1,8 @@
-<%# replace だと <details> ごと入れ替わり、フォーカスが外れてスクロール位置も飛ぶため、通常は morph を使う。
-    focus_id があるときはフォーカスを移すため、あえて replace にする %>
-<% if local_assigns[:focus_id].present? %>
+<%= render "admin/proxy_orders/item_list_stream" %>
+
+<% if local_assigns[:focus_id].present? && @item_list.include?(@item) %>
   <%= turbo_stream.replace dom_id(@item) do %>
     <%= render "admin/proxy_orders/item", item: @item, focus_id: local_assigns[:focus_id] %>
-  <% end %>
-<% else %>
-  <%= turbo_stream.replace dom_id(@item), method: :morph do %>
-    <%= render "admin/proxy_orders/item", item: @item %>
-  <% end %>
-<% end %>
-
-<% if local_assigns[:refresh_participant_selects] && @proxy_order.details_editable? %>
-  <% @items.each do |other| %>
-    <% next if other.id == @item.id %>
-    <%= turbo_stream.replace dom_id(other, :new_allocation), method: :morph do %>
-      <%= render "admin/proxy_orders/new_allocation", item: other %>
-    <% end %>
   <% end %>
 <% end %>
 

@@ -1,0 +1,7 @@
+<span id="proxy_order_item_count" class="text-xs text-stone-500 tabular-nums whitespace-nowrap">
+  <% if @item_list.filtering? %>
+    <%= t("admin.proxy_order.count_filtered", count: @item_list.visible_count, total: @item_list.total_count) %>
+  <% else %>
+    <%= t("admin.proxy_order.count_all", total: @item_list.total_count) %>
+  <% end %>
+</span>

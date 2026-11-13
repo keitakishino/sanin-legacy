@@ -17,7 +17,7 @@
     <div class="flex flex-col lg:flex-row gap-6 items-start">
       <section class="flex-1 min-w-0 flex flex-col gap-4">
         <h2 class="text-2xl font-bold text-stone-800"><%= t("admin.proxy_order.card_details") %></h2>
-        <%= render "items" %>
+        <%= render "item_list" %>
         <% if @proxy_order.details_editable? %>
           <%= render "new_item_form" %>
         <% end %>
