@@ -1,6 +1,4 @@
-<%= turbo_stream.replace "proxy_order_items" do %>
-  <%= render "admin/proxy_orders/items" %>
-<% end %>
+<%= render "admin/proxy_orders/item_list_stream" %>
 
 <%= turbo_stream.replace "proxy_order_summary" do %>
   <%= render "admin/proxy_orders/summary" %>

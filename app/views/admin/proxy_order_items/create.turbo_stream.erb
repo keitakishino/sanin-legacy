@@ -1,6 +1,4 @@
-<%= turbo_stream.append "proxy_order_items" do %>
-  <%= render "admin/proxy_orders/item", item: @item %>
-<% end %>
+<%= render "admin/proxy_orders/item_list_stream", notify_hidden: true %>
 
 <%= turbo_stream.replace "new_proxy_order_item" do %>
   <%= render "admin/proxy_orders/new_item_form" %>

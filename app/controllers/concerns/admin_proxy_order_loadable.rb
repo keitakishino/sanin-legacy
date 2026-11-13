@@ -44,6 +44,8 @@ module AdminProxyOrderLoadable
     @items = @proxy_order.proxy_order_items.includes(:expansion, :proxy_order_price_lines, proxy_order_allocations: { proxy_order_participant: :user }).order(:id)
     @participants = @proxy_order.proxy_order_participants.includes(:user, :proxy_order_allocations).order(:id)
     @calculator = ProxyOrderCalculator.new(@proxy_order)
+    conditions = list_conditions
+    @item_list = ProxyOrderItemList.new(@items, calculator: @calculator, query: conditions[:q], sort: conditions[:sort])
     @users = User.order(:username)
     @participant_candidates = helpers.participant_candidates(@users, @participants)
     @participant_name_conflicts = helpers.participant_name_conflicts(@users, @participants)
@@ -55,6 +57,27 @@ module AdminProxyOrderLoadable
   end
 
   private
+
+  def list_conditions
+    if request.get?
+      params.permit(:q, :sort).to_h.symbolize_keys
+    else
+      extract_conditions_from_referer
+    end
+  end
+
+  def extract_conditions_from_referer
+    return {} unless request.referer.present?
+
+    begin
+      uri = URI.parse(request.referer)
+      return {} unless uri.path == admin_event_proxy_order_path(@event)
+
+      Rack::Utils.parse_nested_query(uri.query).slice("q", "sort").symbolize_keys
+    rescue StandardError
+      {}
+    end
+  end
 
   def reject_locked_operation(message_key)
     load_editor_state
