@@ -15,8 +15,6 @@ RSpec.describe ProxyOrderItem, type: :model do
 
   describe "validations" do
     it { is_expected.to validate_presence_of(:card_name) }
-    it { is_expected.to validate_presence_of(:foil) }
-    it { is_expected.to validate_presence_of(:frame) }
   end
 
   describe "no_duplicate_card_entry validation" do
@@ -128,6 +126,20 @@ RSpec.describe ProxyOrderItem, type: :model do
       create(:proxy_order_item, proxy_order:, card_name: "Ponder", expansion:, foil: :foil, frame: :normal, discarded_at: Time.current)
       item = build(:proxy_order_item, proxy_order:, card_name: "ponder", expansion:, foil: :foil, frame: :normal)
       expect(item).to be_valid
+    end
+
+    it "[C6] rejects duplicate when foil and frame are both blank" do
+      create(:proxy_order_item, proxy_order:, card_name: "Test Card", expansion:, foil: nil, frame: nil)
+      duplicate = build(:proxy_order_item, proxy_order:, card_name: "Test Card", expansion:, foil: nil, frame: nil)
+      expect(duplicate).not_to be_valid
+      expect(duplicate.errors.of_kind?(:base, :duplicate_card_entry)).to be true
+    end
+
+    it "[C6] rejects duplicate when only one of foil or frame is blank" do
+      create(:proxy_order_item, proxy_order:, card_name: "Test Card", expansion:, foil: nil, frame: :normal)
+      duplicate = build(:proxy_order_item, proxy_order:, card_name: "Test Card", expansion:, foil: nil, frame: :normal)
+      expect(duplicate).not_to be_valid
+      expect(duplicate.errors.of_kind?(:base, :duplicate_card_entry)).to be true
     end
   end
 

@@ -110,4 +110,19 @@ RSpec.describe "User Proxy Order History", type: :system do
       end
     end
   end
+
+  describe "[C5] Items with blank foil and frame in history" do
+    before do
+      blank_item = create(:proxy_order_item, proxy_order:, card_name: "Blank Foil Frame History", expansion: nil, foil: nil, frame: nil)
+      create(:proxy_order_price_line, proxy_order_item: blank_item, quantity: 1, unit_price_usd: 3.00)
+      create(:proxy_order_allocation, proxy_order_item: blank_item, proxy_order_participant: me, quantity: 1, lost_quantity: 0)
+    end
+
+    it "[C5] displays history row with blank foil and frame without error" do
+      visit proxy_order_histories_path
+      row = find("#history_proxy_order_#{proxy_order.id}")
+      expect(row).to be_visible
+      expect(page).not_to have_selector("div.error-message")
+    end
+  end
 end

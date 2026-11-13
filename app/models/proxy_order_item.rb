@@ -7,7 +7,7 @@ class ProxyOrderItem < ApplicationRecord
   enum :foil, { foil: 0, non_foil: 1, special: 2 }
   enum :frame, { normal: 0, extended: 1, borderless: 2, showcase: 3, retro: 4 }
 
-  validates :card_name, :foil, :frame, presence: true
+  validates :card_name, presence: true
 
   validate :no_duplicate_card_entry
 
