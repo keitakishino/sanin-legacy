@@ -30,7 +30,7 @@ class Admin::ProxyOrderAllocationsController < Admin::BaseController
       load_editor_state(open_item_ids: [ @item.id ])
 
       respond_to do |format|
-        format.turbo_stream { render "admin/proxy_orders/item_changed", locals: { toast_message: t(".created") } }
+        format.turbo_stream { render "admin/proxy_orders/item_changed", locals: { toast_message: t(".created"), refresh_participant_selects: true } }
         format.html { redirect_to admin_event_proxy_order_path(@event) }
       end
     else
@@ -76,7 +76,7 @@ class Admin::ProxyOrderAllocationsController < Admin::BaseController
       load_editor_state(open_item_ids: [ @item.id ])
 
       respond_to do |format|
-        format.turbo_stream { render "admin/proxy_orders/item_changed", locals: { toast_message: t(".updated") } }
+        format.turbo_stream { render "admin/proxy_orders/item_changed", locals: { toast_message: t(".updated"), refresh_participant_selects: true } }
         format.html { redirect_to admin_event_proxy_order_path(@event) }
       end
     else
@@ -101,7 +101,7 @@ class Admin::ProxyOrderAllocationsController < Admin::BaseController
     load_editor_state(open_item_ids: [ @item.id ])
 
     respond_to do |format|
-      format.turbo_stream { render "admin/proxy_orders/item_changed", locals: { toast_message: t(".deleted") } }
+      format.turbo_stream { render "admin/proxy_orders/item_changed", locals: { toast_message: t(".deleted"), refresh_participant_selects: true } }
       format.html { redirect_to admin_event_proxy_order_path(@event) }
     end
   end

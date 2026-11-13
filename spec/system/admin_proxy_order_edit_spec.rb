@@ -222,11 +222,12 @@ RSpec.describe "Admin Proxy Order Edit", type: :system do
       end
     end
 
-    it "opens card automatically when quantity mismatch" do
+    it "[C2] keeps the card open after adding a price line that causes a mismatch" do
       item = add_card("Mismatch Card")
       add_price_line(item, unit_price: "5.00", quantity: "10")
 
-      within first("details") do
+      expect(page).to have_selector("#proxy_order_item_#{item.id}[open]")
+      within "#proxy_order_item_#{item.id}" do
         expect(page).to have_selector("[id*='mismatch']")
       end
     end

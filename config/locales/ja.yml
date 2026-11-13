@@ -363,6 +363,7 @@ ja:
       col_user: "ユーザー"
       col_allocation_quantity: "注文数"
       summary_quantity: "数量"
+      summary_quantity_match: "数量一致"
       summary_lost: "ロスト"
       summary_unit_price: "1枚あたり"
       add_price_line_link: "＋ 価格行を追加"

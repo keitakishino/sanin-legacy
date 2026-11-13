@@ -201,6 +201,7 @@ en:
       col_user: "User"
       col_allocation_quantity: "Order Quantity"
       summary_quantity: "Quantity"
+      summary_quantity_match: "Quantities match"
       summary_lost: "Lost"
       summary_unit_price: "Per Card"
       add_price_line_link: "+ Add Price Line"

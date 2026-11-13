@@ -13,10 +13,9 @@ RSpec.describe "Admin Proxy Order Item Inputs", type: :system do
   end
 
   def open_item(item)
-    # Use JavaScript to ensure details are open
-    page.execute_script("document.querySelector('details##{dom_id(item)}').setAttribute('open', '')")
-    # Verify it's open
-    page.execute_script("return document.querySelector('details##{dom_id(item)}').open") == true
+    # Details are initially closed, so click summary to open
+    find("details##{dom_id(item)} > summary").click
+    expect(page).to have_selector("details##{dom_id(item)}[open]")
   end
 
   def js_trim(value)
@@ -27,9 +26,10 @@ RSpec.describe "Admin Proxy Order Item Inputs", type: :system do
     it "sets quantity to 1 for new price line form" do
       proxy_order = create(:proxy_order, event:)
       item = create(:proxy_order_item, proxy_order:, card_name: "Test Card")
-      # Create a price line to make details auto-open (quantity_mismatch)
+      # Create a price line to have quantity data available
       create(:proxy_order_price_line, proxy_order_item: item, quantity: 1)
       visit admin_event_proxy_order_path(event)
+      open_item(item)
 
       input = find("#new_price_line_proxy_order_item_#{item.id} input[name='proxy_order_price_line[quantity]']")
       expect(input.value).to eq("1")
@@ -116,9 +116,10 @@ RSpec.describe "Admin Proxy Order Item Inputs", type: :system do
     it "focuses new form unit price after adding price line via Enter" do
       proxy_order = create(:proxy_order, event:)
       item = create(:proxy_order_item, proxy_order:, card_name: "Test Card")
-      # Create a price line to make details auto-open (quantity_mismatch)
+      # Create a price line to have quantity data available
       create(:proxy_order_price_line, proxy_order_item: item, quantity: 1)
       visit admin_event_proxy_order_path(event)
+      open_item(item)
 
       find("##{dom_id(item, :new_price_line)} input[name='proxy_order_price_line[unit_price_usd]']").set("3.00")
       quantity_input = find("##{dom_id(item, :new_price_line)} input[name='proxy_order_price_line[quantity]']")
@@ -137,6 +138,7 @@ RSpec.describe "Admin Proxy Order Item Inputs", type: :system do
       item = create(:proxy_order_item, proxy_order:, card_name: "Test Card")
       create(:proxy_order_price_line, proxy_order_item: item, quantity: 1)
       visit admin_event_proxy_order_path(event)
+      open_item(item)
 
       within "##{dom_id(item, :edit_form)}" do
         expect(page).not_to have_button("更新")
@@ -150,6 +152,7 @@ RSpec.describe "Admin Proxy Order Item Inputs", type: :system do
       item = create(:proxy_order_item, proxy_order:, card_name: "Original")
       create(:proxy_order_price_line, proxy_order_item: item, quantity: 1)
       visit admin_event_proxy_order_path(event)
+      open_item(item)
 
       field = find("##{dom_id(item, :edit_form)} input[name='proxy_order_item[card_name]']")
       field.set("Updated Name")
@@ -163,6 +166,7 @@ RSpec.describe "Admin Proxy Order Item Inputs", type: :system do
       item = create(:proxy_order_item, proxy_order:, card_name: "Test", foil: :foil)
       create(:proxy_order_price_line, proxy_order_item: item, quantity: 1)
       visit admin_event_proxy_order_path(event)
+      open_item(item)
 
       within "##{dom_id(item, :edit_form)}" do
         select "non-foil", from: "proxy_order_item[foil]"
@@ -176,6 +180,7 @@ RSpec.describe "Admin Proxy Order Item Inputs", type: :system do
       item = create(:proxy_order_item, proxy_order:, card_name: "Test", frame: :normal)
       create(:proxy_order_price_line, proxy_order_item: item, quantity: 1)
       visit admin_event_proxy_order_path(event)
+      open_item(item)
 
       within "##{dom_id(item, :edit_form)}" do
         select "拡張アート", from: "proxy_order_item[frame]"

@@ -10,6 +10,15 @@
   <% end %>
 <% end %>
 
+<% if local_assigns[:refresh_participant_selects] && @proxy_order.details_editable? %>
+  <% @items.each do |other| %>
+    <% next if other.id == @item.id %>
+    <%= turbo_stream.replace dom_id(other, :new_allocation), method: :morph do %>
+      <%= render "admin/proxy_orders/new_allocation", item: other %>
+    <% end %>
+  <% end %>
+<% end %>
+
 <%= turbo_stream.replace "proxy_order_summary" do %>
   <%= render "admin/proxy_orders/summary" %>
 <% end %>
