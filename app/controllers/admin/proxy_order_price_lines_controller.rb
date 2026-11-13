@@ -17,7 +17,7 @@ class Admin::ProxyOrderPriceLinesController < Admin::BaseController
       load_editor_state(open_item_ids: [ @item.id ])
 
       respond_to do |format|
-        format.turbo_stream { render "admin/proxy_orders/item_changed", locals: { toast_message: t(".created") } }
+        format.turbo_stream { render "admin/proxy_orders/item_changed", locals: { toast_message: t(".created"), focus_id: helpers.dom_id(@item, :new_price_line_unit_price) } }
         format.html { redirect_to admin_event_proxy_order_path(@event) }
       end
     else
@@ -63,7 +63,9 @@ class Admin::ProxyOrderPriceLinesController < Admin::BaseController
       load_editor_state(open_item_ids: [ @item.id ])
 
       respond_to do |format|
-        format.turbo_stream { render "admin/proxy_orders/item_changed", locals: { toast_message: t(".updated") } }
+        locals = { toast_message: t(".updated") }
+        locals[:focus_id] = next_focus_id if params[:focus_next].present?
+        format.turbo_stream { render "admin/proxy_orders/item_changed", locals: }
         format.html { redirect_to admin_event_proxy_order_path(@event) }
       end
     else
@@ -101,5 +103,12 @@ class Admin::ProxyOrderPriceLinesController < Admin::BaseController
 
   def price_line_params
     params.require(:proxy_order_price_line).permit(:unit_price_usd, :quantity)
+  end
+
+  def next_focus_id
+    lines = @item.proxy_order_price_lines.to_a
+    index = lines.index { |l| l.id == @line.id }
+    next_line = lines[index + 1]
+    next_line.present? ? helpers.dom_id(next_line, :unit_price) : helpers.dom_id(@item, :new_price_line_unit_price)
   end
 end

@@ -78,10 +78,7 @@ RSpec.describe "Admin Proxy Order Edit", type: :system do
       expect(ProxyOrderParticipant.count).to eq(2)
 
       # カード情報の更新
-      within "#edit_form_proxy_order_item_#{item.id}" do
-        fill_in "proxy_order_item[card_name]", with: "Black Lotus (Updated)"
-        click_button "更新"
-      end
+      set_and_commit "#edit_form_proxy_order_item_#{item.id} input[name='proxy_order_item[card_name]']", "Black Lotus (Updated)"
       expect(page).to have_content("カードを更新しました")
       expect(page).to have_content("Black Lotus (Updated)")
 
