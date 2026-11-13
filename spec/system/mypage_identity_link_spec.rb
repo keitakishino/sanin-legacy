@@ -149,9 +149,9 @@ RSpec.describe "Mypage Identity Linking", type: :system do
       mock_discord_auth(uid: "200000000000000001", global_name: "Discord表示名")
       click_button "Discord でサインイン"
 
-      # Simulate OmniAuth callback for signin
-      visit "/auth/discord/callback"
-
+      # テストモードでは /auth/:provider への POST だけでコールバックまで進み、root にリダイレクトされる。
+      # 完了前に別の画面を開くと reset_session と競合して CSRF エラーになるので、そのまま結果を待つ
+      expect(page).to have_current_path(root_path)
       expect(page).to have_text("ダッシュボード")
     end
 
@@ -175,9 +175,9 @@ RSpec.describe "Mypage Identity Linking", type: :system do
       mock_google_auth(uid: "300000001", name: "Google表示名")
       click_button "Google でサインイン"
 
-      # Simulate OmniAuth callback for signin
-      visit "/auth/google/callback"
-
+      # テストモードでは /auth/:provider への POST だけでコールバックまで進み、root にリダイレクトされる。
+      # 完了前に別の画面を開くと reset_session と競合して CSRF エラーになるので、そのまま結果を待つ
+      expect(page).to have_current_path(root_path)
       expect(page).to have_text("ダッシュボード")
     end
   end
