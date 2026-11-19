@@ -108,7 +108,7 @@ class Admin::ProxyOrderPriceLinesController < Admin::BaseController
   def next_focus_id
     lines = @item.proxy_order_price_lines.to_a
     index = lines.index { |l| l.id == @line.id }
-    next_line = lines[index + 1]
+    next_line = index && lines[index + 1]
     next_line.present? ? helpers.dom_id(next_line, :unit_price) : helpers.dom_id(@item, :new_price_line_unit_price)
   end
 end

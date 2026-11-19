@@ -13,6 +13,16 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
     proxy_order  # Ensure proxy_order is created before tests
   end
 
+  # Turbo updates the URL before it renders the new frame content
+  # (changeHistory runs before render in #loadFrameResponse), so have_current_path alone
+  # can pass while the old list is still in the DOM. Mark the current list bar and wait
+  # until it has been replaced by a fresh one.
+  def wait_for_item_list_update
+    execute_script("document.querySelector('#proxy_order_list_bar').setAttribute('data-stale', '')")
+    yield
+    expect(page).to have_css("#proxy_order_list_bar:not([data-stale])")
+  end
+
   describe "[C1] sorting by name A→Z" do
     it "sorts card names in ascending alphabetical order" do
       create(:proxy_order_item, proxy_order:, card_name: "Gamma")
@@ -20,7 +30,7 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
       create(:proxy_order_item, proxy_order:, card_name: "Beta")
 
       visit admin_event_proxy_order_path(event)
-      select "名称（A→Z）", from: "proxy_order_item_sort"
+      wait_for_item_list_update { select "名称（A→Z）", from: "proxy_order_item_sort" }
       expect(page).to have_current_path(%r{sort=name_asc})
 
       card_names = all("[data-role=card-name]").map(&:text)
@@ -35,7 +45,7 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
       create(:proxy_order_item, proxy_order:, card_name: "Beta")
 
       visit admin_event_proxy_order_path(event)
-      select "名称（Z→A）", from: "proxy_order_item_sort"
+      wait_for_item_list_update { select "名称（Z→A）", from: "proxy_order_item_sort" }
       expect(page).to have_current_path(%r{sort=name_desc})
 
       card_names = all("[data-role=card-name]").map(&:text)
@@ -55,7 +65,7 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
       create(:proxy_order_price_line, proxy_order_item: item_c, unit_price_usd: 3.0, quantity: 1)
 
       visit admin_event_proxy_order_path(event)
-      select "一枚あたり金額（安い順）", from: "proxy_order_item_sort"
+      wait_for_item_list_update { select "一枚あたり金額（安い順）", from: "proxy_order_item_sort" }
       expect(page).to have_current_path(%r{sort=unit_price_asc})
 
       card_names = all("[data-role=card-name]").map(&:text)
@@ -73,7 +83,7 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
       create(:proxy_order_price_line, proxy_order_item: item_c, unit_price_usd: 3.0, quantity: 1)
 
       visit admin_event_proxy_order_path(event)
-      select "一枚あたり金額（高い順）", from: "proxy_order_item_sort"
+      wait_for_item_list_update { select "一枚あたり金額（高い順）", from: "proxy_order_item_sort" }
       expect(page).to have_current_path(%r{sort=unit_price_desc})
 
       card_names = all("[data-role=card-name]").map(&:text)
@@ -104,7 +114,7 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
       create(:proxy_order_item, proxy_order:, card_name: "Zulu")
 
       visit admin_event_proxy_order_path(event)
-      select "名称（A→Z）", from: "proxy_order_item_sort"
+      wait_for_item_list_update { select "名称（A→Z）", from: "proxy_order_item_sort" }
       expect(page).to have_current_path(%r{sort=name_asc})
 
       # Edit the first card
@@ -129,10 +139,12 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
       create(:proxy_order_item, proxy_order:, card_name: "Zulu")
 
       visit admin_event_proxy_order_path(event)
-      select "名称（A→Z）", from: "proxy_order_item_sort"
+      wait_for_item_list_update { select "名称（A→Z）", from: "proxy_order_item_sort" }
+      expect(page).to have_current_path(%r{sort=name_asc})
 
       # Open and edit
       find("##{dom_id(item1)} summary").click
+      expect(page).to have_selector("##{dom_id(item1)}[open]")
       find("##{dom_id(item1, :card_name_input)}").fill_in(with: "Zzz")
       find("##{dom_id(item1, :card_name_input)}").send_keys(:tab)
 
@@ -154,7 +166,7 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
       visit admin_event_proxy_order_path(event)
       execute_script("window.__marker = 1")
 
-      select "名称（A→Z）", from: "proxy_order_item_sort"
+      wait_for_item_list_update { select "名称（A→Z）", from: "proxy_order_item_sort" }
       expect(page).to have_current_path(%r{sort=name_asc})
 
       # Page should not reload
@@ -171,10 +183,10 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
       visit admin_event_proxy_order_path(event)
 
       find("#proxy_order_item_search").fill_in(with: "card")
-      find("#proxy_order_item_search").send_keys(:enter)
+      wait_for_item_list_update { find("#proxy_order_item_search").send_keys(:enter) }
       expect(page).to have_current_path(%r{q=card})
 
-      select "名称（Z→A）", from: "proxy_order_item_sort"
+      wait_for_item_list_update { select "名称（Z→A）", from: "proxy_order_item_sort" }
       expect(page).to have_current_path(%r{q=card.*sort=name_desc})
 
       card_names = all("[data-role=card-name]").map(&:text)
@@ -191,7 +203,7 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
       visit admin_event_proxy_order_path(event)
 
       find("#proxy_order_item_search").fill_in(with: "BETA")
-      find("#proxy_order_item_search").send_keys(:enter)
+      wait_for_item_list_update { find("#proxy_order_item_search").send_keys(:enter) }
 
       expect(page).to have_current_path(%r{q=BETA})
 
@@ -212,7 +224,7 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
 
       # Search for items
       find("#proxy_order_item_search").fill_in(with: "Test")
-      find("#proxy_order_item_search").send_keys(:enter)
+      wait_for_item_list_update { find("#proxy_order_item_search").send_keys(:enter) }
 
       expect(find("#proxy_order_item_count")).to have_text("3 件 / 全 4 件")
     end
@@ -225,12 +237,12 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
       visit admin_event_proxy_order_path(event)
 
       find("#proxy_order_item_search").fill_in(with: "nomatch")
-      find("#proxy_order_item_search").send_keys(:enter)
+      wait_for_item_list_update { find("#proxy_order_item_search").send_keys(:enter) }
 
       expect(page).to have_text("『nomatch』に一致するカードはありません")
       expect(page).to have_link("検索をクリア")
 
-      click_link "検索をクリア"
+      wait_for_item_list_update { click_link "検索をクリア" }
       expect(page).to have_current_path(admin_event_proxy_order_path(event))
       expect(find("#proxy_order_item_count")).to have_text("全 1 件")
     end
@@ -244,12 +256,12 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
       visit admin_event_proxy_order_path(event)
 
       find("#proxy_order_item_search").fill_in(with: "Test")
-      find("#proxy_order_item_search").send_keys(:enter)
+      wait_for_item_list_update { find("#proxy_order_item_search").send_keys(:enter) }
 
       expect(page).to have_current_path(%r{q=Test})
       expect(find("#proxy_order_item_count")).to have_text("1 件")
 
-      click_link "×"
+      wait_for_item_list_update { click_link "×" }
 
       expect(page).to have_current_path(admin_event_proxy_order_path(event))
       expect(find("#proxy_order_item_count")).to have_text("全 2 件")
@@ -265,7 +277,7 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
       visit admin_event_proxy_order_path(event)
 
       find("#proxy_order_item_search").fill_in(with: "card")
-      find("#proxy_order_item_search").send_keys(:enter)
+      wait_for_item_list_update { find("#proxy_order_item_search").send_keys(:enter) }
 
       expect(page).to have_current_path(%r{q=card})
       expect(find("#proxy_order_item_count")).to have_text("2 件")
@@ -289,7 +301,7 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
       visit admin_event_proxy_order_path(event)
 
       find("#proxy_order_item_search").fill_in(with: "alpha")
-      find("#proxy_order_item_search").send_keys(:enter)
+      wait_for_item_list_update { find("#proxy_order_item_search").send_keys(:enter) }
 
       expect(find("#proxy_order_item_count")).to have_text("1 件 / 全 2 件")
 

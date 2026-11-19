@@ -1,7 +1,7 @@
 class ProxyOrderItem < ApplicationRecord
   belongs_to :proxy_order
   belongs_to :expansion, optional: true
-  has_many :proxy_order_price_lines, dependent: :destroy
+  has_many :proxy_order_price_lines, -> { order(:id) }, dependent: :destroy
   has_many :proxy_order_allocations, dependent: :destroy
 
   enum :foil, { foil: 0, non_foil: 1, special: 2 }
