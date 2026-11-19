@@ -6,7 +6,7 @@
 
 ### 前提条件
 - Docker & Docker Compose
-- Ruby 3.3.12（ローカル開発の場合）
+- Ruby 3.3.14（ローカル開発の場合）
 - PostgreSQL 17
 
 ### 開発環境のセットアップ
