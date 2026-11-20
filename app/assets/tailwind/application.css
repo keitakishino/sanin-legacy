@@ -144,3 +144,13 @@
     }
   }
 }
+
+/* iOS は 16px 未満の入力欄にフォーカスすると自動でズームするため、スマホ幅では 16px にする */
+/* レイヤー外に配置して Tailwind utilities より優先させる */
+@media (max-width: 47.9375rem) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="file"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}

@@ -20,7 +20,7 @@
       <div class="text-xs text-stone-500 tabular-nums">
         <%= t("admin.proxy_order.breakdown",
               goods: "<span data-role=\"goods-total\">#{usd(@calculator.goods_total(participant))}</span>",
-              fee: "<span data-role=\"fee\">#{usd(@calculator.fee_for(participant))}</span>",
+              fee: "<span data-role=\"fee\">#{usd(@calculator.shipping_for(participant) + @calculator.charges_for(participant))}</span>",
               total: "<span data-role=\"payment-usd\">#{usd(@calculator.payment_usd(participant))}</span>").html_safe %>
       </div>
 
