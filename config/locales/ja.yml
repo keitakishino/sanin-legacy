@@ -52,7 +52,7 @@ ja:
       tile_goods: "商品合計"
       tile_shipping_per_person: "一人あたり送料（%{total} ÷ %{count}人）"
       tile_payment: "支払い金額（100円単位に切り上げ）"
-      breakdown: "商品 %{goods} ＋ 送料 %{shipping} ＋ 手数料等 %{charges} ＝ %{total}"
+      breakdown_html: "商品 %{goods} ＋ 送料 %{shipping} ＋ 手数料等 %{charges} ＝ %{total}"
       calc_line: "%{usd} × %{rate} 円/$ ＝ %{raw} → %{rounded}"
       no_items: "明細はまだありません"
   toasts:

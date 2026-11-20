@@ -108,11 +108,11 @@
       </div>
 
       <p id="proxy_order_my_breakdown" class="m-0 text-xs text-stone-500 tabular-nums">
-        <%= t("proxy_orders.show.breakdown",
-              goods: "<span data-role=\"breakdown-goods\">#{usd(@calculator.goods_total(@participant))}</span>",
-              shipping: "<span data-role=\"breakdown-shipping\">#{usd(@calculator.shipping_for(@participant))}</span>",
-              charges: "<span data-role=\"breakdown-charges\">#{usd(@calculator.charges_for(@participant))}</span>",
-              total: "<span data-role=\"payment-usd\">#{usd(@calculator.payment_usd(@participant))}</span>").html_safe %>
+        <%= t("proxy_orders.show.breakdown_html",
+              goods: content_tag(:span, usd(@calculator.goods_total(@participant)), data: { role: "breakdown-goods" }),
+              shipping: content_tag(:span, usd(@calculator.shipping_for(@participant)), data: { role: "breakdown-shipping" }),
+              charges: content_tag(:span, usd(@calculator.charges_for(@participant)), data: { role: "breakdown-charges" }),
+              total: content_tag(:span, usd(@calculator.payment_usd(@participant)), data: { role: "payment-usd" })) %>
       </p>
       <% if @proxy_order.usd_jpy_rate.present? %>
         <p class="m-0 text-xs text-stone-500 tabular-nums">
