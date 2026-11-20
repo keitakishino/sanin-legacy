@@ -43,7 +43,12 @@ class ProxyOrderCalculator
   end
 
   def fee_total
-    @proxy_order.tax_usd + @proxy_order.customs_usd + @proxy_order.shipping_usd + @proxy_order.payment_fee_usd
+    all_goods_total = @items.flat_map(&:proxy_order_allocations)
+                           .sum { |a| subtotal(a) }
+    payment_fee = ceil2(all_goods_total * @proxy_order.payment_fee_rate / 100)
+    customs = ceil2(all_goods_total * @proxy_order.customs_rate / 100)
+    consumption_tax = ceil2((all_goods_total + payment_fee + customs + @proxy_order.shipping_usd) * @proxy_order.consumption_tax_rate / 100)
+    payment_fee + customs + consumption_tax + @proxy_order.shipping_usd
   end
 
   def fee_payer_count

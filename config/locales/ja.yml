@@ -359,7 +359,7 @@ ja:
       search_label: "カード名で検索"
       search_placeholder: "カード名で検索"
       search_submit: "検索"
-      clear_search_icon: "検索語を消す"
+      clear_filter: "絞り込み解除"
       clear_search: "検索をクリア"
       sort_label: "並び順"
       sort_options:

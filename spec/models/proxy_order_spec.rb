@@ -14,15 +14,14 @@ RSpec.describe ProxyOrder, type: :model do
   describe "[C5] validations" do
     let(:event) { create(:event, :proxy_order) }
 
-    it { is_expected.to validate_presence_of(:tax_usd) }
-    it { is_expected.to validate_presence_of(:customs_usd) }
     it { is_expected.to validate_presence_of(:shipping_usd) }
-    it { is_expected.to validate_presence_of(:payment_fee_usd) }
-    it { is_expected.to validate_presence_of(:usd_jpy_rate).on(:create).allow_nil }
-    it { is_expected.to validate_numericality_of(:tax_usd).is_greater_than_or_equal_to(0) }
-    it { is_expected.to validate_numericality_of(:customs_usd).is_greater_than_or_equal_to(0) }
+    it { is_expected.to validate_presence_of(:payment_fee_rate) }
+    it { is_expected.to validate_presence_of(:customs_rate) }
+    it { is_expected.to validate_presence_of(:consumption_tax_rate) }
     it { is_expected.to validate_numericality_of(:shipping_usd).is_greater_than_or_equal_to(0) }
-    it { is_expected.to validate_numericality_of(:payment_fee_usd).is_greater_than_or_equal_to(0) }
+    it { is_expected.to validate_numericality_of(:payment_fee_rate).is_greater_than_or_equal_to(0) }
+    it { is_expected.to validate_numericality_of(:customs_rate).is_greater_than_or_equal_to(0) }
+    it { is_expected.to validate_numericality_of(:consumption_tax_rate).is_greater_than_or_equal_to(0) }
     it { is_expected.to validate_numericality_of(:usd_jpy_rate).is_greater_than(0).allow_nil }
   end
 
