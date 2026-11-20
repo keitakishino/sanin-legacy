@@ -1,5 +1,5 @@
 class ProxyOrderCalculator
-  # 計算: 設計書「金額計算ルール」に従い、カード単価・参加者別合計・手数料・円換算を計算
+  # 計算: 率ベースの手数料・送料等分・円換算に基づき、カード単価・参加者別合計・手数料・円換算を計算
   def initialize(proxy_order)
     @proxy_order = proxy_order
     # 呼び出し側が preload 済みならそれを使い、そうでなければ従来どおり読み込む
@@ -42,35 +42,55 @@ class ProxyOrderCalculator
     net_quantity(participant).zero?
   end
 
-  def fee_total
-    @proxy_order.tax_usd + @proxy_order.customs_usd + @proxy_order.shipping_usd + @proxy_order.payment_fee_usd
-  end
-
   def fee_payer_count
     @participants.count { |p| !total_loss?(p) }
   end
 
-  def fee_per_person
+  def shipping_per_person
     return BigDecimal("0") if fee_payer_count.zero?
 
-    ceil2(fee_total / fee_payer_count)
+    ceil2(@proxy_order.shipping_usd / fee_payer_count)
   end
 
-  def fee_for(participant)
+  def shipping_for(participant)
     return BigDecimal("0") if total_loss?(participant)
 
-    fee_per_person
+    shipping_per_person
+  end
+
+  def purchase_usd(participant)
+    goods_total(participant) + shipping_for(participant)
+  end
+
+  def payment_fee_for(participant)
+    purchase_usd(participant) * @proxy_order.payment_fee_rate / 100
+  end
+
+  def customs_for(participant)
+    purchase_usd(participant) * @proxy_order.customs_rate / 100
+  end
+
+  def consumption_tax_for(participant)
+    purchase_usd(participant) * (1 + @proxy_order.customs_rate / 100) * @proxy_order.consumption_tax_rate / 100
   end
 
   def payment_usd(participant)
-    goods_total(participant) + fee_for(participant)
+    return BigDecimal("0") if total_loss?(participant)
+
+    ceil2(raw_payment_usd(participant))
+  end
+
+  def charges_for(participant)
+    return 0 if total_loss?(participant)
+
+    payment_usd(participant) - purchase_usd(participant)
   end
 
   def payment_jpy(participant)
     return 0 if total_loss?(participant)
     return nil if @proxy_order.usd_jpy_rate.nil?
 
-    self.class.ceil_100(payment_usd(participant) * @proxy_order.usd_jpy_rate)
+    self.class.ceil_100(raw_payment_usd(participant) * @proxy_order.usd_jpy_rate)
   end
 
   def self.ceil_100(yen)
@@ -78,6 +98,10 @@ class ProxyOrderCalculator
   end
 
   private
+
+  def raw_payment_usd(participant)
+    purchase_usd(participant) + payment_fee_for(participant) + customs_for(participant) + consumption_tax_for(participant)
+  end
 
   def ceil2(value)
     BigDecimal(value.to_s).ceil(2)
