@@ -9,7 +9,13 @@ Rails.application.configure do
     policy.base_uri    :self
     policy.object_src  :none
     policy.frame_ancestors :self
-    policy.form_action :self
+    # Chrome は form-action をフォーム送信後のリダイレクト先にも適用する。
+    # ログイン・登録・マイページ連携のボタンは POST /auth/:provider（マイページは 307 経由）のあと、
+    # OmniAuth が各プロバイダの認可 URL へ 302 する
+    # （Google: accounts.google.com/o/oauth2/auth（omniauth-google-oauth2 の authorize_url）、
+    #   Discord: discord.com/api/oauth2/authorize（omniauth-discord の site + authorize_url））。
+    # そのため認可ホストだけを許可する。プロバイダを足すときはここにも追加する。
+    policy.form_action :self, "https://accounts.google.com", "https://discord.com"
     policy.connect_src :self
     policy.img_src     :self, :data
     policy.manifest_src :self
