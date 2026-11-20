@@ -29,7 +29,7 @@ RSpec.describe "Admin Proxy Order Status", type: :system do
     before do
       create(:proxy_order_price_line, proxy_order_item: item, quantity: 5)
       create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: create(:proxy_order_participant, proxy_order:), quantity: 5)
-      proxy_order.update(tax_usd: 0, customs_usd: 0, shipping_usd: 0, usd_jpy_rate: 150)
+      proxy_order.update(payment_fee_rate: 0, customs_rate: 0, consumption_tax_rate: 0, shipping_usd: 0, usd_jpy_rate: 150)
       visit admin_event_proxy_order_path(event)
     end
 
