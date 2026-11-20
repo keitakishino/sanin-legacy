@@ -65,11 +65,11 @@ end
     end
   end
 
-  describe "C7: 手数料合計 $10 で参加者 1 人のとき、別のユーザーの注文を追加すると、リロードせずに #proxy_order_fee_tiles の表示が「参加者2人」に、#proxy_order_fee_per_person が $5.00 に変わる" do
+  describe "C7: 送料 $10 で参加者 1 人のとき、別のユーザーの注文を追加すると、リロードせずに #proxy_order_fee_tiles の表示が「参加者2人」に、#proxy_order_fee_per_person が $5.00 に変わる" do
     it "fee tiles update with new participant count and amount" do
-      # 事前に税を設定する
+      # 事前に送料を設定する
       within "#proxy_order_fees_form" do
-        fill_in "proxy_order[tax_usd]", with: "10.00"
+        fill_in "proxy_order[shipping_usd]", with: "10.00"
         click_button "保存"
       end
       expect(page).to have_content("税・送料・決済手数料・レートを更新しました")
@@ -104,25 +104,25 @@ end
     end
   end
 
-  describe "C8: 税の入力欄に保存していない値（99.99）を入れたまま注文を追加しても、その入力欄の値は 99.99 のまま残る" do
-    it "unsaved tax input value persists after adding user" do
+  describe "C8: 消費税率の入力欄に保存していない値（99.99）を入れたまま注文を追加しても、その入力欄の値は 99.99 のまま残る" do
+    it "unsaved consumption tax rate input value persists after adding user" do
       item = add_card("Test Card")
       add_price_line(item, unit_price: "3.00", quantity: "1")
       add_user(item, user: buyer, quantity: "1")
       expect(page).to have_content("注文を追加しました")
 
-      # 税の入力欄に値を入れるが保存しない
+      # 消費税率の入力欄に値を入れるが保存しない
       within "#proxy_order_fees_form" do
-        fill_in "proxy_order[tax_usd]", with: "99.99"
+        fill_in "proxy_order[consumption_tax_rate]", with: "99.99"
       end
 
       # ユーザーを追加
       add_user(item, user: tanaka, quantity: "1")
       expect(page).to have_content("注文を追加しました")
 
-      # 税の入力欄の値が残っていることを確認
-      tax_input_value = find("#proxy_order_fees_form input[name='proxy_order[tax_usd]']").value
-      expect(tax_input_value).to eq("99.99")
+      # 消費税率の入力欄の値が残っていることを確認
+      consumption_tax_rate_input_value = find("#proxy_order_fees_form input[name='proxy_order[consumption_tax_rate]']").value
+      expect(consumption_tax_rate_input_value).to eq("99.99")
     end
   end
 end

@@ -11,18 +11,30 @@ RSpec.describe ProxyOrder, type: :model do
     it { is_expected.to define_enum_for(:status).with_values(ordered: 0, arrived: 1, completed: 2) }
   end
 
-  describe "[C5] validations" do
+  describe "validations" do
     let(:event) { create(:event, :proxy_order) }
 
     it { is_expected.to validate_presence_of(:shipping_usd) }
     it { is_expected.to validate_presence_of(:payment_fee_rate) }
     it { is_expected.to validate_presence_of(:customs_rate) }
     it { is_expected.to validate_presence_of(:consumption_tax_rate) }
+    it { is_expected.to validate_presence_of(:usd_jpy_rate).on(:create).allow_nil }
     it { is_expected.to validate_numericality_of(:shipping_usd).is_greater_than_or_equal_to(0) }
     it { is_expected.to validate_numericality_of(:payment_fee_rate).is_greater_than_or_equal_to(0) }
     it { is_expected.to validate_numericality_of(:customs_rate).is_greater_than_or_equal_to(0) }
     it { is_expected.to validate_numericality_of(:consumption_tax_rate).is_greater_than_or_equal_to(0) }
     it { is_expected.to validate_numericality_of(:usd_jpy_rate).is_greater_than(0).allow_nil }
+  end
+
+  describe "defaults" do
+    it "[C3] 新規作成した注文の率の初期値は 決済手数料 4.1・関税 4.0・消費税 10.0" do
+      event = create(:event, :proxy_order)
+      proxy_order = event.create_proxy_order!
+      proxy_order.reload
+      expect(proxy_order.payment_fee_rate).to eq(BigDecimal("4.1"))
+      expect(proxy_order.customs_rate).to eq(BigDecimal("4.0"))
+      expect(proxy_order.consumption_tax_rate).to eq(BigDecimal("10.0"))
+    end
   end
 
   describe "unique event_id" do

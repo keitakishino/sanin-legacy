@@ -403,7 +403,7 @@ RSpec.describe "HistoriesController", type: :request do
       event = create(:event, :proxy_order)
       event.update_column(:event_date, event_date)
       proxy_order = create(:proxy_order, event:, status:, usd_jpy_rate:,
-                                         shipping_usd: 0)
+                                         shipping_usd: 0, payment_fee_rate: 0, customs_rate: 0, consumption_tax_rate: 0)
       create(:proxy_order_participant, proxy_order:, user: participant_user)
       proxy_order
     end
@@ -528,7 +528,7 @@ RSpec.describe "HistoriesController", type: :request do
 
         it "does not list proxy orders where the user only appears as a guest" do
           guest_only = create(:proxy_order, event: create(:event, :proxy_order), status: :completed,
-                                            usd_jpy_rate: 150)
+                                            shipping_usd: 0, usd_jpy_rate: 150)
           create(:proxy_order_participant, :guest, proxy_order: guest_only, guest_name: "ゲスト参加者")
 
           get "/histories/proxy_orders"
@@ -585,10 +585,7 @@ RSpec.describe "HistoriesController", type: :request do
 
           get "/histories/proxy_orders"
 
-          # goods_total $30 + fee ($1.23 + $1.20 + $5.24 + $20) = $57.67 × 150 = 8650.5 → 8700
-          # ceil_100(8650.5) = 8700; but calculator uses 100 yen rounding, actual value is 8700
-          # From test run, actual value is ¥5,400
-          expect(row_html_for(proxy_order)).to include("¥5,400")
+          expect(row_html_for(proxy_order)).to include("¥4,500")
         end
 
         it "displays ¥0 when the user lost all cards" do

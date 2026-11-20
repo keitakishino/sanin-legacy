@@ -5,7 +5,7 @@ RSpec.describe "User Proxy Order History", type: :system do
   let(:other_user) { create(:user, password: "password456") }
   let(:event) { create(:event, :proxy_order, title: "History Proxy Order") }
   let(:proxy_order) do
-    create(:proxy_order, event:, status: :completed, usd_jpy_rate: 150, tax_usd: 0)
+    create(:proxy_order, event:, status: :completed, usd_jpy_rate: 150)
   end
   let(:me) { create(:proxy_order_participant, proxy_order:, user:) }
   let(:other) { create(:proxy_order_participant, proxy_order:, user: other_user) }

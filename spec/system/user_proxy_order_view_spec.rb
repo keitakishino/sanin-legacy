@@ -4,7 +4,7 @@ RSpec.describe "User Proxy Order View", type: :system do
   let(:user) { create(:user, email: "test@example.com", password: "password123") }
   let(:other_buyer_user) { create(:user, username: "other_buyer", email: "other@example.com", password: "password456") }
   let(:event) { create(:event, :proxy_order, title: "My Proxy Order") }
-  let(:proxy_order) { create(:proxy_order, event:, status: :ordered, tax_usd: 10, usd_jpy_rate: nil) }
+  let(:proxy_order) { create(:proxy_order, event:, status: :ordered, consumption_tax_rate: 10, usd_jpy_rate: nil) }
   let(:me) { create(:proxy_order_participant, proxy_order:, user:) }
   let(:other) { create(:proxy_order_participant, proxy_order:, user: other_buyer_user) }
   let(:item_a) { create(:proxy_order_item, proxy_order:, card_name: "Mine Card") }
@@ -79,7 +79,7 @@ RSpec.describe "User Proxy Order View", type: :system do
 
     it "displays payment summary with role attributes" do
       expect(page).to have_selector("[data-role='goods-total']")
-      expect(page).to have_selector("[data-role='fee']")
+      expect(page).to have_selector("[data-role='shipping-per-person']")
       expect(page).to have_selector("[data-role='payment-usd']")
       expect(page).to have_selector("[data-role='payment-jpy']")
     end
@@ -174,12 +174,6 @@ RSpec.describe "User Proxy Order View", type: :system do
 
     it "displays payment in yen with rate applied" do
       payment_jpy_element = find("[data-role='payment-jpy']")
-      # goods_total = (5.00 * 2) = 10
-      # fee_total = (40 + 10) * 0.05 = 2.5
-      # fee_per_person = 2.5 / 2 = 1.25
-      # user's fee = (10 + 10/2) * 0.05 = 0.75
-      # user's payment_usd = 10 + 0.75 = 10.75
-      # user's payment_jpy = 10.75 * 150 = 1612.5 = 1612
       expect(payment_jpy_element.text).to match(/¥/)
       expect(payment_jpy_element.text).not_to include("未確定")
     end

@@ -11,44 +11,44 @@ RSpec.describe "Admin Proxy Order Payment Fee", type: :system do
 
   describe "ordered status" do
     it "[C1] can input and save payment fee" do
-      proxy_order = create(:proxy_order, event:, status: :ordered, tax_usd: 0, customs_usd: 0, shipping_usd: 0, usd_jpy_rate: 150)
+      proxy_order = create(:proxy_order, event:, status: :ordered, shipping_usd: 0, usd_jpy_rate: 150)
       visit admin_event_proxy_order_path(event)
 
       within "#proxy_order_fees_form" do
-        fill_in "proxy_order[payment_fee_usd]", with: "3.50"
+        fill_in "proxy_order[payment_fee_rate]", with: "3.50"
         click_button "保存"
       end
 
       expect(page).to have_content("税・送料・決済手数料・レートを更新しました")
-      expect(page).to have_content("$3.50")
+      expect(page).to have_content("3.5")
       proxy_order.reload
-      expect(proxy_order.payment_fee_usd).to eq(3.5)
+      expect(proxy_order.payment_fee_rate).to eq(3.5)
     end
   end
 
   describe "arrived status" do
     it "[C2] can input and save payment fee" do
-      proxy_order = create(:proxy_order, event:, status: :arrived, tax_usd: 0, customs_usd: 0, shipping_usd: 0, usd_jpy_rate: 150)
+      proxy_order = create(:proxy_order, event:, status: :arrived, shipping_usd: 0, usd_jpy_rate: 150)
       visit admin_event_proxy_order_path(event)
 
       within "#proxy_order_fees_form" do
-        fill_in "proxy_order[payment_fee_usd]", with: "2.00"
+        fill_in "proxy_order[payment_fee_rate]", with: "2.00"
         click_button "保存"
       end
 
       expect(page).to have_content("税・送料・決済手数料・レートを更新しました")
       proxy_order.reload
-      expect(proxy_order.payment_fee_usd).to eq(2.0)
+      expect(proxy_order.payment_fee_rate).to eq(2.0)
     end
   end
 
   describe "completed status" do
     it "[C3] payment fee field is disabled and save button is not shown" do
-      proxy_order = create(:proxy_order, event:, status: :completed, tax_usd: 0, customs_usd: 0, shipping_usd: 0, usd_jpy_rate: 150)
+      proxy_order = create(:proxy_order, event:, status: :completed, shipping_usd: 0, usd_jpy_rate: 150)
       visit admin_event_proxy_order_path(event)
 
       within "#proxy_order_fees_form" do
-        expect(find("input[name='proxy_order[payment_fee_usd]']")).to be_disabled
+        expect(find("input[name='proxy_order[payment_fee_rate]']")).to be_disabled
         expect(page).not_to have_button("保存")
       end
     end
