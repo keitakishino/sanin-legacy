@@ -280,9 +280,9 @@ RSpec.describe "Admin Proxy Order Status", type: :request do
     end
 
     it "prevents fee update" do
-      patch admin_event_proxy_order_path(event), params: { proxy_order: { tax_usd: 5 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
+      patch admin_event_proxy_order_path(event), params: { proxy_order: { consumption_tax_rate: 5 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       expect(response).to have_http_status(:unprocessable_entity)
-      expect(proxy_order.reload.tax_usd).not_to eq(5)
+      expect(proxy_order.reload.consumption_tax_rate).not_to eq(5)
     end
   end
 
@@ -395,17 +395,17 @@ RSpec.describe "Admin Proxy Order Status", type: :request do
       create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant, quantity: 2)
     end
 
-    it "allows tax_usd update" do
-      patch admin_event_proxy_order_path(event), params: { proxy_order: { tax_usd: 5 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
+    it "allows consumption_tax_rate update" do
+      patch admin_event_proxy_order_path(event), params: { proxy_order: { consumption_tax_rate: 5 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       expect(response).to have_http_status(:ok)
-      expect(proxy_order.reload.tax_usd).to eq(5)
+      expect(proxy_order.reload.consumption_tax_rate).to eq(5)
     end
 
     it "recalculates payment after fee update" do
       original_calc = ProxyOrderCalculator.new(proxy_order)
       original_payment = original_calc.payment_usd(participant)
 
-      patch admin_event_proxy_order_path(event), params: { proxy_order: { tax_usd: 5 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
+      patch admin_event_proxy_order_path(event), params: { proxy_order: { consumption_tax_rate: 5 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
 
       proxy_order.reload
       new_calc = ProxyOrderCalculator.new(proxy_order)
@@ -416,9 +416,9 @@ RSpec.describe "Admin Proxy Order Status", type: :request do
 
     it "rejects fee update in completed state" do
       proxy_order.update(status: :completed)
-      patch admin_event_proxy_order_path(event), params: { proxy_order: { tax_usd: 5 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
+      patch admin_event_proxy_order_path(event), params: { proxy_order: { consumption_tax_rate: 5 } }, headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
       expect(response).to have_http_status(:unprocessable_entity)
-      expect(proxy_order.reload.tax_usd).not_to eq(5)
+      expect(proxy_order.reload.consumption_tax_rate).not_to eq(5)
     end
 
     it "allows clearing usd_jpy_rate" do

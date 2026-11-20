@@ -6,7 +6,7 @@ RSpec.describe "ProxyOrders", type: :request do
   let(:third_user) { create(:user, email: "third@example.com", password: "password789") }
   let(:other_buyer_user) { create(:user, username: "other_buyer", email: "other@example.com", password: "password456") }
   let(:event) { create(:event, :proxy_order, title: "Test Proxy Order") }
-  let(:proxy_order) { create(:proxy_order, event:, status: :ordered, tax_usd: 10, usd_jpy_rate: nil) }
+  let(:proxy_order) { create(:proxy_order, event:, status: :ordered, consumption_tax_rate: 10, usd_jpy_rate: nil) }
   let(:me) { create(:proxy_order_participant, proxy_order:, user:) }
   let(:other) { create(:proxy_order_participant, proxy_order:, user: other_buyer_user) }
   let(:item_a) { create(:proxy_order_item, proxy_order:, card_name: "Mine Card") }

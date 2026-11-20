@@ -93,8 +93,8 @@
       </div>
 
       <div class="bg-stone-50 border border-stone-200 rounded p-4">
-        <p class="m-0 mb-1 text-[11px] font-bold text-stone-400 uppercase"><%= t("proxy_orders.show.tile_fee", total: usd(@calculator.fee_total), count: @calculator.fee_payer_count) %></p>
-        <p data-role="fee" class="m-0 text-xl font-extrabold tabular-nums text-sky-700"><%= usd(@calculator.fee_for(@participant)) %></p>
+        <p class="m-0 mb-1 text-[11px] font-bold text-stone-400 uppercase"><%= t("proxy_orders.show.tile_fee", total: usd(@proxy_order.shipping_usd), count: @calculator.fee_payer_count) %></p>
+        <p data-role="fee" class="m-0 text-xl font-extrabold tabular-nums text-sky-700"><%= usd(@calculator.shipping_for(@participant) + @calculator.charges_for(@participant)) %></p>
       </div>
 
       <div class="bg-stone-50 border border-stone-200 rounded p-4">

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_000100) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_20_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -152,14 +152,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_000100) do
   create_table "proxy_orders", force: :cascade do |t|
     t.bigint "event_id", null: false
     t.integer "status", default: 0, null: false, comment: "0=ordered 1=arrived 2=completed"
-    t.decimal "tax_usd", precision: 10, scale: 2, default: "0.0", null: false
-    t.decimal "customs_usd", precision: 10, scale: 2, default: "0.0", null: false
     t.decimal "shipping_usd", precision: 10, scale: 2, default: "0.0", null: false
     t.decimal "usd_jpy_rate", precision: 10, scale: 4
     t.datetime "discarded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.decimal "payment_fee_usd", precision: 10, scale: 2, default: "0.0", null: false, comment: "決済手数料（$）"
+    t.decimal "payment_fee_rate", precision: 5, scale: 2, default: "4.1", null: false, comment: "決済手数料率（%）"
+    t.decimal "customs_rate", precision: 5, scale: 2, default: "4.0", null: false, comment: "関税率（%）"
+    t.decimal "consumption_tax_rate", precision: 5, scale: 2, default: "10.0", null: false, comment: "消費税率（%）"
     t.index ["discarded_at"], name: "index_proxy_orders_on_discarded_at"
     t.index ["event_id"], name: "index_proxy_orders_on_event_id", unique: true
   end

@@ -403,7 +403,7 @@ RSpec.describe "HistoriesController", type: :request do
       event = create(:event, :proxy_order)
       event.update_column(:event_date, event_date)
       proxy_order = create(:proxy_order, event:, status:, usd_jpy_rate:,
-                                         tax_usd: 0, customs_usd: 0, shipping_usd: 0)
+                                         shipping_usd: 0, payment_fee_rate: 0, customs_rate: 0, consumption_tax_rate: 0)
       create(:proxy_order_participant, proxy_order:, user: participant_user)
       proxy_order
     end
@@ -528,7 +528,7 @@ RSpec.describe "HistoriesController", type: :request do
 
         it "does not list proxy orders where the user only appears as a guest" do
           guest_only = create(:proxy_order, event: create(:event, :proxy_order), status: :completed,
-                                            tax_usd: 0, customs_usd: 0, shipping_usd: 0, usd_jpy_rate: 150)
+                                            shipping_usd: 0, usd_jpy_rate: 150)
           create(:proxy_order_participant, :guest, proxy_order: guest_only, guest_name: "ゲスト参加者")
 
           get "/histories/proxy_orders"
