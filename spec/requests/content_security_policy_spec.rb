@@ -22,6 +22,11 @@ RSpec.describe "Content Security Policy", type: :request do
       expect(csp).to include("form-action 'self'")
     end
 
+    it "[C1] form-action に self と Google・Discord の認可ホストだけを許可している" do
+      form_action_sources = csp[/form-action ([^;]+)/, 1].split.sort
+      expect(form_action_sources).to contain_exactly("'self'", "https://accounts.google.com", "https://discord.com")
+    end
+
     it "script-src は self と nonce だけで、unsafe-inline / unsafe-eval を許していない" do
       expect(csp).to match(/script-src 'self' 'nonce-[^']+'/)
       expect(csp).not_to include("script-src 'self' 'unsafe-inline'")
