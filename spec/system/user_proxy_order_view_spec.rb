@@ -79,7 +79,7 @@ RSpec.describe "User Proxy Order View", type: :system do
 
     it "displays payment summary with role attributes" do
       expect(page).to have_selector("[data-role='goods-total']")
-      expect(page).to have_selector("[data-role='fee']")
+      expect(page).to have_selector("[data-role='shipping-per-person']")
       expect(page).to have_selector("[data-role='payment-usd']")
       expect(page).to have_selector("[data-role='payment-jpy']")
     end

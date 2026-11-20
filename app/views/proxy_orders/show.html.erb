@@ -93,8 +93,8 @@
       </div>
 
       <div class="bg-stone-50 border border-stone-200 rounded p-4">
-        <p class="m-0 mb-1 text-[11px] font-bold text-stone-400 uppercase"><%= t("proxy_orders.show.tile_fee", total: usd(@proxy_order.shipping_usd), count: @calculator.fee_payer_count) %></p>
-        <p data-role="fee" class="m-0 text-xl font-extrabold tabular-nums text-sky-700"><%= usd(@calculator.shipping_for(@participant) + @calculator.charges_for(@participant)) %></p>
+        <p class="m-0 mb-1 text-[11px] font-bold text-stone-400 uppercase"><%= t("proxy_orders.show.tile_shipping_per_person", total: usd(@proxy_order.shipping_usd), count: @calculator.fee_payer_count) %></p>
+        <p data-role="shipping-per-person" class="m-0 text-xl font-extrabold tabular-nums text-sky-700"><%= usd(@calculator.shipping_for(@participant)) %></p>
       </div>
 
       <div class="bg-stone-50 border border-stone-200 rounded p-4">
@@ -107,15 +107,21 @@
         <p data-role="payment-jpy" class="m-0 text-xl font-extrabold tabular-nums text-emerald-700"><%= jpy_or_pending(@calculator.payment_jpy(@participant)) %></p>
       </div>
 
-      <p class="m-0 text-xs text-stone-500 tabular-nums">
-        <span data-role="payment-usd"><%= usd(@calculator.payment_usd(@participant)) %></span>
-        <% if @proxy_order.usd_jpy_rate.present? %>
+      <p id="proxy_order_my_breakdown" class="m-0 text-xs text-stone-500 tabular-nums">
+        <%= t("proxy_orders.show.breakdown",
+              goods: "<span data-role=\"breakdown-goods\">#{usd(@calculator.goods_total(@participant))}</span>",
+              shipping: "<span data-role=\"breakdown-shipping\">#{usd(@calculator.shipping_for(@participant))}</span>",
+              charges: "<span data-role=\"breakdown-charges\">#{usd(@calculator.charges_for(@participant))}</span>",
+              total: "<span data-role=\"payment-usd\">#{usd(@calculator.payment_usd(@participant))}</span>").html_safe %>
+      </p>
+      <% if @proxy_order.usd_jpy_rate.present? %>
+        <p class="m-0 text-xs text-stone-500 tabular-nums">
           <%= t("proxy_orders.show.calc_line",
-                usd: "", rate: number_with_precision(@proxy_order.usd_jpy_rate, precision: 2),
+                usd: usd(@calculator.payment_usd(@participant)), rate: number_with_precision(@proxy_order.usd_jpy_rate, precision: 2),
                 raw: jpy_or_pending((@calculator.payment_usd(@participant) * @proxy_order.usd_jpy_rate).round),
                 rounded: jpy_or_pending(@calculator.payment_jpy(@participant))) %>
-        <% end %>
-      </p>
+        </p>
+      <% end %>
     </aside>
   </div>
 </div>
