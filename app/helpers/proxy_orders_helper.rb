@@ -32,6 +32,11 @@ module ProxyOrdersHelper
     ].compact_blank.join(t("admin.proxy_order.card_meta_separator"))
   end
 
+  # 参加者全員の支払い合計（$）
+  def total_payment_usd(calculator, participants)
+    participants.sum { |p| calculator.payment_usd(p) }
+  end
+
   # 参加者全員の支払い合計。レート未設定の参加者が一人でもいれば nil（未確定）
   def total_payment_jpy(calculator, participants)
     amounts = participants.map { |p| calculator.payment_jpy(p) }
