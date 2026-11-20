@@ -248,8 +248,8 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
     end
   end
 
-  describe "[C12] clear search with × button" do
-    it "clears search using the × icon" do
+  describe "[C12] clear search with the clear filter button" do
+    it "clears search using the clear filter button" do
       create(:proxy_order_item, proxy_order:, card_name: "Test Card")
       create(:proxy_order_item, proxy_order:, card_name: "Other Card")
 
@@ -261,7 +261,7 @@ RSpec.describe "Admin Proxy Order Item Search and Sort", type: :system do
       expect(page).to have_current_path(%r{q=Test})
       expect(find("#proxy_order_item_count")).to have_text("1 件")
 
-      wait_for_item_list_update { click_link "×" }
+      wait_for_item_list_update { find("a[data-role=clear-search]").click }
 
       expect(page).to have_current_path(admin_event_proxy_order_path(event))
       expect(find("#proxy_order_item_count")).to have_text("全 2 件")

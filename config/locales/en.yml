@@ -197,7 +197,7 @@ en:
       search_label: "Search by card name"
       search_placeholder: "Search card name"
       search_submit: "Search"
-      clear_search_icon: "Clear search text"
+      clear_filter: "Clear filter"
       clear_search: "Clear search"
       sort_label: "Sort"
       sort_options:
