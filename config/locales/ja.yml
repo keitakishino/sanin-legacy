@@ -50,8 +50,9 @@ ja:
       note_average: "1枚あたりの金額は、同じカードのロストを含めて平均した金額です。他の人の内訳は表示されません。"
       note_provisional: "注文の間は「暫定」として、ロスト 0 で計算した金額を表示します。レートが未設定の場合、円は「未確定」と表示します。"
       tile_goods: "商品合計"
-      tile_fee: "手数料（%{total} ÷ %{count}人）"
+      tile_shipping_per_person: "一人あたり送料（%{total} ÷ %{count}人）"
       tile_payment: "支払い金額（100円単位に切り上げ）"
+      breakdown_html: "商品 %{goods} ＋ 送料 %{shipping} ＋ 手数料等 %{charges} ＝ %{total}"
       calc_line: "%{usd} × %{rate} 円/$ ＝ %{raw} → %{rounded}"
       no_items: "明細はまだありません"
   toasts:
