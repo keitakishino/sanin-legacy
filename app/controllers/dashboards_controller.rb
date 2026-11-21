@@ -2,8 +2,11 @@ class DashboardsController < ApplicationController
   before_action :authenticate_user!
 
   def show
-    @my_proxy_orders = ProxyOrder.joins(:proxy_order_participants, :event)
-                                  .where(proxy_order_participants: { user_id: current_user.id })
+    # 参加者の絞り込みはサブクエリで行う。joins + where で絞ると includes が JOIN 側に切り替わり、
+    # proxy_order_participants が自分 1 人分だけになって送料の割り勘人数が狂う。
+    my_order_ids = ProxyOrderParticipant.where(user_id: current_user.id).select(:proxy_order_id)
+    @my_proxy_orders = ProxyOrder.joins(:event)
+                                  .where(id: my_order_ids)
                                   .where(events: { discarded_at: nil })
                                   .includes(:event, proxy_order_participants: :user)
                                   .order("events.event_date DESC")
