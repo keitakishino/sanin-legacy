@@ -269,6 +269,32 @@ RSpec.describe "Dashboards", type: :request do
         end
       end
 
+      context "when proxy order has several participants and shipping" do
+        let!(:proxy_order) do
+          create(:proxy_order, event: create(:event, :proxy_order), shipping_usd: BigDecimal("10"), usd_jpy_rate: BigDecimal("150"))
+        end
+        let!(:participant) { create(:proxy_order_participant, proxy_order:, user:) }
+        let!(:other_participant) { create(:proxy_order_participant, proxy_order:) }
+
+        before do
+          item = create(:proxy_order_item, proxy_order:)
+          create(:proxy_order_price_line, proxy_order_item: item, quantity: 2)
+          create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: participant)
+          create(:proxy_order_allocation, proxy_order_item: item, proxy_order_participant: other_participant)
+        end
+
+        it "splits shipping among all participants, same as the detail page" do
+          expected = ProxyOrderCalculator.new(ProxyOrder.find(proxy_order.id)).payment_jpy(participant)
+          alone = ProxyOrderCalculator.ceil_100((BigDecimal("3") + 10) * BigDecimal("1.04") * BigDecimal("1.041") * 150)
+          expect(expected).not_to eq(alone)
+
+          get "/"
+          text = Nokogiri::HTML.parse(response.body).css("#my_proxy_orders").text
+          expect(text).to include(ActiveSupport::NumberHelper.number_to_delimited(expected))
+          expect(text).not_to include(ActiveSupport::NumberHelper.number_to_delimited(alone))
+        end
+      end
+
       context "when other user has incomplete trades" do
         let!(:other_user_trade) { create(:trade, user: other_user, event:, status: :pending) }
 
